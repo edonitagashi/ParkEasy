@@ -2,13 +2,13 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function SearchHeader() {
+export default function SearchHeader({title}) {
   return (
     <View style={styles.header}>
       <TouchableOpacity>
         <Ionicons name="menu-outline" size={28} color="#5C8374" />
       </TouchableOpacity>
-      <Text style={styles.title}>Search Parking</Text>
+      <Text style={styles.title}>{title}</Text>
       <View style={{ width: 28 }} /> 
     </View>
   );
