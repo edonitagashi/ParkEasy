@@ -10,7 +10,7 @@ import SearchHeader from "../../components/SearchHeader";
 import SearchBar from "../../components/SearchBar";
 import SearchResultItem from "../../components/SearchResultItem";
 
-// Përdor require direkt, jo import
+
 const placeholderImage = require("../../assets/images/image1.png");
 
 export default function SearchParkingScreen() {
