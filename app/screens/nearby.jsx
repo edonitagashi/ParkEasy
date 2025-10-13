@@ -1,44 +1,58 @@
 import React, { useState } from "react";
-import {StatusBar,View,FlatList,Text,Image,TouchableOpacity,StyleSheet,} from "react-native";
+import { StatusBar, View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
+import ParkingCard from "../../components/ParkingCard"; 
 
 const Nearby = () => {
   const [parkings] = useState([
-  { id: "1", name: "City Center Parking", address: "Deshmoret e Kombit St.", distance: "150 m", price: "2 €/h", spots: 8 },
-  { id: "2", name: "Theater Parking", address: "Skenderbej Square", distance: "320 m", price: "1.5 €/h", spots: 3 },
-  { id: "3", name: "University Parking", address: "Zogu I Blvd.", distance: "500 m", price: "Free", spots: 10 },
-  { id: "4", name: "Mall Parking", address: "Mall Street", distance: "600 m", price: "2 €/h", spots: 5 },
-  { id: "5", name: "Train Station Parking", address: "Train Station", distance: "750 m", price: "1 €/h", spots: 2 },
-  { id: "6", name: "Airport Parking", address: "Airport Rd.", distance: "1 km", price: "3 €/h", spots: 12 },
-  { id: "7", name: "Library Parking", address: "Library St.", distance: "850 m", price: "Free", spots: 6 },
-  { id: "8", name: "Hospital Parking", address: "Hospital Rd.", distance: "900 m", price: "1 €/h", spots: 0 },
-]);
+    { id: "1", name: "City Center Parking", address: "Deshmoret e Kombit St.", distance: "150 m", price: "2 €/h", spots: 8 },
+    { id: "2", name: "Theater Parking", address: "Skenderbej Square", distance: "320 m", price: "1.5 €/h", spots: 3 },
+    { id: "3", name: "University Parking", address: "Zogu I Blvd.", distance: "500 m", price: "Free", spots: 10 },
+    { id: "4", name: "Mall Parking", address: "Mall Street", distance: "600 m", price: "2 €/h", spots: 5 },
+    { id: "5", name: "Train Station Parking", address: "Train Station", distance: "750 m", price: "1 €/h", spots: 2 },
+    { id: "6", name: "Airport Parking", address: "Airport Rd.", distance: "1 km", price: "3 €/h", spots: 12 },
+    { id: "7", name: "Library Parking", address: "Library St.", distance: "850 m", price: "Free", spots: 6 },
+    { id: "8", name: "Hospital Parking", address: "Hospital Rd.", distance: "900 m", price: "1 €/h", spots: 0 },
+  ]);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <SearchHeader title="Nearby Parkings" />
 
-        <View style={styles.mapContainer}>
+      <View style={styles.mapContainer}>
         <Image
-          source={require("../../assets/images/map.png")} 
+          source={require("../../assets/images/map.png")}
           style={styles.mapImage}
           resizeMode="cover"
         />
       </View>
 
+      {/* Butonat */}
       <View style={styles.controls}>
-  <TouchableOpacity style={styles.sortBtn}>
-    <Text style={styles.sortText}>Sort by: Distance</Text>
-  </TouchableOpacity>
+        <TouchableOpacity style={styles.sortBtn}>
+          <Text style={styles.sortText}>Sort by: Distance</Text>
+        </TouchableOpacity>
 
-  <TouchableOpacity style={styles.refreshBtn}>
-    <Text style={styles.refreshText}>Refresh</Text>
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity style={styles.refreshBtn}>
+          <Text style={styles.refreshText}>Refresh</Text>
+        </TouchableOpacity>
+      </View>
 
-    </SafeAreaView>    
+      {/* Lista e ParkingCard jashtë controls */}
+      <View style={{ marginBottom: 20 }}>
+        {parkings.map((parking) => (
+          <ParkingCard
+            key={parking.id}
+            name={parking.name}
+            distance={parking.distance}
+            price={parking.price}
+          />
+        ))}
+      </View>
+
+    </SafeAreaView>
   );
 };
 
@@ -53,5 +67,4 @@ const styles = StyleSheet.create({
   sortText: { color: "#5C8374", fontWeight: "500" },
   refreshBtn: { backgroundColor: "#5C8374", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
   refreshText: { color: "#fff", fontWeight: "bold" },
-
 });
