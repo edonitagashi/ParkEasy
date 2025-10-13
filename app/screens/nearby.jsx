@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StatusBar, View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { StatusBar, View, Text, Image, TouchableOpacity, StyleSheet ,FlatList} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
 import ParkingCard from "../../components/ParkingCard"; 
@@ -40,17 +40,22 @@ const Nearby = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Lista e ParkingCard jashtë controls */}
-      <View style={{ marginBottom: 20 }}>
-        {parkings.map((parking) => (
+      {/* Lista me scroll */}
+      <FlatList
+        data={parkings}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
           <ParkingCard
-            key={parking.id}
-            name={parking.name}
-            distance={parking.distance}
-            price={parking.price}
+            name={item.name}
+            address={item.address}
+            distance={item.distance}
+            price={item.price}
+            spots={item.spots}
           />
-        ))}
-      </View>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        contentContainerStyle={{ paddingBottom: 30 }}
+      />
 
     </SafeAreaView>
   );

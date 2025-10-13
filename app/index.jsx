@@ -7,6 +7,9 @@ export default function Home() {
       <Text style={{ fontSize: 22, fontWeight: "bold", color: "#5C8374" }}>
         Welcome to ParkEasy
       </Text>
+      <Link href="/screens/nearby" asChild>
+        <Button title="Go to Nearby Parking" color="#5C8374" />
+      </Link>
       <Link href="/screens/SearchParkingScreen" asChild>
         <Button title="Go to Search Parking" color="#5C8374" />
       </Link>

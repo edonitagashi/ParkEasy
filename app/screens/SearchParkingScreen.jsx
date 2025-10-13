@@ -34,9 +34,11 @@ export default function SearchParkingScreen() {
   );
 
   return (
+    
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <SearchHeader />
+      <SearchHeader title="Search Parking" />
+  
       <View style={styles.searchContainer}>
         <SearchBar value={searchText} onChangeText={setSearchText} />
       </View>
