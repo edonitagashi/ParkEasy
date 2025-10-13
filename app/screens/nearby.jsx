@@ -15,9 +15,16 @@ const Nearby = () => {
     { id: "7", name: "Library Parking", address: "Library St.", distance: "850 m", price: "Free", spots: 6 },
     { id: "8", name: "Hospital Parking", address: "Hospital Rd.", distance: "900 m", price: "1 €/h", spots: 0 },
   ]);
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.parkingName}>{item.name}</Text>
+      <Text style={styles.text}>Distanca: {item.distance}</Text>
+      <Text style={styles.text}>Çmimi: {item.price}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}  edges={['left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <SearchHeader title="Nearby Parkings" />
 
@@ -40,22 +47,22 @@ const Nearby = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Lista me scroll */}
-      <FlatList
-        data={parkings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ParkingCard
-            name={item.name}
-            address={item.address}
-            distance={item.distance}
-            price={item.price}
-            spots={item.spots}
-          />
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        contentContainerStyle={{ paddingBottom: 30 }}
-      />
+       <FlatList
+  data={parkings}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <ParkingCard
+      name={item.name}
+      address={item.address}
+      distance={item.distance}
+      price={item.price}
+      spots={item.spots} 
+    />
+  )}
+  ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+  contentContainerStyle={{ paddingBottom: 20 }}
+  style={{ flex: 1 }}
+/>
 
     </SafeAreaView>
   );
@@ -64,10 +71,13 @@ const Nearby = () => {
 export default Nearby;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF", paddingHorizontal: 20, paddingTop: 10 },
-  mapContainer: { height: 200, marginBottom: 15, borderRadius: 10, overflow: "hidden" },
-  mapImage: { width: "100%", height: "100%" },
-  controls: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15 },
+   container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+  },
+  mapContainer: { height: 250, marginBottom: 15,marginTop:10, borderRadius: 10, overflow: "hidden" ,paddingHorizontal: 16 },
+  mapImage: { width: "100%", height: "100%" , borderRadius: 10},
+  controls: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15 ,paddingLeft:16,paddingRight:16},
   sortBtn: { backgroundColor: "#CDE6DC", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
   sortText: { color: "#5C8374", fontWeight: "500" },
   refreshBtn: { backgroundColor: "#5C8374", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },

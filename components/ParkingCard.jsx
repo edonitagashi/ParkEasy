@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
-const ParkingCard = ({ name, distance, price }) => {
+const ParkingCard = ({ name, distance, price,spots }) => {
   // Funksioni që thirret kur klikojmë kartën
   const handlePress = () => {
     Alert.alert(
@@ -17,6 +17,14 @@ const ParkingCard = ({ name, distance, price }) => {
         <Text style={styles.detail}>Distanca: {distance} km</Text>
         <Text style={styles.detail}>Çmimi: ${price}</Text>
       </View>
+       <View
+          style={[
+            styles.availabilityBox,
+            { backgroundColor: spots === 0 ? "#D9534F" : spots < 5 ? "#F08080" : "#5C8374" },
+          ]}
+        >
+          <Text style={styles.availabilityText}>{spots} free spots</Text>
+        </View>
     </TouchableOpacity>
   );
 };
@@ -43,6 +51,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginBottom: 2,
+  },
+   availabilityBox: { 
+    borderRadius: 8,
+    paddingVertical: 6,
+    marginTop: 5 
+  },
+  availabilityText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    fontSize: 13 
   },
 });
 
