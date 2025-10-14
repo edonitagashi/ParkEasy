@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
+  Text,
 } from "react-native";
 import SearchHeader from "../../components/SearchHeader";
 import SearchBar from "../../components/SearchBar";
@@ -43,25 +44,51 @@ export default function SearchParkingScreen() {
         <SearchBar value={searchText} onChangeText={setSearchText} />
       </View>
       <FlatList
-        data={filteredParkings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <SearchResultItem
-            item={{
-              ...item,
-              image: item.image ? item.image : placeholderImage,
-            }}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+  data={filteredParkings}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <SearchResultItem
+      item={{
+        ...item,
+        image: item.image ? item.image : placeholderImage,
+      }}
+    />
+  )}
+  contentContainerStyle={
+    filteredParkings.length === 0
+      ? { flex: 1 }
+      : styles.listContent
+  }
+  showsVerticalScrollIndicator={false}
+ListEmptyComponent={() => (
+  <View style={styles.noResultsWrapper}>
+    <Text style={styles.noResultsText}>No results found</Text>
+  </View>
+)}
+/>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+   container: { flex: 1, backgroundColor: "#fff" },
   searchContainer: { paddingHorizontal: 12, marginTop: 8 },
   listContent: { padding: 10, backgroundColor: "#fff" },
+  noResultsContainer: { 
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noResultsText: { 
+    color: "#777",
+    fontSize: 16,
+},
+noResultsWrapper: {
+  flexGrow: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100%",
+},
+
 });
+
