@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Image, StatusBar } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function Home() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(30)).current;
+  const translateY = useRef(new Animated.Value(40)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -25,34 +24,47 @@ export default function Home() {
   }, []);
 
   return (
-    <LinearGradient colors={["#E8F3F1", "#C7E3DA", "#A4D4C5"]} style={styles.gradient}>
-      <Animated.View
-        style={[
-          styles.container,
-          { opacity: fadeAnim, transform: [{ translateY }] },
-        ]}
+    <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
+      <StatusBar barStyle="dark-content" backgroundColor="#E9F8F6" />
+      <Animated.ScrollView
+        contentContainerStyle={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}
+        showsVerticalScrollIndicator={false}
       >
-        {/* IKONA SI LOGO */}
-        <View style={styles.iconContainer}>
-          <Ionicons name="car-outline" size={90} color="#2E7D6A" />
+        {/* HEADER IMAGE */}
+        <Image
+          source={{
+            uri: "https://cdn-icons-png.flaticon.com/512/2333/2333229.png",
+          }}
+          style={styles.headerImage}
+        />
+
+        {/* APP TITLE */}
+        <Text style={styles.appTitle}>ParkEasy</Text>
+        <Text style={styles.welcomeText}>Welcome to the world of effortless parking.</Text>
+
+        {/* INFO BANNER */}
+        <View style={styles.banner}>
+          <Text style={styles.bannerTitle}>Special Offer!</Text>
+          <Text style={styles.bannerText}>
+            Reserve your first parking spot and get 20% off your first hour. 🚗
+          </Text>
         </View>
 
-        <Text style={styles.title}>Welcome to</Text>
-        <Text style={styles.appName}>ParkEasy</Text>
-        <Text style={styles.subtitle}>Find and reserve your parking spot effortlessly</Text>
+        {/* BUTTONS */}
+        <View style={styles.buttonContainer}>
+          <Link href="/screens/LoginScreen" asChild>
+            <TouchableOpacity style={styles.loginButton}>
+              <Text style={styles.loginText}>Login</Text>
+            </TouchableOpacity>
+          </Link>
 
-        <Link href="/screens/LoginScreen" asChild>
-          <TouchableOpacity style={styles.buttonPrimary}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-        </Link>
-
-        <Link href="/screens/RegisterScreen" asChild>
-          <TouchableOpacity style={styles.buttonSecondary}>
-            <Text style={styles.buttonSecondaryText}>Register</Text>
-          </TouchableOpacity>
-        </Link>
-      </Animated.View>
+          <Link href="/screens/RegisterScreen" asChild>
+            <TouchableOpacity style={styles.signupButton}>
+              <Text style={styles.signupText}>Register</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+      </Animated.ScrollView>
     </LinearGradient>
   );
 }
@@ -62,72 +74,88 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingVertical: 80,
+    paddingHorizontal: 25,
   },
-  iconContainer: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "#ffffffcc",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+  headerImage: {
+    width: 220,
+    height: 220,
+    marginBottom: 10,
   },
-  title: {
-    fontSize: 22,
-    color: "#3A5A40",
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: "900",
+  appTitle: {
+    fontSize: 34,
+    fontWeight: "800",
     color: "#2E7D6A",
-    marginBottom: 8,
-    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowColor: "rgba(0,0,0,0.1)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 3,
   },
-  subtitle: {
+  welcomeText: {
     fontSize: 16,
-    color: "#5C8374",
-    marginBottom: 40,
     textAlign: "center",
+    color: "#4C6E64",
+    marginVertical: 8,
   },
-  buttonPrimary: {
-    backgroundColor: "#2E7D6A",
-    paddingVertical: 15,
-    paddingHorizontal: 70,
+  banner: {
+    backgroundColor: "#BFE5D7",
+    padding: 15,
     borderRadius: 14,
+    marginTop: 25,
+    marginBottom: 40,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1E5E4D",
+    marginBottom: 5,
+  },
+  bannerText: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#2F6657",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
+  },
+  loginButton: {
+    backgroundColor: "#2E7D6A",
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginHorizontal: 5,
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 6,
-    marginBottom: 15,
+    elevation: 5,
   },
-  buttonText: {
+  loginText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "700",
   },
-  buttonSecondary: {
-    backgroundColor: "transparent",
+  signupButton: {
     borderWidth: 2,
     borderColor: "#2E7D6A",
-    paddingVertical: 15,
-    paddingHorizontal: 65,
-    borderRadius: 14,
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginHorizontal: 5,
+    alignItems: "center",
   },
-  buttonSecondaryText: {
+  signupText: {
     color: "#2E7D6A",
     fontSize: 18,
     fontWeight: "700",
