@@ -1,11 +1,20 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Image, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Image,
+  StatusBar,
+  ScrollView,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 
-export default function Home() {
+export default function Index() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(40)).current;
+  const translateY = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -24,140 +33,132 @@ export default function Home() {
   }, []);
 
   return (
-    <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
+    <LinearGradient
+      colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]}
+      style={styles.gradient}
+    >
       <StatusBar barStyle="dark-content" backgroundColor="#E9F8F6" />
-      <Animated.ScrollView
-        contentContainerStyle={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* HEADER IMAGE */}
-        <Image
-          source={{
-            uri: "https://cdn-icons-png.flaticon.com/512/2333/2333229.png",
-          }}
-          style={styles.headerImage}
-        />
+        <Animated.View
+          style={[
+            styles.container,
+            { opacity: fadeAnim, transform: [{ translateY }] },
+          ]}
+        >
+          <Text style={styles.appName}>ParkEasy</Text>
 
-        {/* APP TITLE */}
-        <Text style={styles.appTitle}>ParkEasy</Text>
-        <Text style={styles.welcomeText}>Welcome to the world of effortless parking.</Text>
+          <Image
+            source={require("../assets/images/index4.jpg")}
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
 
-        {/* INFO BANNER */}
-        <View style={styles.banner}>
-          <Text style={styles.bannerTitle}>Special Offer!</Text>
-          <Text style={styles.bannerText}>
-            Reserve your first parking spot and get 20% off your first hour. 🚗
+          <Text style={styles.subtitle}>
+            Find and reserve your parking spot effortlessly.
           </Text>
-        </View>
 
-        {/* BUTTONS */}
-        <View style={styles.buttonContainer}>
-          <Link href="/screens/LoginScreen" asChild>
-            <TouchableOpacity style={styles.loginButton}>
-              <Text style={styles.loginText}>Login</Text>
-            </TouchableOpacity>
-          </Link>
+          <View style={styles.banner}>
+            <Text style={styles.bannerTitle}>🚗 Smart Parking Starts Here</Text>
+            <Text style={styles.bannerText}>
+              Save time and secure your perfect spot in just a few taps.
+            </Text>
+          </View>
 
-          <Link href="/screens/RegisterScreen" asChild>
-            <TouchableOpacity style={styles.signupButton}>
-              <Text style={styles.signupText}>Register</Text>
-            </TouchableOpacity>
-          </Link>
-        </View>
-      </Animated.ScrollView>
+          <View style={styles.buttonContainer}>
+            {/* Fixed routes */}
+            <Link href="/screens/Login" asChild>
+              <TouchableOpacity style={styles.primaryButton}>
+                <Text style={styles.primaryText}>Login</Text>
+              </TouchableOpacity>
+            </Link>
+
+            <Link href="/screens/Register" asChild>
+              <TouchableOpacity style={styles.secondaryButton}>
+                <Text style={styles.secondaryText}>Register</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </Animated.View>
+      </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
+  gradient: { flex: 1 },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
   },
   container: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 80,
-    paddingHorizontal: 25,
+    width: "90%",
+    backgroundColor: "#FFFFFFDD",
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  headerImage: {
-    width: 220,
-    height: 220,
+  headerImage: { width: 240, height: 200, marginBottom: 10, borderRadius: 12 },
+  appName: {
+    fontSize: 38,
+    fontWeight: "900",
+    color: "#2E7D6A",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
     marginBottom: 10,
   },
-  appTitle: {
-    fontSize: 34,
-    fontWeight: "800",
-    color: "#2E7D6A",
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 3,
-  },
-  welcomeText: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#4C6E64",
-    marginVertical: 8,
-  },
+  subtitle: { fontSize: 16, color: "#4C6E64", textAlign: "center", marginTop: 8, marginBottom: 25 },
   banner: {
     backgroundColor: "#BFE5D7",
-    padding: 15,
     borderRadius: 14,
-    marginTop: 25,
-    marginBottom: 40,
+    padding: 18,
     width: "100%",
     alignItems: "center",
+    marginBottom: 35,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
   },
-  bannerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1E5E4D",
-    marginBottom: 5,
-  },
-  bannerText: {
-    fontSize: 14,
-    textAlign: "center",
-    color: "#2F6657",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "80%",
-  },
-  loginButton: {
+  bannerTitle: { fontSize: 18, fontWeight: "700", color: "#1E5E4D", marginBottom: 6 },
+  bannerText: { fontSize: 14, color: "#2F6657", textAlign: "center" },
+  buttonContainer: { width: "100%", alignItems: "center" },
+  primaryButton: {
     backgroundColor: "#2E7D6A",
-    flex: 1,
+    width: "80%",
     paddingVertical: 14,
-    borderRadius: 12,
-    marginHorizontal: 5,
+    borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 5,
+    marginBottom: 15,
   },
-  loginText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  signupButton: {
+  primaryText: { color: "#fff", fontSize: 18, fontWeight: "700" },
+  secondaryButton: {
+    width: "80%",
+    paddingVertical: 14,
     borderWidth: 2,
     borderColor: "#2E7D6A",
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginHorizontal: 5,
+    borderRadius: 14,
     alignItems: "center",
   },
-  signupText: {
-    color: "#2E7D6A",
-    fontSize: 18,
-    fontWeight: "700",
-  },
+  secondaryText: { color: "#2E7D6A", fontSize: 18, fontWeight: "700" },
 });
