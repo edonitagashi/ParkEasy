@@ -51,7 +51,7 @@ export default function Index() {
           <Text style={styles.appName}>ParkEasy</Text>
 
           <Image
-            source={require("../assets/images/index4.jpg")}
+            source={require("../assets/images/index5.jpg")}
             style={styles.headerImage}
             resizeMode="contain"
           />
@@ -61,21 +61,21 @@ export default function Index() {
           </Text>
 
           <View style={styles.banner}>
-            <Text style={styles.bannerTitle}>🚗 Smart Parking Starts Here</Text>
+            <Text style={styles.bannerTitle}>Smart Parking Starts Here</Text>
             <Text style={styles.bannerText}>
               Save time and secure your perfect spot in just a few taps.
             </Text>
           </View>
 
           <View style={styles.buttonContainer}>
-            {/* Fixed routes */}
-            <Link href="/screens/Login" asChild>
+            {/* Fixed links */}
+            <Link href="/screens/LoginScreen" asChild>
               <TouchableOpacity style={styles.primaryButton}>
                 <Text style={styles.primaryText}>Login</Text>
               </TouchableOpacity>
             </Link>
 
-            <Link href="/screens/Register" asChild>
+            <Link href="/screens/RegisterScreen" asChild>
               <TouchableOpacity style={styles.secondaryButton}>
                 <Text style={styles.secondaryText}>Register</Text>
               </TouchableOpacity>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 8,
   },
-  headerImage: { width: 240, height: 200, marginBottom: 10, borderRadius: 12 },
+  headerImage: { width: 600, height: 300, marginBottom: 10, borderRadius: 12 },
   appName: {
     fontSize: 38,
     fontWeight: "900",
