@@ -46,14 +46,14 @@ export default function FavoritesScreen() {
           data={favoriteParkings}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ParkingCard
-              name={item.name}
-              distance={item.distance}
-              price={item.price}
-              spots={item.spots}
-              isFavorite={favorites.includes(item.id)}
-              onFavoriteToggle={() => toggleFavorite(item.id)}
-            />
+           <ParkingCard
+             name={item.name}
+             distance={item.distance}
+             price={item.price}
+             spots={item.spots}
+             isFavorite={favorites.includes(item.id)}
+             onFavoriteToggle={() => toggleFavorite(item.id)}
+           />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           contentContainerStyle={{ paddingBottom: 20 }}

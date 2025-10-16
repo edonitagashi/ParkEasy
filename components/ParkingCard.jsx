@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const ParkingCard = ({ name, distance, price, spots }) => {
-  const [isFavorite, setIsFavorite] = useState(false); 
+const ParkingCard = ({ name, distance, price, spots, isFavorite, onFavoriteToggle }) => {
 
   const handlePress = () => {
     Alert.alert(
       'Detajet e Parkingut',
       `Emri: ${name}\nDistanca: ${distance} km\nÇmimi: ${price}`
     );
-  };
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
   };
 
   return (
@@ -33,14 +28,16 @@ const ParkingCard = ({ name, distance, price, spots }) => {
         <Text style={styles.availabilityText}>{spots} free spots</Text>
       </View>
 
-      
-      <TouchableOpacity style={styles.favoriteIcon} onPress={toggleFavorite}>
-        <Ionicons
-          name={isFavorite ? "bookmark" : "bookmark-outline"}
-          size={24}
-          color={isFavorite ? "#FFD700" : "#5C8374"}
-        />
-      </TouchableOpacity>
+      {/* Butoni për favorite */}
+      {onFavoriteToggle && (
+        <TouchableOpacity style={styles.favoriteIcon} onPress={onFavoriteToggle}>
+          <Ionicons
+            name={isFavorite ? "bookmark" : "bookmark-outline"}
+            size={24}
+            color={isFavorite ? "#FFD700" : "#5C8374"}
+          />
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 };
