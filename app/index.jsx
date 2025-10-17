@@ -69,13 +69,13 @@ export default function Index() {
 
           <View style={styles.buttonContainer}>
             {/* Fixed links */}
-            <Link href="/screens/LoginScreen" asChild>
+            <Link href="/auth/LoginScreen" asChild>
               <TouchableOpacity style={styles.primaryButton}>
                 <Text style={styles.primaryText}>Login</Text>
               </TouchableOpacity>
             </Link>
 
-            <Link href="/screens/RegisterScreen" asChild>
+            <Link href="/auth/RegisterScreen" asChild>
               <TouchableOpacity style={styles.secondaryButton}>
                 <Text style={styles.secondaryText}>Register</Text>
               </TouchableOpacity>

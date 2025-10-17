@@ -32,11 +32,16 @@ export default function RegisterScreen() {
         onChangeText={setConfirmPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/screens/LoginScreen")}>
+      {/* NDRYSHIMI: Shkon te TAB BAR pas regjistrimit */}
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={() => router.replace("/screens")}
+      >
         <Text style={styles.buttonText}>Krijo llogari</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/screens/LoginScreen")}>
+      {/* NDRYSHIMI: Shkon te /auth/login */}
+      <TouchableOpacity onPress={() => router.push("/auth/login")}>
         <Text style={styles.link}>Ke tashmë llogari? Kyçu</Text>
       </TouchableOpacity>
     </View>
@@ -47,7 +52,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 30 },
   input: { width: "100%", borderWidth: 1, borderColor: "#ccc", padding: 12, borderRadius: 10, marginBottom: 15 },
-  button: { backgroundColor: "#28a745", padding: 15, borderRadius: 10, width: "100%", alignItems: "center" },
+  button: { backgroundColor: "#2E7D6A", padding: 15, borderRadius: 10, width: "100%", alignItems: "center" },
   buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
-  link: { marginTop: 15, color: "#007bff" },
+  link: { marginTop: 15, color: "#2E7D6A" },
 });

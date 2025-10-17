@@ -24,17 +24,17 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      {/* NDËRRUAR: dërgon te /screens/nearby me të dhënat e futura */}
+      {/* NDRYSHIMI: Shkon te TAB BAR */}
       <TouchableOpacity
         style={styles.button}
         onPress={() =>
-          router.push({
-            pathname: "/screens/nearby",
+          router.replace({
+            pathname: "/screens",
             params: {
               name: email ? email.split("@")[0] : "User",
               email,
-              phone: "96034 56878",
-              pwdLen: String(password.length || 8),
+              phone: "96034 56878", 
+              password: password || "defaultPassword",
             },
           })
         }
@@ -42,7 +42,8 @@ export default function LoginScreen() {
         <Text style={styles.buttonText}>Kyçu</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/screens/RegisterScreen")}>
+      {/* NDRYSHIMI: Shkon te /auth/register */}
+      <TouchableOpacity onPress={() => router.push("/auth/register")}>
         <Text style={styles.link}>Nuk ke llogari? Regjistrohu</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 30 },
   input: { width: "100%", borderWidth: 1, borderColor: "#ccc", padding: 12, borderRadius: 10, marginBottom: 15 },
-  button: { backgroundColor: "#007bff", padding: 15, borderRadius: 10, width: "100%", alignItems: "center" },
+  button: { backgroundColor: "#2E7D6A", padding: 15, borderRadius: 10, width: "100%", alignItems: "center" },
   buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
-  link: { marginTop: 15, color: "#007bff" },
+  link: { marginTop: 15, color: "#2E7D6A" },
 });
