@@ -1,28 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Profile() {
-  // NDËRRUAR: te gjitha fushat realisht editueshme (editable) + Show/Hide password
-  const { name = "User", email: emailIn = "", phone: phoneIn = "", password: passIn = "" } = useLocalSearchParams();
+  // nëse vijnë params, i përdorim; përndryshe lexojmë nga storage
+  const { name = "", email: emailIn = "", phone: phoneIn = "", password: passIn = "" } = useLocalSearchParams();
   const router = useRouter();
 
-  const [fullName, setFullName]   = useState(String(name));
-  const [phoneNumber, setPhoneNumber] = useState(String(phoneIn));
-  const [email, setEmail]         = useState(String(emailIn));
-  const [password, setPassword]   = useState(String(passIn));
-  const [showPwd, setShowPwd]     = useState(false);
-  const [saved, setSaved]         = useState(false);
+  const [fullName, setFullName]       = useState("User");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail]             = useState("");
+  const [password, setPassword]       = useState("");
+  const [showPwd, setShowPwd]         = useState(false);
+  const [saved, setSaved]             = useState(false);
 
   const profileSrc = require("../../assets/icon.png");
 
-  const handleSave = () => {
+  useEffect(() => {
+    (async () => {
+      try {
+        if (name || emailIn || phoneIn || passIn) {
+          setFullName(String(name || "User"));
+          setEmail(String(emailIn || ""));
+          setPhoneNumber(String(phoneIn || ""));
+          setPassword(String(passIn || ""));
+          return;
+        }
+        const entries = await AsyncStorage.multiGet(["name","phone","email","password"]);
+        const map = Object.fromEntries(entries);
+        setFullName(map.name || "User");
+        setPhoneNumber(map.phone || "");
+        setEmail(map.email || "");
+        setPassword(map.password || "");
+      } catch (e) {
+        console.error("Profile init error:", e);
+      }
+    })();
+  }, [name, emailIn, phoneIn, passIn]);
+
+  const handleSave = async () => {
     if (!fullName.trim() || !phoneNumber.trim() || !email.trim() || !password.trim()) {
-      Alert.alert("Gabim", "Plotëso Emri, Numri, Email, Password.");
-      return;
+      return Alert.alert("Gabim", "Plotëso Emri, Numri, Email, Password.");
     }
-    setSaved(true); setTimeout(() => setSaved(false), 1200);
-    Alert.alert("Sukses", "Ndryshimet u ruajtën!");
+    try {
+      await AsyncStorage.multiSet([
+        ["name", fullName.trim()],
+        ["phone", phoneNumber.trim()],
+        ["email", email.trim().toLowerCase()],
+        ["password", password],
+      ]);
+      setSaved(true); setTimeout(() => setSaved(false), 1200);
+      Alert.alert("Sukses", "Ndryshimet u ruajtën!");
+    } catch (e) {
+      console.error("Profile save error:", e);
+      Alert.alert("Gabim", "Nuk u ruajtën ndryshimet.");
+    }
   };
 
   return (
@@ -32,11 +65,9 @@ export default function Profile() {
 
       <Text style={s.section}>Edit profile</Text>
 
-      {/* Emri */}
       <View style={s.row}>
         <Text style={s.label}>Emri</Text>
         <TextInput
-          editable
           value={fullName}
           onChangeText={setFullName}
           placeholder="Shkruaj emrin"
@@ -46,41 +77,35 @@ export default function Profile() {
         />
       </View>
 
-      {/* Numri */}
       <View style={s.row}>
         <Text style={s.label}>Phone Number</Text>
         <TextInput
-          editable
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           placeholder="Shkruaj numrin"
-          keyboardType="tel"
+          keyboardType="phone-pad"
           style={s.input}
           autoCorrect={false}
         />
       </View>
 
-      {/* Email */}
       <View style={s.row}>
         <Text style={s.label}>Email</Text>
         <TextInput
-          editable
           value={email}
           onChangeText={setEmail}
           placeholder="Shkruaj email-in"
           autoCapitalize="none"
           keyboardType="email-address"
+          inputMode="email"
           style={s.input}
           autoCorrect={false}
-          inputMode="email"
         />
       </View>
 
-      {/* Password + Show/Hide */}
       <View style={[s.row, { position: "relative" }]}>
         <Text style={s.label}>Password</Text>
         <TextInput
-          editable
           value={password}
           onChangeText={setPassword}
           placeholder="Shkruaj fjalëkalimin"

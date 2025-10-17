@@ -44,10 +44,6 @@ const Nearby = () => {
           style={styles.mapImage}
           resizeMode="cover"
         />
-        {/* NDËRRUAR: avatar sipër djathtas që hap modalin e profilit */}
-        <TouchableOpacity style={styles.avatarBtn} onPress={() => setShowProfile(true)}>
-          <Image source={profileSrc} style={styles.avatar} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.controls}>
