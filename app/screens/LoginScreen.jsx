@@ -24,7 +24,21 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/screens/nearby")}>
+      {/* NDËRRUAR: dërgon te /screens/nearby me të dhënat e futura */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          router.push({
+            pathname: "/screens/nearby",
+            params: {
+              name: email ? email.split("@")[0] : "User",
+              email,
+              phone: "96034 56878",
+              pwdLen: String(password.length || 8),
+            },
+          })
+        }
+      >
         <Text style={styles.buttonText}>Kyçu</Text>
       </TouchableOpacity>
 
@@ -37,7 +51,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,                 // Kjo e lejon scroll
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
