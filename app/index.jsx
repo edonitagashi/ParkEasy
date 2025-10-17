@@ -15,7 +15,9 @@ import { Link } from "expo-router";
 export default function Index() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(30)).current;
+ 
 
+  
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
