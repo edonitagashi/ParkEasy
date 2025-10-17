@@ -1,6 +1,7 @@
 // app/screens/FavoritesScreen.jsx
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
-import { SafeAreaView, FlatList, StatusBar, StyleSheet, Text, View } from "react-native";
+import { FlatList, StatusBar, StyleSheet, Text, View } from "react-native";
 import SearchHeader from "../../components/SearchHeader";
 import ParkingCard from "../../components/ParkingCard";
 
