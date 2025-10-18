@@ -4,15 +4,21 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function SearchResultItem({ item }) {
+  const handlePress = () => {
+    Alert.alert(
+      "Parking Details",
+      `Name: ${item.name}\nDistance: ${item.distance} km\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
+    );
+  };
+
   return (
-    <TouchableOpacity onPress={() => Alert.alert("Parking selected", item.name)}>
+    <TouchableOpacity onPress={handlePress}>
       <LinearGradient
         colors={["#5C8374", "#6FA48B"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.card}
       >
-    
         <Image source={item.image} style={styles.image} />
 
         <View style={styles.infoContainer}>
@@ -23,6 +29,10 @@ export default function SearchResultItem({ item }) {
             <Ionicons name="location-outline" size={14} color="#fff" />
             <Text style={styles.address}>{item.address}</Text>
           </View>
+
+          <Text style={styles.detail}>Distance: {item.distance} km</Text>
+          <Text style={styles.detail}>Price: {item.price}</Text>
+          <Text style={styles.detail}>Available: {item.spots} spots</Text>
         </View>
 
         <Ionicons name="bookmark-outline" size={22} color="#fff" style={styles.bookmarkIcon} />
@@ -71,6 +81,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: 4,
     fontSize: 12,
+  },
+  detail: {
+    color: "#fff",
+    fontSize: 12,
+    marginTop: 2,
   },
   bookmarkIcon: {
     padding: 10,

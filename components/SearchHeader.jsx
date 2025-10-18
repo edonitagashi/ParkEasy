@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   header: {
   flexDirection: "row",
   alignItems: "center",
-  justifyContent: "center", // <-- ndrysho nga "space-between" në "center"
+  justifyContent: "center", 
   paddingHorizontal: 16,
   paddingVertical: 14,
   backgroundColor: "#fff",
