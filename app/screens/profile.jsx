@@ -1,4 +1,3 @@
-// app/screens/profile.jsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -34,10 +33,9 @@ export default function Profile() {
   const [loading, setLoading]         = useState(true);
   const [saving, setSaving]           = useState(false);
 
-  // ✅ Mesazhi i gjelbër i suksesit
   const [successMsg, setSuccessMsg]   = useState("");
 
-  const placeholder = require("../../assets/icon.png");
+  const placeholder = require("../../assets/images/profile.jpg");
 
   // Load currentUser nga AsyncStorage
   useEffect(() => {
@@ -162,7 +160,6 @@ export default function Profile() {
         await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
       }
 
-      // ✅ Mesazh i gjelbër poshtë butonit
       setSuccessMsg("✅ Ndryshimet u ruajtën me sukses!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (e) {

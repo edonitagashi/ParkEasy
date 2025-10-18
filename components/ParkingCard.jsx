@@ -7,7 +7,7 @@ export default function ParkingCard({ item }) {
   const handlePress = () => {
     Alert.alert(
       "Parking Details",
-      `Name: ${item.name}\nDistance: ${item.distance} km\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
+      `Name: ${item.name}\nDistance: ${item.distance}\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
     );
   };
 
@@ -30,12 +30,19 @@ export default function ParkingCard({ item }) {
             <Text style={styles.address}>{item.address}</Text>
           </View>
 
-          <Text style={styles.detail}>Distance: {item.distance} km</Text>
+          <Text style={styles.detail}>Distance: {item.distance}</Text>
           <Text style={styles.detail}>Price: {item.price}</Text>
           <Text style={styles.detail}>Available: {item.spots} spots</Text>
         </View>
 
-        <Ionicons name="bookmark-outline" size={22} color="#fff" style={styles.bookmarkIcon} />
+        <TouchableOpacity onPress={item.onFavoriteToggle}>
+          <Ionicons
+            name={item.isFavorite ? "bookmark" : "bookmark-outline"}
+            size={22}
+            color={item.isFavorite ? "#e5d058ff" : "#fff"}
+            style={styles.bookmarkIcon}
+          />
+        </TouchableOpacity>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -53,41 +60,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     alignItems: "center",
+    padding: 5,
   },
-  image: {
-    width: 100,
-    height: 100,
-  },
-  infoContainer: {
-    flex: 1,
-    padding: 10,
-    justifyContent: "center",
-  },
-  bookingId: {
-    fontSize: 12,
-    color: "#fff",
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
-    marginVertical: 4,
-  },
-  addressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  address: {
-    color: "#fff",
-    marginLeft: 4,
-    fontSize: 12,
-  },
-  detail: {
-    color: "#fff",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  bookmarkIcon: {
-    padding: 10,
-  },
+  image: { width: 100, height: 100, borderRadius: 8, },
+  infoContainer: { flex: 1, padding: 10, justifyContent: "center" },
+  bookingId: { fontSize: 12, color: "#fff" },
+  name: { fontSize: 16, fontWeight: "bold", color: "#fff", marginVertical: 4 },
+  addressContainer: { flexDirection: "row", alignItems: "center" },
+  address: { color: "#fff", marginLeft: 4, fontSize: 12 },
+  detail: { color: "#fff", fontSize: 12, marginTop: 2 },
+  bookmarkIcon: { padding: 10 },
 });
