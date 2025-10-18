@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import {
   View,
   FlatList,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
 import SearchBar from "../../components/SearchBar";
 import SearchResultItem from "../../components/SearchResultItem";
@@ -20,8 +20,8 @@ export default function SearchParkingScreen() {
     { id: "E001", name: "Parking Prishtina Center", address: "Rruga Nëna Terezë, Prishtinë, Kosovo", distance: 0.5, price: "1€/h", spots: 7, image: require("../../assets/images/image1.png") },
     { id: "E002", name: "Parking Mother Teresa", address: "Rruga Lidhja e Pejës, Prishtinë, Kosovo", distance: 1.2, price: "0.8€/h", spots: 3, image: require("../../assets/images/image2.png") },
     { id: "E003", name: "Parking Peja Mall", address: "Rruga Bjeshkët e Nemuna, Pejë, Kosovo", distance: 3.5, price: "1.2€/h", spots: 5, image: require("../../assets/images/image3.png") },
-    { id: "E004", name: "Parking Gërmia", address: "Rruga Gërmia, Prishtinë, Kosovo", distance: 2.1, price: "0.5€/h", spots: 10, image: require("../../assets/images/image4.png") },
-    { id: "E005", name: "Parking Dardania", address: "Rruga Dardania, Prishtinë, Kosovo", distance: 1.8, price: "1€/h", spots: 0, image: require("../../assets/images/image5.png") },
+    { id: "E004", name: "Parking Gërmia", address: "Rruga Gërmia, Prishtinë, Kosovo", distance: 2.1, price: "0.5€/h", spots: 10, image: require("../../assets/images/image5.png") },
+    { id: "E005", name: "Parking Dardania", address: "Rruga Dardania, Prishtinë, Kosovo", distance: 1.8, price: "1€/h", spots: 0, image: require("../../assets/images/image4.png") },
     { id: "E006", name: "Parking Mitrovica City", address: "Rruga 1 Tetori, Mitrovicë, Kosovo", distance: 4.5, price: "0.7€/h", spots: 2, image: require("../../assets/images/image6.png") },
     { id: "E007", name: "Parking Prizren Old Town", address: "Rruga Shatervan, Prizren, Kosovo", distance: 5.0, price: "1.5€/h", spots: 8, image: require("../../assets/images/image7.png") },
     { id: "E008", name: "Parking Ferizaj Center", address: "Rruga Rexhep Luci, Ferizaj, Kosovo", distance: 3.0, price: "1€/h", spots: 6, image: require("../../assets/images/image8.png") },
