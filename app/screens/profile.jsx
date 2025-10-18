@@ -10,10 +10,13 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  ScrollView,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from '@expo/vector-icons';
 
 const USERS_KEY = "users";               // lista e përdoruesve
 const CURRENT_USER_KEY = "currentUser";  // sesioni aktiv
@@ -54,7 +57,7 @@ export default function Profile() {
         setAvatarUri(me.avatarUri || null);
       } catch (e) {
         console.error("Profile read error:", e);
-        Alert.alert("Gabim", "S’u lexuan të dhënat e profilit.");
+        Alert.alert("Gabim", "S'u lexuan të dhënat e profilit.");
       } finally {
         setLoading(false);
       }
@@ -178,6 +181,56 @@ export default function Profile() {
     router.replace("/"); // te hyrja
   };
 
+  // Funksione të reja për Settings, About Us, Help
+  const handleSettings = () => {
+    Alert.alert("Settings", "Cilësimet do të shtohen në versionin e ardhshëm!");
+  };
+
+  const handleAboutUs = () => {
+    Alert.alert(
+      "About ParkEasy",
+      `ParkEasy v1.0.0\n\nAplikacion modern për gjetjen e parkingut.\n\nDeveloped with ❤️ në Kosovë\n\nKontakt: info@parkeasy.com`
+    );
+  };
+
+  const handleHelp = () => {
+    Alert.alert(
+      "Help & Support",
+      "Keni nevojë për ndihmë?\n\n• Kontakt: +383 49 000 000\n• Email: support@parkeasy.com\n• Orari: 08:00 - 20:00",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Call Support", 
+          onPress: () => Linking.openURL('tel:+38349000000')
+        },
+        { 
+          text: "Email Support", 
+          onPress: () => Linking.openURL('mailto:support@parkeasy.com')
+        }
+      ]
+    );
+  };
+
+  const handlePrivacyPolicy = () => {
+    Alert.alert(
+      "Privacy Policy",
+      "Ne respektojmë privatësinë tuaj. Të dhënat tuaja janë të sigurta dhe përdoren vetëm për qëllime të shërbimit tonë.",
+      [
+        { text: "OK", style: "default" }
+      ]
+    );
+  };
+
+  const handleTermsOfService = () => {
+    Alert.alert(
+      "Terms of Service",
+      "Duke përdorur ParkEasy, ju pranoni kushtet tona të shërbimit. Lexoni dokumentin e plotë në website-n tonë.",
+      [
+        { text: "OK", style: "default" }
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={[s.container, { alignItems: "center", justifyContent: "center" }]}>
@@ -188,7 +241,7 @@ export default function Profile() {
   }
 
   return (
-    <View style={s.container}>
+    <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       {/* Avatar + Add/Change Photo */}
       <View style={s.avatarWrap}>
         <Image source={avatarUri ? { uri: avatarUri } : placeholder} style={s.avatar} />
@@ -230,7 +283,7 @@ export default function Profile() {
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           placeholder="Shkruaj numrin"
-        keyboardType="phone-pad"
+          keyboardType="phone-pad"
           inputMode="tel"
           style={s.input}
           autoCorrect={false}
@@ -275,10 +328,69 @@ export default function Profile() {
       {/* ✅ Mesazhi i suksesit poshtë butonit */}
       {successMsg ? <Text style={s.successMsg}>{successMsg}</Text> : null}
 
-      <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
-        <Text style={s.logoutTxt}>Logout ➜</Text>
+      {/* SEKSIONI I RI: Opsione të tjera */}
+      <Text style={s.section}>More Options</Text>
+
+      {/* Settings */}
+      <TouchableOpacity style={s.optionItem} onPress={handleSettings}>
+        <View style={s.optionLeft}>
+          <Ionicons name="settings" size={24} color="#4C6E64" />
+          <Text style={s.optionText}>Settings</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
       </TouchableOpacity>
-    </View>
+
+      {/* About Us */}
+      <TouchableOpacity style={s.optionItem} onPress={handleAboutUs}>
+        <View style={s.optionLeft}>
+          <Ionicons name="information-circle" size={24} color="#4C6E64" />
+          <Text style={s.optionText}>About Us</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+      </TouchableOpacity>
+
+      {/* Help & Support */}
+      <TouchableOpacity style={s.optionItem} onPress={handleHelp}>
+        <View style={s.optionLeft}>
+          <Ionicons name="help-circle" size={24} color="#4C6E64" />
+          <Text style={s.optionText}>Help & Support</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+      </TouchableOpacity>
+
+      {/* Privacy Policy */}
+      <TouchableOpacity style={s.optionItem} onPress={handlePrivacyPolicy}>
+        <View style={s.optionLeft}>
+          <Ionicons name="shield-checkmark" size={24} color="#4C6E64" />
+          <Text style={s.optionText}>Privacy Policy</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+      </TouchableOpacity>
+
+      {/* Terms of Service */}
+      <TouchableOpacity style={s.optionItem} onPress={handleTermsOfService}>
+        <View style={s.optionLeft}>
+          <Ionicons name="document-text" size={24} color="#4C6E64" />
+          <Text style={s.optionText}>Terms of Service</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+      </TouchableOpacity>
+
+      {/* Logout */}
+      <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
+        <View style={s.optionLeft}>
+          <Ionicons name="log-out" size={24} color="#b02a37" />
+          <Text style={[s.optionText, { color: "#b02a37" }]}>Logout</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#b02a37" />
+      </TouchableOpacity>
+
+      {/* Version Info */}
+      <View style={s.versionContainer}>
+        <Text style={s.versionText}>ParkEasy v1.0.0</Text>
+        <Text style={s.copyright}>© 2024 ParkEasy. All rights reserved.</Text>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -296,7 +408,7 @@ const s = StyleSheet.create({
   },
   addPhotoTxt:{ color:"#2E7D6A", fontWeight:"700" },
   fullname:{ textAlign:"center", fontSize:18, fontWeight:"700", color:"#2E7D6A", marginBottom:10 },
-  section:{ color:"#4C6E64", fontWeight:"700", marginBottom:8 },
+  section:{ color:"#4C6E64", fontWeight:"700", marginBottom:8, marginTop: 16 },
   row:{ backgroundColor:"#fff", borderWidth:1, borderColor:"#CFE1DB", borderRadius:12, padding:12, marginBottom:10 },
   label:{ color:"#4C6E64", marginBottom:6, fontWeight:"600" },
   input:{ fontSize:16, color:"#1b1b1b" },
@@ -314,6 +426,56 @@ const s = StyleSheet.create({
     borderRadius:8,
     fontWeight:"700",
   },
-  logoutBtn:{ alignSelf:"flex-start", marginTop:12, paddingVertical:10, paddingHorizontal:14, borderRadius:12, borderWidth:2, borderColor:"#2E7D6A" },
-  logoutTxt:{ color:"#2E7D6A", fontWeight:"700" },
+  
+  // Stilet e reja për opsionet
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#CFE1DB',
+  },
+  optionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#1b1b1b',
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: '#b02a37',
+  },
+  versionContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+    padding: 16,
+  },
+  versionText: {
+    color: '#4C6E64',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  copyright: {
+    color: '#4C6E64',
+    fontSize: 12,
+    marginTop: 5,
+    textAlign: 'center',
+  },
 });
