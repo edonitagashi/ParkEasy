@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import SearchHeader from "../../components/SearchHeader";
-import ParkingCard from "../../components/ParkingCard";
+import SearchResultItem from "../../components/SearchResultItem";
+const placeholderImage = require("../../assets/images/image1.png");
 
 const Nearby = () => {
   const router = useRouter();
@@ -23,14 +24,14 @@ const Nearby = () => {
   const profileSrc = require("../../assets/icon.png"); // placeholder lokal
 
   const [parkings] = useState([
-    { id: "1", name: "City Center Parking", address: "Deshmoret e Kombit St.", distance: "150 m", price: "2 €/h", spots: 8 },
-    { id: "2", name: "Theater Parking", address: "Skenderbej Square", distance: "320 m", price: "1.5 €/h", spots: 3 },
-    { id: "3", name: "University Parking", address: "Zogu I Blvd.", distance: "500 m", price: "Free", spots: 10 },
-    { id: "4", name: "Mall Parking", address: "Mall Street", distance: "600 m", price: "2 €/h", spots: 5 },
-    { id: "5", name: "Train Station Parking", address: "Train Station", distance: "750 m", price: "1 €/h", spots: 2 },
-    { id: "6", name: "Airport Parking", address: "Airport Rd.", distance: "1 km", price: "3 €/h", spots: 12 },
-    { id: "7", name: "Library Parking", address: "Library St.", distance: "850 m", price: "Free", spots: 6 },
-    { id: "8", name: "Hospital Parking", address: "Hospital Rd.", distance: "900 m", price: "1 €/h", spots: 0 },
+    { id: "E001", name: "Parking Prishtina Center", address: "Rruga Nëna Terezë, Prishtinë, Kosovo", distance: 0.5, price: "1€/h", spots: 7, image: require("../../assets/images/image1.png") },
+    { id: "E002", name: "Parking Mother Teresa", address: "Rruga Lidhja e Pejës, Prishtinë, Kosovo", distance: 1.2, price: "0.8€/h", spots: 3, image: require("../../assets/images/image2.png") },
+    { id: "E003", name: "Parking Peja Mall", address: "Rruga Bjeshkët e Nemuna, Pejë, Kosovo", distance: 3.5, price: "1.2€/h", spots: 5, image: require("../../assets/images/image3.png") },
+    { id: "E004", name: "Parking Gërmia", address: "Rruga Gërmia, Prishtinë, Kosovo", distance: 2.1, price: "0.5€/h", spots: 10, image: require("../../assets/images/image5.png") },
+    { id: "E005", name: "Parking Dardania", address: "Rruga Dardania, Prishtinë, Kosovo", distance: 1.8, price: "1€/h", spots: 0, image: require("../../assets/images/image4.png") },
+    { id: "E006", name: "Parking Mitrovica City", address: "Rruga 1 Tetori, Mitrovicë, Kosovo", distance: 4.5, price: "0.7€/h", spots: 2, image: require("../../assets/images/image6.png") },
+    { id: "E007", name: "Parking Prizren Old Town", address: "Rruga Shatervan, Prizren, Kosovo", distance: 5.0, price: "1.5€/h", spots: 8, image: require("../../assets/images/image7.png") },
+    { id: "E008", name: "Parking Ferizaj Center", address: "Rruga Rexhep Luci, Ferizaj, Kosovo", distance: 3.0, price: "1€/h", spots: 6, image: require("../../assets/images/image8.png") },
   ]);
 
   return (
@@ -56,22 +57,16 @@ const Nearby = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={parkings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ParkingCard
-            name={item.name}
-            address={item.address}
-            distance={item.distance}
-            price={item.price}
-            spots={item.spots}
-          />
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        style={{ flex: 1 }}
-      />
+     <FlatList
+  data={parkings}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <SearchResultItem item={item} /> 
+  )}
+  ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+  contentContainerStyle={{ paddingBottom: 20 }}
+  style={{ flex: 1 }}
+/>
 
       <Modal
         visible={showProfile}
