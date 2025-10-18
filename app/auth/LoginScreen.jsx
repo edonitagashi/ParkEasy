@@ -3,25 +3,38 @@ import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert 
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const USERS_KEY = "users";
+const CURRENT_USER_KEY = "currentUser"; // opsionale: ruaje sesionin
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const entries = await AsyncStorage.multiGet(["email", "password"]);
-      const store = Object.fromEntries(entries);
-      const savedEmail = (store.email || "").toLowerCase();
-      const savedPwd   = store.password || "";
+      // 1) Lexo listën e përdoruesve
+      const raw = await AsyncStorage.getItem(USERS_KEY);
+      const users = raw ? JSON.parse(raw) : [];
 
-      if (!savedEmail || !savedPwd) {
+      if (!Array.isArray(users) || users.length === 0) {
         return Alert.alert("Gabim", "S’ka llogari të regjistruar. Regjistrohu fillimisht.");
       }
-      if (email.trim().toLowerCase() !== savedEmail || password !== savedPwd) {
+
+      // 2) Gjej përdoruesin sipas email + password
+      const me = users.find(
+        (u) =>
+          u.email?.toLowerCase() === email.trim().toLowerCase() &&
+          u.password === password
+      );
+
+      if (!me) {
         return Alert.alert("Gabim", "Email ose fjalëkalim i pasaktë.");
       }
 
-      // sukses → shko te Nearby (tab-i yt)
+      // 3) (Opsionale) Ruaje sesionin
+      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
+
+      // 4) Sukses → shko te Nearby
       router.replace("/screens/nearby");
     } catch (e) {
       console.error("Login read error:", e);
@@ -54,7 +67,7 @@ export default function LoginScreen() {
         <Text style={styles.buttonText}>Kyçu</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/auth/register")}>
+      <TouchableOpacity onPress={() => router.push("/auth/RegisterScreen")}>
         <Text style={styles.link}>Nuk ke llogari? Regjistrohu</Text>
       </TouchableOpacity>
     </ScrollView>
