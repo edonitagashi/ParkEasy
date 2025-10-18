@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import SearchHeader from "../../components/SearchHeader";
-import SearchResultItem from "../../components/SearchResultItem";
+import ParkingCard from "../../components/ParkingCard";
 const placeholderImage = require("../../assets/images/image1.png");
 
 const Nearby = () => {
@@ -57,16 +57,15 @@ const Nearby = () => {
         </TouchableOpacity>
       </View>
 
-     <FlatList
+<FlatList
   data={parkings}
   keyExtractor={(item) => item.id}
-  renderItem={({ item }) => (
-    <SearchResultItem item={item} /> 
-  )}
+  renderItem={({ item }) => <ParkingCard item={item} />}
   ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
   contentContainerStyle={{ paddingBottom: 20 }}
   style={{ flex: 1 }}
 />
+
 
       <Modal
         visible={showProfile}

@@ -1,4 +1,3 @@
-// app/screens/FavoritesScreen.jsx
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
 import { FlatList, StatusBar, StyleSheet, Text, View } from "react-native";
@@ -6,7 +5,6 @@ import SearchHeader from "../../components/SearchHeader";
 import ParkingCard from "../../components/ParkingCard";
 
 export default function FavoritesScreen() {
-  // Lista e parkimeve të gjitha (për shembull, nga Nearby)
   const initialParkings = [
     { id: "1", name: "City Center Parking", address: "Deshmoret e Kombit St.", distance: "150 m", price: "2 €/h", spots: 8 },
     { id: "2", name: "Theater Parking", address: "Skenderbej Square", distance: "320 m", price: "1.5 €/h", spots: 3 },
@@ -16,21 +14,18 @@ export default function FavoritesScreen() {
     { id: "6", name: "Airport Parking", address: "Airport Rd.", distance: "1 km", price: "3 €/h", spots: 12 },
   ];
 
-  // Gjendja e favorites
   const [favorites, setFavorites] = useState([
     "1",
     "3",
     "6"
   ]);
 
-  // Funksioni për toggle favorite
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
   };
 
-  // Filter për parkimet që janë favorite
   const favoriteParkings = initialParkings.filter((p) => favorites.includes(p.id));
 
   return (
@@ -47,14 +42,14 @@ export default function FavoritesScreen() {
           data={favoriteParkings}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-           <ParkingCard
-             name={item.name}
-             distance={item.distance}
-             price={item.price}
-             spots={item.spots}
-             isFavorite={favorites.includes(item.id)}
-             onFavoriteToggle={() => toggleFavorite(item.id)}
-           />
+          <ParkingCard
+          item={{
+             ...item,
+             isFavorite: favorites.includes(item.id),
+            onFavoriteToggle: () => toggleFavorite(item.id),
+            }}
+            />
+
           )}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           contentContainerStyle={{ paddingBottom: 20 }}

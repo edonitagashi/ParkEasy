@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
 import SearchBar from "../../components/SearchBar";
-import SearchResultItem from "../../components/SearchResultItem";
+import ParkingCard from "../../components/ParkingCard";
 
 const placeholderImage = require("../../assets/images/image1.png");
 
@@ -46,12 +46,12 @@ export default function SearchParkingScreen() {
         data={filteredParkings}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <SearchResultItem
-            item={{
+          <ParkingCard
+            item={{ 
               ...item,
               image: item.image ? item.image : placeholderImage,
-            }}
-          />
+             }}
+             />
         )}
         contentContainerStyle={
           filteredParkings.length === 0 ? { flex: 1 } : styles.listContent
