@@ -4,8 +4,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const USERS_KEY = "users";              // lista e përdoruesve
-const CURRENT_USER_KEY = "currentUser"; // sesioni aktiv
+const USERS_KEY = "users";              
+const CURRENT_USER_KEY = "currentUser"; 
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -22,32 +22,31 @@ export default function RegisterScreen() {
     if (password !== confirmPassword) return Alert.alert("Gabim", "Fjalëkalimet nuk përputhen.");
 
     try {
-      // 1) Lexo listën ekzistuese të përdoruesve
+     
       const raw = await AsyncStorage.getItem(USERS_KEY);
       const users = raw ? JSON.parse(raw) : [];
 
-      // 2) Kontrollo duplikimin e email-it
+     
       const exists = users.some((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
       if (exists) return Alert.alert("Gabim", "Ky email ekziston. Përdor një tjetër.");
 
-      // 3) Shto përdoruesin e ri
+      
       const newUser = {
         id: Date.now().toString(),
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim().toLowerCase(),
-        password, // (projekt demo) – mos e ruaj plaintext në prodhim
+        password, 
       };
       const next = [...users, newUser];
 
-      // 4) Ruaje listën
+      
       await AsyncStorage.setItem(USERS_KEY, JSON.stringify(next));
 
-      // 5) ✅ AUTO-LOGIN: ruaje sesionin
+      
       await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
 
-      // 6) Shko direkt te Nearby (ose te Login nëse s’do auto-login)
-      router.replace("/screens/nearby");
+      router.replace("/nearby");
     } catch (e) {
       console.error("Register save error:", e);
       Alert.alert("Gabim", "Nuk u ruajtën të dhënat.");
@@ -68,7 +67,7 @@ export default function RegisterScreen() {
         <Text style={styles.buttonText}>Krijo llogari</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/auth/LoginScreen")}>
+      <TouchableOpacity onPress={() => router.push("/LoginScreen")}>
         <Text style={styles.link}>Ke tashmë llogari? Kyçu</Text>
       </TouchableOpacity>
     </View>

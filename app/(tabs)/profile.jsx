@@ -17,8 +17,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from '@expo/vector-icons';
 
-const USERS_KEY = "users";               // lista e përdoruesve
-const CURRENT_USER_KEY = "currentUser";  // sesioni aktiv
+const USERS_KEY = "users";               
+const CURRENT_USER_KEY = "currentUser";  
 
 export default function Profile() {
   const router = useRouter();
@@ -37,14 +37,13 @@ export default function Profile() {
 
   const placeholder = require("../../assets/images/profile.jpg");
 
-  // Load currentUser nga AsyncStorage
   useEffect(() => {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
         if (!raw) {
-          Alert.alert("Sesion i mbyllur", "Kyçu për të parë profilin.");
-          router.replace("/auth/LoginScreen");
+          Alert.alert("Session expired", "Please log in to view your profile.");
+          router.replace("/LoginScreen");
           return;
         }
         const me = JSON.parse(raw);
@@ -55,20 +54,20 @@ export default function Profile() {
         setAvatarUri(me.avatarUri || null);
       } catch (e) {
         console.error("Profile read error:", e);
-        Alert.alert("Gabim", "S'u lexuan të dhënat e profilit.");
+        Alert.alert("Error", "Profile data could not be read.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  // Zgjedh foto + sinkronizo currentUser dhe users
+  
   const pickFromLibrary = async () => {
     try {
       if (Platform.OS !== "web") {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("Leje e nevojshme", "Na duhet leja për të qasur fotot.");
+          Alert.alert("Permission required", "We need access to your photos.");
           return;
         }
       }
@@ -100,11 +99,11 @@ export default function Profile() {
       }
     } catch (e) {
       console.error("Image pick error:", e);
-      Alert.alert("Gabim", "Nuk u zgjodh fotoja.");
+      Alert.alert("Error", "The photo could not be selected.");
     }
   };
 
-  // Heq foto + sinkronizo currentUser dhe users
+ 
   const handleRemovePhoto = async () => {
     try {
       setAvatarUri(null);
@@ -126,18 +125,19 @@ export default function Profile() {
     } catch {}
   };
 
-  // Ruaj ndryshimet në currentUser + users
+  
   const handleSave = async () => {
     if (saving) return;
     if (!fullName.trim() || !phoneNumber.trim() || !email.trim() || !password.trim()) {
-      return Alert.alert("Gabim", "Plotëso Emri, Numri, Email, Password.");
+      return Alert.alert("Error", "Please fill in Name, Phone, Email, and Password.");
+
     }
     setSaving(true);
     try {
       const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
       if (!rawCur) {
-        Alert.alert("Sesion i mbyllur", "Kyçu përsëri.");
-        router.replace("/auth/LoginScreen");
+        Alert.alert("Session expired", "Please log in again.");
+        router.replace("/LoginScreen");
         return;
       }
       const me = JSON.parse(rawCur);
@@ -160,17 +160,17 @@ export default function Profile() {
         await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
       }
 
-      setSuccessMsg("✅ Ndryshimet u ruajtën me sukses!");
+      setSuccessMsg("✅ Changes saved succesfully!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (e) {
       console.error("Profile save error:", e);
-      Alert.alert("Gabim", "Nuk u ruajtën ndryshimet.");
+      Alert.alert("Wrong", "No changes were saved.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Logout: hiq vetëm currentUser
+  
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem(CURRENT_USER_KEY);
@@ -178,61 +178,52 @@ export default function Profile() {
     router.replace("/"); // te hyrja
   };
 
-  // Funksione të reja për Settings, About Us, Help
+  
   const handleSettings = () => {
-    Alert.alert("Settings", "Cilësimet do të shtohen në versionin e ardhshëm!");
+Alert.alert("Settings", "Settings will be added in the next version!");
   };
 
   const handleAboutUs = () => {
-    Alert.alert(
-      "About ParkEasy",
-      `ParkEasy v1.0.0\n\nAplikacion modern për gjetjen e parkingut.\n\nDeveloped with ❤️ në Kosovë\n\nKontakt: info@parkeasy.com`
-    );
+   Alert.alert(
+  "About ParkEasy",
+  `ParkEasy v1.0.0\n\nA modern app for finding parking.\n\nDeveloped with ❤️ in Kosovo\n\nContact: info@parkeasy.com`
+);
   };
 
   const handleHelp = () => {
     Alert.alert(
-      "Help & Support",
-      "Keni nevojë për ndihmë?\n\n• Kontakt: +383 49 000 000\n• Email: support@parkeasy.com\n• Orari: 08:00 - 20:00",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Call Support", 
-          onPress: () => Linking.openURL('tel:+38349000000')
-        },
-        { 
-          text: "Email Support", 
-          onPress: () => Linking.openURL('mailto:support@parkeasy.com')
-        }
-      ]
-    );
+  "Help & Support",
+  "Need help?\n\n• Contact: +383 49 000 000\n• Email: support@parkeasy.com\n• Hours: 08:00 - 20:00",
+  [
+    { text: "Cancel", style: "cancel" },
+    { text: "Call Support", onPress: () => Linking.openURL('tel:+38349000000') },
+    { text: "Email Support", onPress: () => Linking.openURL('mailto:support@parkeasy.com') }
+  ]
+);
   };
 
   const handlePrivacyPolicy = () => {
     Alert.alert(
-      "Privacy Policy",
-      "Ne respektojmë privatësinë tuaj. Të dhënat tuaja janë të sigurta dhe përdoren vetëm për qëllime të shërbimit tonë.",
-      [
-        { text: "OK", style: "default" }
-      ]
-    );
+  "Privacy Policy",
+  "We respect your privacy. Your data is secure and used only for service purposes.",
+  [{ text: "OK", style: "default" }]
+);
   };
 
   const handleTermsOfService = () => {
     Alert.alert(
-      "Terms of Service",
-      "Duke përdorur ParkEasy, ju pranoni kushtet tona të shërbimit. Lexoni dokumentin e plotë në website-n tonë.",
-      [
-        { text: "OK", style: "default" }
-      ]
-    );
+  "Terms of Service",
+  "By using ParkEasy, you agree to our terms of service. Read the full document on our website.",
+  [{ text: "OK", style: "default" }]
+);
+
   };
 
   if (loading) {
     return (
       <View style={[s.container, { alignItems: "center", justifyContent: "center" }]}>
         <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 10, color: "#4C6E64" }}>Duke ngarkuar profilin...</Text>
+        <Text style={{ marginTop: 10, color: "#4C6E64" }}>Loading profile...</Text>
       </View>
     );
   }
@@ -256,17 +247,17 @@ export default function Profile() {
         ) : null}
       </View>
 
-      <Text style={s.fullname}>{fullName || "Përdorues"}</Text>
+      <Text style={s.fullname}>{fullName || "User"}</Text>
 
       <Text style={s.section}>Edit profile</Text>
 
       {/* Emri */}
       <View style={s.row}>
-        <Text style={s.label}>Emri</Text>
+        <Text style={s.label}>Name</Text>
         <TextInput
           value={fullName}
           onChangeText={setFullName}
-          placeholder="Shkruaj emrin"
+          placeholder="Enter your name"
           style={s.input}
           autoCorrect={false}
           autoCapitalize="words"
@@ -279,7 +270,7 @@ export default function Profile() {
         <TextInput
           value={phoneNumber}
           onChangeText={setPhoneNumber}
-          placeholder="Shkruaj numrin"
+          placeholder="Enter your phone number"          
           keyboardType="phone-pad"
           inputMode="tel"
           style={s.input}
@@ -293,7 +284,7 @@ export default function Profile() {
         <TextInput
           value={email}
           onChangeText={setEmail}
-          placeholder="Shkruaj email-in"
+          placeholder="Enter your email"
           autoCapitalize="none"
           keyboardType="email-address"
           inputMode="email"
@@ -308,7 +299,7 @@ export default function Profile() {
         <TextInput
           value={password}
           onChangeText={setPassword}
-          placeholder="Shkruaj fjalëkalimin"
+          placeholder="Enter your password"
           secureTextEntry={!showPwd}
           style={[s.input, { paddingRight: 64 }]}
           autoCapitalize="none"
@@ -319,7 +310,7 @@ export default function Profile() {
       </View>
 
       <TouchableOpacity style={[s.saveBtn, saving && { opacity: 0.7 }]} onPress={handleSave} disabled={saving}>
-        <Text style={s.saveTxt}>{saving ? "Duke ruajtur..." : "Ruaj ndryshimet"}</Text>
+        <Text style={s.saveTxt}>{saving ? "Saving..." : "Save changes"}</Text>
       </TouchableOpacity>
 
       {/* ✅ Mesazhi i suksesit poshtë butonit */}
@@ -413,7 +404,7 @@ const s = StyleSheet.create({
   showTxt:{ color:"#2E7D6A", fontWeight:"700" },
   saveBtn:{ backgroundColor:"#2E7D6A", borderRadius:12, alignItems:"center", paddingVertical:12, marginTop:4 },
   saveTxt:{ color:"#fff", fontWeight:"700" },
-  // ✅ Stili i mesazhit të suksesit
+  
   successMsg:{
     color:"#2E7D6A",
     backgroundColor:"#DFF6E3",
@@ -424,7 +415,7 @@ const s = StyleSheet.create({
     fontWeight:"700",
   },
   
-  // Stilet e reja për opsionet
+
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',

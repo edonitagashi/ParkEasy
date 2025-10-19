@@ -4,16 +4,11 @@ import { useRouter } from "expo-router";
 
 export default function SearchHeader({ title }) {
   const router = useRouter();
-  const profileSrc = require("../assets/icon.png"); 
+ 
 
   return (
     <View style={styles.header}>
       <Text style={styles.title}>{title}</Text>
-      
-      
-      <TouchableOpacity onPress={() => router.push("/screens/profile")}>
-        <Image source={profileSrc} style={styles.avatar} />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -22,7 +17,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", 
+    justifyContent: "center", 
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: "#fff",
@@ -43,5 +38,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#ddd",
+    textAlign: "center",
   },
 });

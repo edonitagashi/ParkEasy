@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 export default function NotFound() {
-  const router = useRouter(); // Used for navigation
+  const router = useRouter(); 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -16,7 +16,7 @@ export default function NotFound() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/")} // Go back to home screen
+          onPress={() => router.push("/")} 
         >
           <Text style={styles.buttonText}>Go Home</Text>
         </TouchableOpacity>

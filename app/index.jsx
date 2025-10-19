@@ -1,4 +1,4 @@
-// app/index.jsx
+
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,7 +22,7 @@ export default function Index() {
 
   useEffect(() => {
     (async () => {
-      // (Opsionale) Migrim nga çelësat e vjetër në users – nuk prish gjë nëse s’ka
+      
       const oldEntries = await AsyncStorage.multiGet(["name","phone","email","password","avatarUri"]);
       const old = Object.fromEntries(oldEntries || []);
       if (old.email && old.password) {
@@ -43,10 +43,10 @@ export default function Index() {
         await AsyncStorage.multiRemove(["name","phone","email","password","avatarUri"]);
       }
 
-      // ✅ Auto-redirect sipas sesionit
+      
       const cur = await AsyncStorage.getItem(CURRENT_USER_KEY);
       if (cur) {
-        router.replace("/screens/nearby");
+        router.replace("/nearby");
       } else {
         // qëndro këtu (faqja e hyrjes) – ose shko te Login nëse e preferon:
         // router.replace("/auth/LoginScreen");
@@ -67,12 +67,12 @@ export default function Index() {
             <Text style={styles.bannerText}>Save time and secure your perfect spot in just a few taps.</Text>
           </View>
           <View style={styles.buttonContainer}>
-            <Link href="/auth/LoginScreen" asChild>
+            <Link href="/LoginScreen" asChild>
               <TouchableOpacity style={styles.primaryButton}>
                 <Text style={styles.primaryText}>Login</Text>
               </TouchableOpacity>
             </Link>
-            <Link href="/auth/RegisterScreen" asChild>
+            <Link href="/RegisterScreen" asChild>
               <TouchableOpacity style={styles.secondaryButton}>
                 <Text style={styles.secondaryText}>Register</Text>
               </TouchableOpacity>

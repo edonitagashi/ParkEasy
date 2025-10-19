@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser"; // opsionale: ruaje sesionin
+const CURRENT_USER_KEY = "currentUser"; 
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -12,7 +12,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      // 1) Lexo listën e përdoruesve
+      
       const raw = await AsyncStorage.getItem(USERS_KEY);
       const users = raw ? JSON.parse(raw) : [];
 
@@ -20,7 +20,7 @@ export default function LoginScreen() {
         return Alert.alert("Gabim", "S’ka llogari të regjistruar. Regjistrohu fillimisht.");
       }
 
-      // 2) Gjej përdoruesin sipas email + password
+      
       const me = users.find(
         (u) =>
           u.email?.toLowerCase() === email.trim().toLowerCase() &&
@@ -31,11 +31,11 @@ export default function LoginScreen() {
         return Alert.alert("Gabim", "Email ose fjalëkalim i pasaktë.");
       }
 
-      // 3) (Opsionale) Ruaje sesionin
+      
       await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
 
-      // 4) Sukses → shko te Nearby
-      router.replace("/screens/nearby");
+      
+      router.replace("/nearby");
     } catch (e) {
       console.error("Login read error:", e);
       Alert.alert("Gabim", "Nuk po lexohen të dhënat lokale.");
@@ -67,7 +67,7 @@ export default function LoginScreen() {
         <Text style={styles.buttonText}>Kyçu</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/auth/RegisterScreen")}>
+      <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
         <Text style={styles.link}>Nuk ke llogari? Regjistrohu</Text>
       </TouchableOpacity>
     </ScrollView>

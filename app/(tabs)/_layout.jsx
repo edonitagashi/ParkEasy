@@ -50,13 +50,13 @@ export default function TabLayout() {
     />
     
     
-    {/* NDRYSHIMI: Nëse keni FavoritesScreen, ndryshoni emrin dhe ikonën */}
+    
     <Tabs.Screen
       name="FavoritesScreen"
       options={{
-        title: 'Favorites', // Ndryshoni këtu emrin që dëshironi
+        title: 'Favorites', 
         tabBarIcon: ({ color, size }) => (
-          <Ionicons name="heart" size={size} color={color} /> // Ikonë zemer
+          <Ionicons name="heart" size={size} color={color} /> 
         ),
       }}
     />
