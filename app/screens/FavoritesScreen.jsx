@@ -27,7 +27,7 @@ export default function FavoritesScreen() {
   const favoriteParkings = initialParkings.filter((p) => favorites.includes(p.id));
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <SearchHeader title="Favorites" />
 

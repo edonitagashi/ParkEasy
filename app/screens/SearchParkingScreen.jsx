@@ -34,7 +34,7 @@ export default function SearchParkingScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <SearchHeader title="Search Parking" />
 
