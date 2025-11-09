@@ -1,44 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser"; 
+import { auth } from "../firebase/firebase";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) router.replace("/nearby");
+    });
+    return unsubscribe;
+  }, []);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      return Alert.alert("Gabim", "Ploteso email dhe fjalekalim");
+    }
+
+    setLoading(true);
     try {
-      
-      const raw = await AsyncStorage.getItem(USERS_KEY);
-      const users = raw ? JSON.parse(raw) : [];
-
-      if (!Array.isArray(users) || users.length === 0) {
-        return Alert.alert("Gabim", "S’ka llogari të regjistruar. Regjistrohu fillimisht.");
-      }
-
-      
-      const me = users.find(
-        (u) =>
-          u.email?.toLowerCase() === email.trim().toLowerCase() &&
-          u.password === password
-      );
-
-      if (!me) {
-        return Alert.alert("Gabim", "Email ose fjalëkalim i pasaktë.");
-      }
-
-      
-      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
-
-      
+      await signInWithEmailAndPassword(auth, email, password);
       router.replace("/nearby");
-    } catch (e) {
-      console.error("Login read error:", e);
-      Alert.alert("Gabim", "Nuk po lexohen të dhënat lokale.");
+    } catch (error) {
+      Alert.alert("Gabim", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,6 +45,7 @@ export default function LoginScreen() {
         value={email}
         onChangeText={setEmail}
       />
+
       <TextInput
         style={styles.input}
         placeholder="Fjalëkalimi"
@@ -63,8 +54,8 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Kyçu</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? "Loading..." : "Kyçu"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
