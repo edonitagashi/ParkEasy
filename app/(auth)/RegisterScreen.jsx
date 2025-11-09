@@ -1,11 +1,8 @@
-// app/auth/RegisterScreen.jsx
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const USERS_KEY = "users";              
-const CURRENT_USER_KEY = "currentUser"; 
+import { auth } from "../firebase/firebase"; 
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -13,6 +10,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!name.trim()) return Alert.alert("Gabim", "Shkruaj emrin.");
@@ -21,35 +19,14 @@ export default function RegisterScreen() {
     if (password.length < 6) return Alert.alert("Gabim", "Fjalëkalimi duhet të ketë të paktën 6 karaktere.");
     if (password !== confirmPassword) return Alert.alert("Gabim", "Fjalëkalimet nuk përputhen.");
 
+    setLoading(true);
     try {
-     
-      const raw = await AsyncStorage.getItem(USERS_KEY);
-      const users = raw ? JSON.parse(raw) : [];
-
-     
-      const exists = users.some((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
-      if (exists) return Alert.alert("Gabim", "Ky email ekziston. Përdor një tjetër.");
-
-      
-      const newUser = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim().toLowerCase(),
-        password, 
-      };
-      const next = [...users, newUser];
-
-      
-      await AsyncStorage.setItem(USERS_KEY, JSON.stringify(next));
-
-      
-      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
-
-      router.replace("/nearby");
-    } catch (e) {
-      console.error("Register save error:", e);
-      Alert.alert("Gabim", "Nuk u ruajtën të dhënat.");
+      await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      router.replace("/nearby"); 
+    } catch (error) {
+      Alert.alert("Gabim", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,8 +40,8 @@ export default function RegisterScreen() {
       <TextInput style={styles.input} placeholder="Fjalëkalimi" secureTextEntry value={password} onChangeText={setPassword} />
       <TextInput style={styles.input} placeholder="Konfirmo fjalëkalimin" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Krijo llogari</Text>
+      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? "Loading..." : "Krijo llogari"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/LoginScreen")}>
