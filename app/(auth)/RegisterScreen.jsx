@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
-import { auth } from "../firebase/firebase"; 
+import { auth } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -13,18 +14,18 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name.trim()) return Alert.alert("Gabim", "Shkruaj emrin.");
-    if (!phone.trim()) return Alert.alert("Gabim", "Shkruaj numrin e telefonit.");
-    if (!email.trim()) return Alert.alert("Gabim", "Shkruaj email-in.");
-    if (password.length < 6) return Alert.alert("Gabim", "Fjalëkalimi duhet të ketë të paktën 6 karaktere.");
-    if (password !== confirmPassword) return Alert.alert("Gabim", "Fjalëkalimet nuk përputhen.");
+   if (!name.trim()) return Alert.alert("Error", "Please enter your name.");
+if (!phone.trim()) return Alert.alert("Error", "Please enter your phone number.");
+if (!email.trim()) return Alert.alert("Error", "Please enter your email.");
+if (password.length < 6) return Alert.alert("Error", "Password must be at least 6 characters long.");
+if (password !== confirmPassword) return Alert.alert("Error", "Passwords do not match.");
 
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
       router.replace("/nearby"); 
     } catch (error) {
-      Alert.alert("Gabim", error.message);
+      Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
@@ -32,7 +33,7 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Regjistrohu</Text>
+      <Text style={styles.title}>Sign up</Text>
 
       <TextInput style={styles.input} placeholder="Emri" value={name} onChangeText={setName} />
       <TextInput style={styles.input} placeholder="Numri i telefonit" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
@@ -41,11 +42,13 @@ export default function RegisterScreen() {
       <TextInput style={styles.input} placeholder="Konfirmo fjalëkalimin" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? "Loading..." : "Krijo llogari"}</Text>
+        <Text style={styles.buttonText}>{loading ? "Loading..." : "Create Account"}</Text>
       </TouchableOpacity>
 
+      <GoogleAuthButton />
+
       <TouchableOpacity onPress={() => router.push("/LoginScreen")}>
-        <Text style={styles.link}>Ke tashmë llogari? Kyçu</Text>
+        <Text style={styles.link}>Already have an account? Log In</Text>
       </TouchableOpacity>
     </View>
   );

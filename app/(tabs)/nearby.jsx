@@ -7,7 +7,7 @@ import {
   StyleSheet,
   FlatList,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+//import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
 import ParkingCard from "../../components/ParkingCard";
@@ -37,7 +37,7 @@ const Nearby = () => {
         style={styles.mapPreview}
         onPress={() => setShowFullMap(true)}
       >
-        <MapView
+       {/* <MapView
           style={styles.map}
           initialRegion={{
             latitude: 42.6629,
@@ -55,6 +55,7 @@ const Nearby = () => {
             />
           ))}
         </MapView>
+*/}
         <View style={styles.overlay}>
           <Text style={styles.mapText}>Tap to view full map</Text>
         </View>
@@ -80,7 +81,7 @@ const Nearby = () => {
       />
 
      
-      {showFullMap && (
+      {/*{showFullMap && (
         <View style={styles.fullMapOverlay}>
           <MapView
             style={{ flex: 1 }}
@@ -101,6 +102,7 @@ const Nearby = () => {
               />
             ))}
           </MapView>
+          */}
 
           {selectedParking && (
             <View style={styles.infoBox}>
@@ -112,14 +114,14 @@ const Nearby = () => {
             </View>
           )}
 
-          <TouchableOpacity
+          {/*<TouchableOpacity
             style={styles.closeBtn}
             onPress={() => setShowFullMap(false)}
           >
             <Text style={styles.closeTxt}>Close</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )}*/}
     </SafeAreaView>
   );
 };

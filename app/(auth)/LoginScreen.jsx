@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
-import { auth } from "../firebase/firebase";
+import { auth } from "../../firebase";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      return Alert.alert("Gabim", "Ploteso email dhe fjalekalim");
+      return Alert.alert("Error", "Please fill in both email and password.");
     }
 
     setLoading(true);
@@ -34,7 +35,7 @@ export default function LoginScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Kyçu</Text>
+      <Text style={styles.title}>Log in</Text>
 
       <TextInput
         style={styles.input}
@@ -55,11 +56,13 @@ export default function LoginScreen() {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? "Loading..." : "Kyçu"}</Text>
+        <Text style={styles.buttonText}>{loading ? "Loading..." : "Log in"}</Text>
       </TouchableOpacity>
 
+      <GoogleAuthButton />
+
       <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
-        <Text style={styles.link}>Nuk ke llogari? Regjistrohu</Text>
+        <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
     </ScrollView>
   );
