@@ -63,6 +63,8 @@ export default function ParkingCard({ item, hideReserve }) {
             </View>
 
             <Text style={styles.detail}>Available: {item.spots} spots</Text>
+
+            
           </View>
 
           {/* Favorite */}
@@ -73,8 +75,7 @@ export default function ParkingCard({ item, hideReserve }) {
               color={isFavorite ? "#e5d058ff" : "#fff"}
             />
           </TouchableOpacity>
-
-          {/* Reserve button (ALWAYS shown) */}
+          {/* Reserve button (absolute badge) */}
           {!hideReserve && (
             <TouchableOpacity style={styles.reserveBadge} onPress={handleReserve}>
               <Ionicons
@@ -133,7 +134,6 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 20,
   },
-
   reserveBadge: {
     position: "absolute",
     bottom: 10,

@@ -110,7 +110,6 @@ const Nearby = () => {
                 (item.imageUrl && resolveImage(item.imageUrl)) ||
                 placeholderImage,
             }}
-            hideReserve={true}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
