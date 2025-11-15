@@ -11,6 +11,8 @@ import {
   Platform,
   ScrollView,
   Linking,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,10 +37,21 @@ export default function Profile() {
   const [saving, setSaving]           = useState(false);
 
   const [successMsg, setSuccessMsg]   = useState("");
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+  const [showAboutPanel, setShowAboutPanel] = useState(false);
+  const [showHelpPanel, setShowHelpPanel] = useState(false);
+  const [showPrivacyPanel, setShowPrivacyPanel] = useState(false);
+  const [showTermsPanel, setShowTermsPanel] = useState(false);
+  const [theme, setTheme] = useState("light");
 
   const placeholder = require("../../assets/images/profile.jpg");
 
   useEffect(() => {
+    // enable LayoutAnimation on Android
+    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+
     (async () => {
       try {
         // First check Firebase auth
@@ -225,42 +238,28 @@ export default function Profile() {
 
   
   const handleSettings = () => {
-Alert.alert("Settings", "Settings will be added in the next version!");
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowSettingsPanel(v => !v);
   };
 
   const handleAboutUs = () => {
-   Alert.alert(
-  "About ParkEasy",
-  `ParkEasy v1.0.0\n\nA modern app for finding parking.\n\nDeveloped with ❤️ in Kosovo\n\nContact: info@parkeasy.com`
-);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowAboutPanel(v => !v);
   };
 
   const handleHelp = () => {
-    Alert.alert(
-  "Help & Support",
-  "Need help?\n\n• Contact: +383 49 000 000\n• Email: support@parkeasy.com\n• Hours: 08:00 - 20:00",
-  [
-    { text: "Cancel", style: "cancel" },
-    { text: "Call Support", onPress: () => Linking.openURL('tel:+38349000000') },
-    { text: "Email Support", onPress: () => Linking.openURL('mailto:support@parkeasy.com') }
-  ]
-);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowHelpPanel(v => !v);
   };
 
   const handlePrivacyPolicy = () => {
-    Alert.alert(
-  "Privacy Policy",
-  "We respect your privacy. Your data is secure and used only for service purposes.",
-  [{ text: "OK", style: "default" }]
-);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowPrivacyPanel(v => !v);
   };
 
   const handleTermsOfService = () => {
-    Alert.alert(
-  "Terms of Service",
-  "By using ParkEasy, you agree to our terms of service. Read the full document on our website.",
-  [{ text: "OK", style: "default" }]
-);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowTermsPanel(v => !v);
 
   };
 
@@ -370,8 +369,30 @@ Alert.alert("Settings", "Settings will be added in the next version!");
           <Ionicons name="settings" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Settings</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+        <Ionicons name={showSettingsPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
+
+      {showSettingsPanel && (
+        <View style={s.expandedPanel}>
+          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
+            <Text style={s.expandedLabel}>Theme</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+              <TouchableOpacity
+                style={[s.smallBtn, theme === 'light' && s.smallBtnActive]}
+                onPress={() => setTheme('light')}
+              >
+                <Text style={s.smallBtnText}>Light</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.smallBtn, theme === 'dark' && s.smallBtnActive]}
+                onPress={() => setTheme('dark')}
+              >
+                <Text style={s.smallBtnText}>Dark</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      )}
 
       {/* About Us */}
       <TouchableOpacity style={s.optionItem} onPress={handleAboutUs}>
@@ -379,8 +400,16 @@ Alert.alert("Settings", "Settings will be added in the next version!");
           <Ionicons name="information-circle" size={24} color="#4C6E64" />
           <Text style={s.optionText}>About Us</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+        <Ionicons name={showAboutPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
+
+      {showAboutPanel && (
+        <View style={s.expandedPanel}>
+          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
+            <Text style={s.expandedText}>ParkEasy v1.0.0 — A modern app for finding parking. Developed with ❤️ in Kosovo. Contact: info@parkeasy.com</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Help & Support */}
       <TouchableOpacity style={s.optionItem} onPress={handleHelp}>
@@ -388,8 +417,26 @@ Alert.alert("Settings", "Settings will be added in the next version!");
           <Ionicons name="help-circle" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Help & Support</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+        <Ionicons name={showHelpPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
+
+      {showHelpPanel && (
+        <View style={s.expandedPanel}>
+          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
+            <Text style={s.expandedLabel}>Contact</Text>
+            <Text style={s.expandedText}>Phone: +383 49 000 000</Text>
+            <Text style={s.expandedText}>Email: support@parkeasy.com</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+              <TouchableOpacity style={s.smallBtn} onPress={() => Linking.openURL('tel:+38349000000')}>
+                <Text style={s.smallBtnText}>Call</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.smallBtn} onPress={() => Linking.openURL('mailto:support@parkeasy.com')}>
+                <Text style={s.smallBtnText}>Email</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Privacy Policy */}
       <TouchableOpacity style={s.optionItem} onPress={handlePrivacyPolicy}>
@@ -397,8 +444,16 @@ Alert.alert("Settings", "Settings will be added in the next version!");
           <Ionicons name="shield-checkmark" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Privacy Policy</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+        <Ionicons name={showPrivacyPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
+
+      {showPrivacyPanel && (
+        <View style={s.expandedPanel}>
+          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
+            <Text style={s.expandedText}>We respect your privacy. Your data is secure and used only for service purposes. We do not share personal data without consent.</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Terms of Service */}
       <TouchableOpacity style={s.optionItem} onPress={handleTermsOfService}>
@@ -406,8 +461,16 @@ Alert.alert("Settings", "Settings will be added in the next version!");
           <Ionicons name="document-text" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Terms of Service</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#4C6E64" />
+        <Ionicons name={showTermsPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
+
+      {showTermsPanel && (
+        <View style={s.expandedPanel}>
+          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
+            <Text style={s.expandedText}>By using ParkEasy, you agree to our terms of service. Use the app responsibly and follow local parking rules.</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Logout */}
       <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
@@ -510,5 +573,41 @@ const s = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
     textAlign: 'center',
+  },
+  expandedPanel: {
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#CFE1DB',
+    marginBottom: 8,
+  },
+  panelScroll: {
+    maxHeight: 220,
+  },
+  expandedLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#4C6E64',
+  },
+  expandedText: {
+    fontSize: 14,
+    color: '#1b1b1b',
+    marginTop: 6,
+  },
+  smallBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#F3F8F7',
+    borderWidth: 1,
+    borderColor: '#CFE1DB',
+  },
+  smallBtnActive: {
+    backgroundColor: '#2E7D6A',
+  },
+  smallBtnText: {
+    color: '#1b1b1b',
+    fontWeight: '600',
   },
 });
