@@ -1,183 +1,194 @@
 import React, { useState, useEffect } from "react";
-import {
-  StatusBar,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-} from "react-native";
-//import MapView, { Marker } from "react-native-maps";
-import { SafeAreaView } from "react-native-safe-area-context";
-import SearchHeader from "../../components/SearchHeader";
-import { resolveImage } from "../../components/images";
-import ParkingCard from "../../components/ParkingCard";
+import { View, StyleSheet } from "react-native";
+
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
-const placeholderImage = require("../../assets/images/image1.png");
+import ParkingCard from "../../components/ParkingCard";
+import { useRouter } from "expo-router";
+import { resolveImage } from "../../components/images";
 
-const Nearby = () => {
-  const [showFullMap, setShowFullMap] = useState(false);
-  const [selectedParking, setSelectedParking] = useState(null);
+export default function NearbyWeb() {
+  const router = useRouter();
 
   const [parkings, setParkings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedParking, setSelectedParking] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const loadParkings = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "parkings"));
-        const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setParkings(items);
-      } catch (err) {
-        console.log("Error loading parkings:", err);
-      } finally {
-        setLoading(false);
-      }
+      const snap = await getDocs(collection(db, "parkings"));
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setParkings(items);
     };
-
     loadParkings();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading...</Text>
-      </View>
-    );
-  }
+  const handleReserve = (parking) => {
+    setModalVisible(false);
+    setSelectedParking(null);
+
+    setTimeout(() => {
+      router.push(`/BookParkingScreen?id=${parking.id}`);
+    }, 50);
+  };
+
+  const openModal = (p) => {
+    setSelectedParking(p);
+    setModalVisible(true);
+  };
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-      <SearchHeader title="Nearby Parkings" />
+    <View style={styles.container}>
 
-      <TouchableOpacity
-        style={styles.mapPreview}
-        onPress={() => setShowFullMap(true)}
-      >
-       {/* <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 42.6629,
-            longitude: 21.1655,
-            latitudeDelta: 0.2,
-            longitudeDelta: 0.2,
-          }}
-        >
-          {parkings.map((p) => (
-            <Marker
-              key={p.id}
-              coordinate={{ latitude: p.latitude, longitude: p.longitude }}
-              title={p.name}
-              description={p.address}
-            />
-          ))}
-        </MapView>
-*/}
+      {/* MAP */}
+      <div style={styles.mapWrapper}>
+        <MapContainer center={[42.6629, 21.1655]} zoom={13} style={styles.map}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        <View style={styles.overlay}>
-          <Text style={styles.mapText}>Tap to view full map</Text>
-        </View>
-      </TouchableOpacity>
+          {parkings.map((p) => {
+            const resolved = resolveImage(p.imageUrl);
+            const imageSrc =
+              typeof resolved === "object" ? resolved.uri : resolved;
 
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.sortBtn}>
-          <Text style={styles.sortText}>Sort by: Distance</Text>
-        </TouchableOpacity>
+            if (!p.coordinate) return null;
 
-        <TouchableOpacity style={styles.refreshBtn}>
-          <Text style={styles.refreshText}>Refresh</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={parkings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ParkingCard
-            item={{
-              ...item,
-              image:
-                // prefer already-resolved item.image
-                item.image ||
-                // try Firestore imageUrl path mapping to local assets
-                (item.imageUrl && resolveImage(item.imageUrl)) ||
-                placeholderImage,
-            }}
-          />
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
-
-      {/*{showFullMap && (
-        <View style={styles.fullMapOverlay}>
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={{
-              latitude: 42.6629,
-              longitude: 21.1655,
-              latitudeDelta: 0.3,
-              longitudeDelta: 0.3,
-            }}
-          >
-            {parkings.map((p) => (
+            return (
               <Marker
                 key={p.id}
-                coordinate={{ latitude: p.latitude, longitude: p.longitude }}
-                title={p.name}
-                description={`${p.address} - ${p.price}`}
-                onPress={() => setSelectedParking(p)}
+                position={[p.coordinate.latitude, p.coordinate.longitude]}
+                icon={L.divIcon({
+                  className: "custom_marker",
+                  html: `
+                    <div style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      overflow: hidden;
+                      border: 2px solid white;
+                      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+                    ">
+                      <img src="${imageSrc}" style="
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                      "/>
+                    </div>
+                  `,
+                  iconSize: [34, 34],
+                  iconAnchor: [17, 17],
+                })}
+                eventHandlers={{ click: () => openModal(p) }}
               />
-            ))}
-          </MapView>
-          */}
+            );
+          })}
+        </MapContainer>
+      </div>
 
-          {selectedParking && (
-            <View style={styles.infoBox}>
-              <Text style={styles.infoTitle}>{selectedParking.name}</Text>
-              <Text style={styles.infoText}>{selectedParking.address}</Text>
-              <Text style={styles.infoText}>
-                {selectedParking.price} • {selectedParking.spots} spots
-              </Text>
-            </View>
-          )}
+      {/* WEB MODAL */}
+      {modalVisible && selectedParking && (
+        <div style={styles.webModalOverlay}>
+          <div style={styles.webModalContent}>
 
-          {/*<TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => setShowFullMap(false)}
-          >
-            <Text style={styles.closeTxt}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      )}*/}
-    </SafeAreaView>
+            {/* TITLE ONLY (NO IMAGE HERE) */}
+            <div style={styles.webHeaderOnlyTitle}>
+              <h2 style={styles.webTitle}>{selectedParking.name}</h2>
+            </div>
+
+            {/* ParkingCard WITH IMAGE */}
+            <ParkingCard
+              item={selectedParking}
+              hideReserve={false}
+              onReserve={() => handleReserve(selectedParking)}
+            />
+
+            <button
+              style={styles.webCloseButton}
+              onClick={() => setModalVisible(false)}
+            >
+              Close
+            </button>
+
+          </div>
+        </div>
+      )}
+
+    </View>
   );
-};
-
-export default Nearby;
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
-  mapPreview: { height: 220, marginHorizontal: 16, marginVertical: 10, borderRadius: 12, overflow: "hidden", position: "relative" },
-  map: { width: "100%", height: "100%" },
-  fullMapOverlay: {position: "absolute",top: 0,left: 0,right: 0,bottom: 0,zIndex: 10,elevation: 10,backgroundColor: "#fff",},
-  controls: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15, paddingHorizontal: 16 },
-  sortBtn: { backgroundColor: "#CDE6DC", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
-  sortText: { color: "#5C8374", fontWeight: "500" },
-  refreshBtn: { backgroundColor: "#5C8374", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
-  refreshText: { color: "#fff", fontWeight: "bold" },
-  overlay: { position: "absolute", bottom: 10, left: 0, right: 0, alignItems: "center" },
-  mapText: { backgroundColor: "rgba(0,0,0,0.6)", color: "#fff", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, fontWeight: "500" },
-  infoBox: { position: "absolute", bottom: 50, left: 20, right: 20, backgroundColor: "#fff", borderRadius: 12, padding: 14, elevation: 5 },
-  infoTitle: { fontWeight: "700", fontSize: 16, marginBottom: 5 },
-  infoText: { color: "#555", fontSize: 14 },
-  closeBtn: { position: "absolute", top: 40, right: 20, backgroundColor: "#fff", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, elevation: 5 },
-  closeTxt: { fontWeight: "700", color: "#333" },
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100vh",
+    position: "relative",
+  },
+
+  mapWrapper: {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100vh",
+  },
+
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+
+  webModalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+
+  webModalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 18,
+    width: "90%",
+    maxWidth: 420,
+  },
+
+  webHeaderOnlyTitle: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+
+  webTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    margin: 0,
+  },
+
+  webCloseButton: {
+    marginTop: 15,
+    width: "100%",
+    padding: 12,
+    borderRadius: 10,
+    border: "none",
+    backgroundColor: "#2E7D6A",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: 16,
+  },
+
+  custom_marker: {
+    background: "transparent !important",
+    border: "none !important",
+  },
 });
