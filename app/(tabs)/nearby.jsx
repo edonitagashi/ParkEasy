@@ -10,6 +10,7 @@ import {
 //import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
+import { resolveImage } from "../../components/images";
 import ParkingCard from "../../components/ParkingCard";
 
 import { collection, getDocs } from "firebase/firestore";
@@ -102,11 +103,15 @@ const Nearby = () => {
           <ParkingCard
             item={{
               ...item,
-              image: placeholderImage,
-     }}
-     hideReserve={true}
-  />
-
+              image:
+                // prefer already-resolved item.image
+                item.image ||
+                // try Firestore imageUrl path mapping to local assets
+                (item.imageUrl && resolveImage(item.imageUrl)) ||
+                placeholderImage,
+            }}
+            hideReserve={true}
+          />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         contentContainerStyle={{ paddingBottom: 20 }}

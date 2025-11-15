@@ -41,7 +41,12 @@ export default function ParkingCard({ item, hideReserve }) {
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          <Image source={item.image} style={styles.image} />
+          {/* Support both local requires and remote URLs from Firestore */}
+          {(() => {
+            const src = item.image;
+            const imageSource = typeof src === "string" ? { uri: src } : src;
+            return <Image source={imageSource} style={styles.image} />;
+          })()}
 
           <View style={styles.infoContainer}>
             <Text style={styles.bookingId}>ID: {item.id}</Text>

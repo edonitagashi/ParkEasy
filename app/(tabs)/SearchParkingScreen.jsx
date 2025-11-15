@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
+import { resolveImage } from "../../components/images";
 import SearchBar from "../../components/SearchBar";
 import ParkingCard from "../../components/ParkingCard";
 
@@ -69,7 +70,8 @@ export default function SearchParkingScreen() {
           <ParkingCard
             item={{
               ...item,
-              image: placeholderImage, // FOTO LOKALE PËR TË GJITHË
+              image:
+                item.image || (item.imageUrl && resolveImage(item.imageUrl)) || placeholderImage,
             }}
           />
         )}

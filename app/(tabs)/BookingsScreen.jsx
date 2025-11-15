@@ -39,6 +39,7 @@ export default function BookingsScreen() {
         ...d.data(),
       }));
 
+      console.log("Loaded bookings for user:", auth.currentUser.uid, items);
       setBookings(items);
     } catch (err) {
       Alert.alert("Error", "Failed to load bookings.");
@@ -53,14 +54,56 @@ export default function BookingsScreen() {
       {
         text: "Delete",
         style: "destructive",
-        onPress: async () => {
-          await deleteDoc(doc(db, "bookings", bookingId));
-
-          // UI UPDATE INSTANT — fix delete
-          setBookings((prev) => prev.filter((b) => b.id !== bookingId));
-        },
+        onPress: () => runDelete(bookingId),
       },
     ]);
+  };
+
+  // perform actual delete with error handling and UI feedback
+  const runDelete = async (bookingId) => {
+    try {
+      console.log("runDelete called for bookingId:", bookingId);
+
+      if (!bookingId) {
+        Alert.alert("Error", "Booking id missing.");
+        return;
+      }
+
+      if (!auth || !auth.currentUser) {
+        Alert.alert("Error", "You must be logged in to delete a booking.");
+        return;
+      }
+
+      // optimistic UI: remove locally first for snappy UX
+      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+
+      await deleteDoc(doc(db, "bookings", bookingId));
+
+      console.log("deleteDoc succeeded for:", bookingId);
+      Alert.alert("Deleted", "Booking removed successfully.");
+    } catch (err) {
+      console.error("Delete error:", err);
+      const code = err?.code || "unknown";
+      const msg = err?.message || String(err);
+      // Show detailed error to help debugging (permission, auth, etc.)
+      Alert.alert(
+        "Delete failed",
+        `${code}\n${msg}`,
+        [{ text: "OK" }]
+      );
+
+      // Helpful hint for common permission error
+      if (code === "permission-denied") {
+        Alert.alert(
+          "Permission denied",
+          "Your Firestore rules prevent deleting this document. Check that `userId` matches the signed-in user or update rules.",
+          [{ text: "OK" }]
+        );
+      }
+
+      // revert UI if delete failed: reload bookings from server
+      loadBookings();
+    }
   };
 
   if (loading) {
@@ -68,7 +111,7 @@ export default function BookingsScreen() {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <SearchHeader title="My Bookings" />
-
+        
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#2E7D6A" />
           <Text style={{ marginTop: 10 }}>Loading bookings...</Text>
@@ -81,6 +124,8 @@ export default function BookingsScreen() {
     <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <SearchHeader title="My Bookings" />
+
+      
 
       {bookings.length === 0 ? (
         <View style={styles.emptyBox}>
@@ -97,6 +142,7 @@ export default function BookingsScreen() {
               <View style={styles.row}>
                 <Ionicons name="car-outline" size={20} color="#2E7D6A" />
                 <Text style={styles.parkingName}>{item.parkingName}</Text>
+                {/* booking id hidden in UI */}
               </View>
 
               <Text style={styles.info}> {item.date}</Text>
@@ -108,7 +154,7 @@ export default function BookingsScreen() {
                   style={styles.editBtn}
                   onPress={() =>
                     router.push({
-                      pathname: "/EditBookingScreen",
+                      pathname: "EditBookingScreen",
                       params: { bookingId: item.id },
                     })
                   }
@@ -119,7 +165,7 @@ export default function BookingsScreen() {
 
                 <TouchableOpacity
                   style={styles.deleteBtn}
-                  onPress={() => handleDelete(item.id)}
+                  onPress={() => runDelete(item.id)}
                 >
                   <Ionicons name="trash-outline" size={18} color="#fff" />
                   <Text style={styles.btnText}>Delete</Text>
