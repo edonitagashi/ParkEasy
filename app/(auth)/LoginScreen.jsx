@@ -10,12 +10,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) router.replace("/nearby");
-    });
-    return unsubscribe;
-  }, []);
+
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -25,13 +20,21 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/nearby");
+      // Auth state listener will handle navigation
     } catch (error) {
       Alert.alert("Gabim", error.message);
-    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && loading) {
+        router.replace("nearby");
+      }
+    });
+    return unsubscribe;
+  }, [loading]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -58,10 +61,9 @@ export default function LoginScreen() {
       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? "Loading..." : "Log in"}</Text>
       </TouchableOpacity>
-
       <GoogleAuthButton />
 
-      <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
+      <TouchableOpacity onPress={() => router.push("RegisterScreen")}>
         <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
     </ScrollView>

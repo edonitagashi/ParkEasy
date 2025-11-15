@@ -46,7 +46,7 @@ export default function Index() {
       
       const cur = await AsyncStorage.getItem(CURRENT_USER_KEY);
       if (cur) {
-        router.replace("/nearby");
+        router.replace("nearby");
       } else {
         // qëndro këtu (faqja e hyrjes) – ose shko te Login nëse e preferon:
         // router.replace("/auth/LoginScreen");
@@ -67,12 +67,12 @@ export default function Index() {
             <Text style={styles.bannerText}>Save time and secure your perfect spot in just a few taps.</Text>
           </View>
           <View style={styles.buttonContainer}>
-            <Link href="/LoginScreen" asChild>
+            <Link href="LoginScreen" asChild>
               <TouchableOpacity style={styles.primaryButton}>
                 <Text style={styles.primaryText}>Login</Text>
               </TouchableOpacity>
             </Link>
-            <Link href="/RegisterScreen" asChild>
+            <Link href="RegisterScreen" asChild>
               <TouchableOpacity style={styles.secondaryButton}>
                 <Text style={styles.secondaryText}>Register</Text>
               </TouchableOpacity>

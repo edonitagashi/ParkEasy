@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { auth } from "../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function RegisterScreen() {
@@ -23,13 +23,21 @@ if (password !== confirmPassword) return Alert.alert("Error", "Passwords do not 
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-      router.replace("/nearby"); 
+      // Auth state listener will handle navigation after user is created
     } catch (error) {
       Alert.alert("Error", error.message);
-    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && loading) {
+        router.replace("nearby");
+      }
+    });
+    return unsubscribe;
+  }, [loading]);
 
   return (
     <View style={styles.container}>
@@ -47,7 +55,7 @@ if (password !== confirmPassword) return Alert.alert("Error", "Passwords do not 
 
       <GoogleAuthButton />
 
-      <TouchableOpacity onPress={() => router.push("/LoginScreen")}>
+      <TouchableOpacity onPress={() => router.push("LoginScreen")}>
         <Text style={styles.link}>Already have an account? Log In</Text>
       </TouchableOpacity>
     </View>

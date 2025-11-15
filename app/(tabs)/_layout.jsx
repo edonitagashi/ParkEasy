@@ -39,16 +39,23 @@ export default function TabLayout() {
         ),
       }}
     />
-    <Tabs.Screen
-      name="HistoryScreen"
-      options={{
-        title: 'Bookings',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="calendar" size={size} color={color} />
-        ),
-      }}
-    />
-    
+   <Tabs.Screen
+  name="BookingsScreen"
+  options={{
+    title: 'Bookings',
+    tabBarIcon: ({ color, size }) => (
+      <Ionicons name="calendar" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Tabs.Screen
+  name="BookParkingScreen"
+  options={{
+    href: null, // Fshehet nga tabbar
+  }}
+/>
+
     
     
     <Tabs.Screen
