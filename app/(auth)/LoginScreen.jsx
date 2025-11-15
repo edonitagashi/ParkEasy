@@ -1,35 +1,78 @@
-import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { auth } from "../firebase/firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
-
+const USERS_KEY = "users";
+const CURRENT_USER_KEY = "currentUser";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
 
+  const validatePassword = (password) => {
+    const re = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    return re.test(password);
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
-      return Alert.alert("Error", "Please fill in both email and password.");
+      return Alert.alert("Gabim", "Ju lutem plotësoni email dhe fjalëkalimin.");
+    }
+
+    if (!validateEmail(email)) {
+      return Alert.alert("Gabim", "Email-i nuk është në format të saktë.");
+    }
+
+    if (!validatePassword(password)) {
+      return Alert.alert(
+        "Gabim",
+        "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër."
+      );
     }
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Auth state listener will handle navigation
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const fbUser = result.user;
+
+      try {
+        const rawUsers = await AsyncStorage.getItem(USERS_KEY);
+        const users = rawUsers ? JSON.parse(rawUsers) : [];
+        let found = users.find(u => u.email?.toLowerCase() === String(fbUser.email).toLowerCase());
+        if (!found) {
+          found = {
+            id: fbUser.uid,
+            name: fbUser.displayName || "User",
+            phone: "",
+            email: fbUser.email || email,
+            password: password,
+            avatarUri: fbUser.photoURL || "",
+          };
+          users.push(found);
+          await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+        await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(found));
+      } catch (syncErr) {
+        console.error("Gabim gjatë sinkronizimit në AsyncStorage:", syncErr);
+      }
+
+      setLoading(false);
+      router.replace("nearby");
     } catch (error) {
       Alert.alert("Gabim", error.message);
       setLoading(false);
     }
   };
-
- 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -56,6 +99,7 @@ export default function LoginScreen() {
       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? "Loading..." : "Log in"}</Text>
       </TouchableOpacity>
+
       <GoogleAuthButton />
 
       <TouchableOpacity onPress={() => router.push("RegisterScreen")}>

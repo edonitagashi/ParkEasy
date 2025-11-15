@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { auth } from "../firebase/firebase";
-import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+
+const USERS_KEY = "users";
+const CURRENT_USER_KEY = "currentUser";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -13,24 +17,60 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const re = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    return re.test(password);
+  };
+
   const handleRegister = async () => {
-   if (!name.trim()) return Alert.alert("Error", "Please enter your name.");
-if (!phone.trim()) return Alert.alert("Error", "Please enter your phone number.");
-if (!email.trim()) return Alert.alert("Error", "Please enter your email.");
-if (password.length < 6) return Alert.alert("Error", "Password must be at least 6 characters long.");
-if (password !== confirmPassword) return Alert.alert("Error", "Passwords do not match.");
+    if (!name.trim()) return Alert.alert("Gabim", "Ju lutem vendosni emrin tuaj.");
+    if (!phone.trim()) return Alert.alert("Gabim", "Ju lutem vendosni numrin e telefonit.");
+    if (!email.trim()) return Alert.alert("Gabim", "Ju lutem vendosni email-in.");
+    if (!validateEmail(email.trim())) return Alert.alert("Gabim", "Email-i nuk është në format të saktë.");
+    if (!validatePassword(password)) return Alert.alert("Gabim", "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër.");
+    if (password !== confirmPassword) return Alert.alert("Gabim", "Fjalëkalimet nuk përputhen.");
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-      // Auth state listener will handle navigation after user is created
+      const result = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      const fbUser = result.user;
+
+      const newUser = {
+        id: fbUser.uid,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        avatarUri: fbUser.photoURL || "",
+      };
+
+      try {
+        const rawUsers = await AsyncStorage.getItem(USERS_KEY);
+        const users = rawUsers ? JSON.parse(rawUsers) : [];
+        const exists = users.some(u => u.email?.toLowerCase() === newUser.email);
+
+        if (!exists) {
+          users.push(newUser);
+          await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      } catch (syncErr) {
+        console.error("Gabim gjatë ruajtjes në AsyncStorage:", syncErr);
+      }
+
+      setLoading(false);
+      router.replace("nearby");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Gabim", error.message);
       setLoading(false);
     }
   };
-
-
 
   return (
     <View style={styles.container}>
