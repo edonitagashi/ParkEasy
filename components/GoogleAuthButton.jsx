@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { auth } from "../firebase";
+import { auth } from "../app/firebase/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { router } from "expo-router";
 

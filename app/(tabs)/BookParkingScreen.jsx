@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, StyleSheet, Platform } from "react-native";
 import { addDoc, collection } from "firebase/firestore";
-import { db, auth } from "../../firebase";
+import { db, auth } from "../firebase/firebase";
 import { useLocalSearchParams, router } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 

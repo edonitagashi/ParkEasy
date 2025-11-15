@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
-import { auth } from "../../firebase";
+import { auth } from "../firebase/firebase";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleAuthButton from "../../components/GoogleAuthButton";

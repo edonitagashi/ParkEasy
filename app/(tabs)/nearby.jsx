@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StatusBar,
   View,
@@ -12,27 +12,50 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
 import ParkingCard from "../../components/ParkingCard";
 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+
+const placeholderImage = require("../../assets/images/image1.png");
+
 const Nearby = () => {
   const [showFullMap, setShowFullMap] = useState(false);
   const [selectedParking, setSelectedParking] = useState(null);
 
-  const [parkings] = useState([
-    { id: "E001", name: "Parking Prishtina Center", address: "Rruga Nëna Terezë, Prishtinë, Kosovo", latitude: 42.6629, longitude: 21.1655, distance: 0.5, price: "1€/h", spots: 7, image: require("../../assets/images/image1.png") },
-    { id: "E002", name: "Parking Mother Teresa", address: "Rruga Lidhja e Pejës, Prishtinë, Kosovo", latitude: 42.6635, longitude: 21.1600, distance: 1.2, price: "0.8€/h", spots: 3, image: require("../../assets/images/image2.png") },
-    { id: "E003", name: "Parking Peja Mall", address: "Rruga Bjeshkët e Nemuna, Pejë, Kosovo", latitude: 42.6607, longitude: 20.2887, distance: 3.5, price: "1.2€/h", spots: 5, image: require("../../assets/images/image3.png") },
-    { id: "E004", name: "Parking Gërmia", address: "Rruga Gërmia, Prishtinë, Kosovo", latitude: 42.6701, longitude: 21.1855, distance: 2.1, price: "0.5€/h", spots: 10, image: require("../../assets/images/image5.png") },
-    { id: "E005", name: "Parking Dardania", address: "Rruga Dardania, Prishtinë, Kosovo", latitude: 42.6543, longitude: 21.1658, distance: 1.8, price: "1€/h", spots: 0, image: require("../../assets/images/image4.png") },
-    { id: "E006", name: "Parking Mitrovica City", address: "Rruga 1 Tetori, Mitrovicë, Kosovo", latitude: 42.8894, longitude: 20.8656, distance: 4.5, price: "0.7€/h", spots: 2, image: require("../../assets/images/image6.png") },
-    { id: "E007", name: "Parking Prizren Old Town", address: "Rruga Shatervan, Prizren, Kosovo", latitude: 42.2139, longitude: 20.7397, distance: 5.0, price: "1.5€/h", spots: 8, image: require("../../assets/images/image7.png") },
-    { id: "E008", name: "Parking Ferizaj Center", address: "Rruga Rexhep Luci, Ferizaj, Kosovo", latitude: 42.3700, longitude: 21.1550, distance: 3.0, price: "1€/h", spots: 6, image: require("../../assets/images/image8.png") },
-  ]);
+  const [parkings, setParkings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadParkings = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "parkings"));
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setParkings(items);
+      } catch (err) {
+        console.log("Error loading parkings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParkings();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 18 }}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <SearchHeader title="Nearby Parkings" />
 
-    
       <TouchableOpacity
         style={styles.mapPreview}
         onPress={() => setShowFullMap(true)}
@@ -56,6 +79,7 @@ const Nearby = () => {
           ))}
         </MapView>
 */}
+
         <View style={styles.overlay}>
           <Text style={styles.mapText}>Tap to view full map</Text>
         </View>
@@ -71,16 +95,21 @@ const Nearby = () => {
         </TouchableOpacity>
       </View>
 
-      
       <FlatList
         data={parkings}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ParkingCard item={item} />}
+        renderItem={({ item }) => (
+          <ParkingCard
+            item={{
+              ...item,
+              image: placeholderImage,
+            }}
+          />
+        )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
 
-     
       {/*{showFullMap && (
         <View style={styles.fullMapOverlay}>
           <MapView
