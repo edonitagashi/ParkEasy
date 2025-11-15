@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import SearchHeader from "../../components/SearchHeader";
 
 export default function BookingsScreen() {
   const [bookings, setBookings] = useState([]);
@@ -21,9 +24,10 @@ export default function BookingsScreen() {
     loadBookings();
   }, []);
 
-  // Load list of bookings for current user
   const loadBookings = async () => {
     try {
+      if (!auth.currentUser) return;
+
       const q = query(
         collection(db, "bookings"),
         where("userId", "==", auth.currentUser.uid)
@@ -43,7 +47,6 @@ export default function BookingsScreen() {
     }
   };
 
-  // Delete booking
   const handleDelete = (bookingId) => {
     Alert.alert("Delete Booking", "Are you sure you want to delete this booking?", [
       { text: "Cancel", style: "cancel" },
@@ -52,25 +55,32 @@ export default function BookingsScreen() {
         style: "destructive",
         onPress: async () => {
           await deleteDoc(doc(db, "bookings", bookingId));
-          loadBookings();
+
+          // UI UPDATE INSTANT — fix delete
+          setBookings((prev) => prev.filter((b) => b.id !== bookingId));
         },
       },
     ]);
   };
 
-  // Loading state
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
-        <Text style={{ marginTop: 10 }}>Loading bookings...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <SearchHeader title="My Bookings" />
+
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#2E7D6A" />
+          <Text style={{ marginTop: 10 }}>Loading bookings...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Bookings</Text>
+    <SafeAreaView style={styles.container} edges={["left", "right"]}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <SearchHeader title="My Bookings" />
 
       {bookings.length === 0 ? (
         <View style={styles.emptyBox}>
@@ -81,6 +91,7 @@ export default function BookingsScreen() {
         <FlatList
           data={bookings}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -88,17 +99,16 @@ export default function BookingsScreen() {
                 <Text style={styles.parkingName}>{item.parkingName}</Text>
               </View>
 
-              <Text style={styles.info}>Date: {item.date}</Text>
-              <Text style={styles.info}>Time: {item.time}</Text>
-              <Text style={styles.info}>Duration: {item.duration} hours</Text>
+              <Text style={styles.info}> {item.date}</Text>
+              <Text style={styles.info}> {item.time}</Text>
+              <Text style={styles.info}> {item.duration} hours</Text>
 
               <View style={styles.actions}>
-                {/* EDIT BUTTON */}
                 <TouchableOpacity
                   style={styles.editBtn}
                   onPress={() =>
                     router.push({
-                      pathname: "/(tabs)/EditBookingScreen",
+                      pathname: "/EditBookingScreen",
                       params: { bookingId: item.id },
                     })
                   }
@@ -107,7 +117,6 @@ export default function BookingsScreen() {
                   <Text style={styles.btnText}>Edit</Text>
                 </TouchableOpacity>
 
-                {/* DELETE BUTTON */}
                 <TouchableOpacity
                   style={styles.deleteBtn}
                   onPress={() => handleDelete(item.id)}
@@ -120,27 +129,21 @@ export default function BookingsScreen() {
           )}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
-/* ---------- STYLES ---------- */
+/* --------- STYLES --------- */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff" },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  title: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: "#2E7D6A",
-    marginBottom: 20,
-  },
-
   emptyBox: {
-    marginTop: 60,
+    marginTop: 100,
     alignItems: "center",
+    justifyContent: "center",
   },
 
   emptyText: {
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
 
   parkingName: {
@@ -174,7 +177,7 @@ const styles = StyleSheet.create({
   info: {
     fontSize: 15,
     color: "#333",
-    marginTop: 3,
+    marginTop: 4,
   },
 
   actions: {

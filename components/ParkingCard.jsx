@@ -4,59 +4,24 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db, auth } from "../app/firebase/firebase";
-
 export default function ParkingCard({ item, hideReserve }) {
-  const [hasBooking, setHasBooking] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(item.isFavorite);
 
-  // Kontrollo nese useri e ka rezervuar kete parking
+  // useEffect për favorite UI sync
   useEffect(() => {
-    const checkBooking = async () => {
-      if (!auth.currentUser) return;
+    setIsFavorite(item.isFavorite);
+  }, [item.isFavorite]);
 
-      try {
-        const q = query(
-          collection(db, "bookings"),
-          where("userId", "==", auth.currentUser.uid),
-          where("parkingId", "==", item.id)
-        );
+  const toggleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+    if (item.onFavoriteToggle) item.onFavoriteToggle();
+  };
 
-        const snap = await getDocs(q);
-        setHasBooking(!snap.empty);
-      } catch (err) {
-        console.log("Error checking booking:", err);
-      }
-    };
-
-    checkBooking();
-  }, []);
-
-  // Navigimi
-  const handleReservePress = async () => {
-    if (hasBooking) return; // mos hap edit prej ketu
-    if (!auth.currentUser) return Alert.alert("Error", "You must be logged in.");
-
-    try {
-      // kontrollo edhe njehere realtime
-      const q = query(
-        collection(db, "bookings"),
-        where("userId", "==", auth.currentUser.uid),
-        where("parkingId", "==", item.id)
-      );
-
-      const snap = await getDocs(q);
-
-      if (snap.empty) {
-        // shko me rezervu
-        router.push({
-          pathname: "/(tabs)/BookParkingScreen",
-          params: { id: item.id, name: item.name },
-        });
-      }
-    } catch (err) {
-      Alert.alert("Error", "Could not process reservation.");
-    }
+  const handleReserve = () => {
+    router.push({
+      pathname: "/(tabs)/BookParkingScreen",
+      params: { id: item.id, name: item.name },
+    });
   };
 
   return (
@@ -76,10 +41,8 @@ export default function ParkingCard({ item, hideReserve }) {
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          {/* Image */}
           <Image source={item.image} style={styles.image} />
 
-          {/* Info */}
           <View style={styles.infoContainer}>
             <Text style={styles.bookingId}>ID: {item.id}</Text>
             <Text style={styles.name}>{item.name}</Text>
@@ -98,33 +61,24 @@ export default function ParkingCard({ item, hideReserve }) {
           </View>
 
           {/* Favorite */}
-          <TouchableOpacity onPress={item.onFavoriteToggle} style={styles.bookmarkWrapper}>
+          <TouchableOpacity onPress={toggleFavorite} style={styles.bookmarkWrapper}>
             <Ionicons
-              name={item.isFavorite ? "bookmark" : "bookmark-outline"}
+              name={isFavorite ? "bookmark" : "bookmark-outline"}
               size={22}
-              color={item.isFavorite ? "#e5d058ff" : "#fff"}
+              color={isFavorite ? "#e5d058ff" : "#fff"}
             />
           </TouchableOpacity>
 
-          {/* Reserve / Reserved */}
+          {/* Reserve button (ALWAYS shown) */}
           {!hideReserve && (
-            <TouchableOpacity
-              style={[
-                styles.reserveBadge,
-                hasBooking && { backgroundColor: "#4A6F6A", opacity: 0.85 }
-              ]}
-              disabled={hasBooking}
-              onPress={handleReservePress}
-            >
+            <TouchableOpacity style={styles.reserveBadge} onPress={handleReserve}>
               <Ionicons
-                name={hasBooking ? "checkmark-circle-outline" : "calendar-outline"}
+                name="calendar-outline"
                 size={16}
                 color="#fff"
                 style={{ marginRight: 4 }}
               />
-              <Text style={styles.reserveBadgeText}>
-                {hasBooking ? "Reserved" : "Reserve"}
-              </Text>
+              <Text style={styles.reserveBadgeText}>Reserve</Text>
             </TouchableOpacity>
           )}
         </LinearGradient>
@@ -185,10 +139,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 6,
   },
 
@@ -196,6 +146,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
     fontSize: 14,
-    marginLeft: 2,
   },
 });
