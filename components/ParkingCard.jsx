@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";  // ❗ Kjo mungonte
+import { router } from "expo-router";  //
 
-export default function ParkingCard({ item }) {
+export default function ParkingCard({ item, hideReserve }) {
   const handlePress = () => {
     Alert.alert(
       "Parking Details",
@@ -52,21 +52,23 @@ export default function ParkingCard({ item }) {
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Reserve button */}
-      <TouchableOpacity
-        style={styles.reserveBtn}
-        onPress={() =>
-          router.push({
-            pathname: "BookParkingScreen",
-            params: {
-              id: item.id,
-              name: item.name,
-            },
-          })
-        }
-      >
-        <Text style={styles.reserveText}>Reserve Spot</Text>
-      </TouchableOpacity>
+      {/* Reserve button (hidden when `hideReserve` is true) */}
+      {!hideReserve && (
+        <TouchableOpacity
+          style={styles.reserveBtn}
+          onPress={() =>
+            router.push({
+              pathname: "BookParkingScreen",
+              params: {
+                id: item.id,
+                name: item.name,
+              },
+            })
+          }
+        >
+          <Text style={styles.reserveText}>Reserve a Spot</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

@@ -103,8 +103,10 @@ const Nearby = () => {
             item={{
               ...item,
               image: placeholderImage,
-            }}
-          />
+     }}
+     hideReserve={true}
+  />
+
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         contentContainerStyle={{ paddingBottom: 20 }}
