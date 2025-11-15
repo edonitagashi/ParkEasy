@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,32 +21,33 @@ export default function BookingsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadBookings();
-  }, []);
-
-  const loadBookings = async () => {
-    try {
-      if (!auth.currentUser) return;
-
+    // subscribe to real-time updates for this user's bookings
+    let unsub = () => {};
+    if (auth.currentUser) {
       const q = query(
         collection(db, "bookings"),
         where("userId", "==", auth.currentUser.uid)
       );
-
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-
-      console.log("Loaded bookings for user:", auth.currentUser.uid, items);
-      setBookings(items);
-    } catch (err) {
-      Alert.alert("Error", "Failed to load bookings.");
-    } finally {
+      unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+          console.log("Realtime bookings update, count:", items.length);
+          setBookings(items);
+          setLoading(false);
+        },
+        (err) => {
+          console.error("Bookings onSnapshot error:", err);
+          Alert.alert("Error", "Could not load bookings.");
+          setLoading(false);
+        }
+      );
+    } else {
       setLoading(false);
     }
-  };
+
+    return () => unsub();
+  }, []);
 
   const handleDelete = (bookingId) => {
     Alert.alert("Delete Booking", "Are you sure you want to delete this booking?", [
