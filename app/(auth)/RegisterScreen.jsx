@@ -9,6 +9,14 @@ import GoogleAuthButton from "../../components/GoogleAuthButton";
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "currentUser";
 
+const showAlert = (title, message) => {
+  if (typeof window !== "undefined" && window.alert) {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    Alert.alert(title, message);
+  }
+};
+
 export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -28,12 +36,12 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    if (!name.trim()) return Alert.alert("Gabim", "Ju lutem vendosni emrin tuaj.");
-    if (!phone.trim()) return Alert.alert("Gabim", "Ju lutem vendosni numrin e telefonit.");
-    if (!email.trim()) return Alert.alert("Gabim", "Ju lutem vendosni email-in.");
-    if (!validateEmail(email.trim())) return Alert.alert("Gabim", "Email-i nuk është në format të saktë.");
-    if (!validatePassword(password)) return Alert.alert("Gabim", "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër.");
-    if (password !== confirmPassword) return Alert.alert("Gabim", "Fjalëkalimet nuk përputhen.");
+    if (!name.trim()) return showAlert("Gabim", "Ju lutem vendosni emrin tuaj.");
+    if (!phone.trim()) return showAlert("Gabim", "Ju lutem vendosni numrin e telefonit.");
+    if (!email.trim()) return showAlert("Gabim", "Ju lutem vendosni email-in.");
+    if (!validateEmail(email.trim())) return showAlert("Gabim", "Email-i nuk është në format të saktë.");
+    if (!validatePassword(password)) return showAlert("Gabim", "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër.");
+    if (password !== confirmPassword) return showAlert("Gabim", "Fjalëkalimet nuk përputhen.");
 
     setLoading(true);
     try {
@@ -67,7 +75,7 @@ export default function RegisterScreen() {
       setLoading(false);
       router.replace("nearby");
     } catch (error) {
-      Alert.alert("Gabim", error.message);
+      showAlert("Gabim", error.message);
       setLoading(false);
     }
   };

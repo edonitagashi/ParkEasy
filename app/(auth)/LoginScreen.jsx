@@ -9,6 +9,16 @@ import GoogleAuthButton from "../../components/GoogleAuthButton";
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "currentUser";
 
+const showAlert = (title, message) => {
+  if (typeof window !== "undefined" && typeof window.alert === "function") {
+    setTimeout(() => {
+      window.alert(`${title}\n\n${message}`);
+    }, 50);
+  } else {
+    Alert.alert(title, message);
+  }
+};
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,15 +36,15 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      return Alert.alert("Gabim", "Ju lutem plotësoni email dhe fjalëkalimin.");
+      return showAlert("Gabim", "Ju lutem plotësoni email dhe fjalëkalimin.");
     }
 
     if (!validateEmail(email)) {
-      return Alert.alert("Gabim", "Email-i nuk është në format të saktë.");
+      return showAlert("Gabim", "Email-i nuk është në format të saktë.");
     }
 
     if (!validatePassword(password)) {
-      return Alert.alert(
+      return showAlert(
         "Gabim",
         "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër."
       );
@@ -49,6 +59,7 @@ export default function LoginScreen() {
         const rawUsers = await AsyncStorage.getItem(USERS_KEY);
         const users = rawUsers ? JSON.parse(rawUsers) : [];
         let found = users.find(u => u.email?.toLowerCase() === String(fbUser.email).toLowerCase());
+
         if (!found) {
           found = {
             id: fbUser.uid,
@@ -61,6 +72,7 @@ export default function LoginScreen() {
           users.push(found);
           await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
         }
+
         await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(found));
       } catch (syncErr) {
         console.error("Gabim gjatë sinkronizimit në AsyncStorage:", syncErr);
@@ -69,7 +81,17 @@ export default function LoginScreen() {
       setLoading(false);
       router.replace("nearby");
     } catch (error) {
-      Alert.alert("Gabim", error.message);
+      let message = error.message;
+
+      if (error.code === "auth/wrong-password") {
+        message = "Fjalëkalimi është gabim.";
+      } else if (error.code === "auth/user-not-found") {
+        message = "Email-i nuk ekziston.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Email-i nuk është i vlefshëm.";
+      }
+
+      showAlert("Gabim", message);
       setLoading(false);
     }
   };
