@@ -3,11 +3,9 @@ import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert 
 import { router } from "expo-router";
 import { auth } from "../firebase/firebase";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser";
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -31,26 +29,7 @@ export default function LoginScreen() {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && loading) {
-        try {
-          // Find user in AsyncStorage and save as current user
-          const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-          const users = rawUsers ? JSON.parse(rawUsers) : [];
-          const foundUser = users.find(u => u.email?.toLowerCase() === user.email?.toLowerCase());
-          
-          if (foundUser) {
-            await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(foundUser));
-          }
-          router.replace("nearby");
-        } catch (err) {
-          console.error("Error saving current user:", err);
-        }
-      }
-    });
-    return unsubscribe;
-  }, [loading]);
+ 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

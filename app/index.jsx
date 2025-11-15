@@ -3,10 +3,8 @@ import React, { useEffect, useRef } from "react";
 import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser";
+
 
 export default function Index() {
   const router = useRouter();
@@ -20,40 +18,7 @@ export default function Index() {
     ]).start();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      
-      const oldEntries = await AsyncStorage.multiGet(["name","phone","email","password","avatarUri"]);
-      const old = Object.fromEntries(oldEntries || []);
-      if (old.email && old.password) {
-        const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-        const users = rawUsers ? JSON.parse(rawUsers) : [];
-        const exists = users.some(u => u.email?.toLowerCase() === String(old.email).toLowerCase());
-        if (!exists) {
-          users.push({
-            id: Date.now().toString(),
-            name: old.name || "User",
-            phone: old.phone || "",
-            email: String(old.email).toLowerCase(),
-            password: old.password,
-            avatarUri: old.avatarUri || "",
-          });
-          await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-        }
-        await AsyncStorage.multiRemove(["name","phone","email","password","avatarUri"]);
-      }
-
-      
-      const cur = await AsyncStorage.getItem(CURRENT_USER_KEY);
-      if (cur) {
-        router.replace("nearby");
-      } else {
-        // qëndro këtu (faqja e hyrjes) – ose shko te Login nëse e preferon:
-        // router.replace("/auth/LoginScreen");
-      }
-    })();
-  }, []);
-
+  
   return (
     <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
       <StatusBar barStyle="dark-content" backgroundColor="#E9F8F6" />
@@ -86,13 +51,13 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
-  scrollContainer: { flexGrow: 1, justifyContent: "center", alignItems: "center", paddingVertical: 60 },
+  scrollContainer: { alignItems: "center", paddingVertical: 60 },
   container: {
     alignItems: "center", justifyContent: "center", width: "90%",
     backgroundColor: "#FFFFFFDD", borderRadius: 20, paddingVertical: 40, paddingHorizontal: 20,
     shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 8,
   },
-  headerImage: { width: 600, height: 300, marginBottom: 10, borderRadius: 12 },
+  headerImage: { width: "100%" , height: 120, marginBottom: 10, borderRadius: 12 },
   appName: {
     fontSize: 38, fontWeight: "900", color: "#2E7D6A", textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.15)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4, marginBottom: 10,

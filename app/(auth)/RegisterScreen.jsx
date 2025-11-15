@@ -3,11 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import { router } from "expo-router";
 import { auth } from "../firebase/firebase";
 import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
-
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -34,40 +30,7 @@ if (password !== confirmPassword) return Alert.alert("Error", "Passwords do not 
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && loading) {
-        try {
-          // Create user object and save to AsyncStorage
-          const newUser = {
-            id: user.uid,
-            name,
-            phone,
-            email: email.trim().toLowerCase(),
-            password,
-            avatarUri: "",
-          };
-          
-          // Add to users list
-          const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-          const users = rawUsers ? JSON.parse(rawUsers) : [];
-          const exists = users.some(u => u.email?.toLowerCase() === newUser.email);
-          
-          if (!exists) {
-            users.push(newUser);
-            await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-          }
-          
-          // Set as current user
-          await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
-          router.replace("nearby");
-        } catch (err) {
-          console.error("Error saving new user:", err);
-        }
-      }
-    });
-    return unsubscribe;
-  }, [loading]);
+
 
   return (
     <View style={styles.container}>
