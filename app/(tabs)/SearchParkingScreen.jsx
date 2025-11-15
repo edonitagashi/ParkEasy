@@ -19,13 +19,13 @@ const placeholderImage = require("../../assets/images/image1.png");
 
 export default function SearchParkingScreen() {
   const [searchText, setSearchText] = useState("");
-  const { parkings, loading, error, refresh } = useParkings();
+  const { parkings, loading, error, refresh } = useParkings(); // realtime onSnapshot
 
   const filteredParkings = useMemo(() => {
-    if (!parkings || parkings.length === 0) return [];
-    if (!searchText?.trim()) return parkings;
+    const list = parkings || [];
+    if (!searchText?.trim()) return list;
     const q = searchText.trim().toLowerCase();
-    return parkings.filter((p) => {
+    return list.filter((p) => {
       const name = (p.name || "").toLowerCase();
       const address = (p.address || "").toLowerCase();
       return name.includes(q) || address.includes(q);

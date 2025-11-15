@@ -3,13 +3,12 @@ import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 /**
- * useParkings - reusable hook to read 'parkings' collection in realtime.
- *
+ * useParkings - realtime listener for 'parkings' collection using onSnapshot.
  * Returns:
- *  - parkings: array of parking objects { id, ...data }
+ *  - parkings: array of { id, ...data }
  *  - loading: boolean
  *  - error: Error | null
- *  - refresh: () => void  // manual refresh (re-subscribes)
+ *  - refresh: () => void  // re-subscribe (manual refresh)
  *
  * Usage:
  *  const { parkings, loading, error, refresh } = useParkings();
@@ -25,14 +24,18 @@ export default function useParkings() {
     setLoading(true);
     setError(null);
 
+    // cleanup previous listener if exists
+    if (unsubRef.current) {
+      try {
+        unsubRef.current();
+      } catch (e) {
+        // ignore
+      }
+      unsubRef.current = null;
+    }
+
     try {
       const q = query(collection(db, "parkings"));
-      // unsubscribe existing
-      if (unsubRef.current) {
-        try { unsubRef.current(); } catch (e) {}
-        unsubRef.current = null;
-      }
-
       unsubRef.current = onSnapshot(
         q,
         (snapshot) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   StatusBar,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  TextInput,
   ActivityIndicator,
 } from "react-native";
 //import MapView, { Marker } from "react-native-maps";
@@ -19,17 +20,29 @@ import useParkings from "../hooks/useParkings";
 const placeholderImage = require("../../assets/images/image1.png");
 
 const Nearby = () => {
-  // use the reusable hook (reads parkings in realtime)
+  // realtime parkings via onSnapshot
   const { parkings, loading, error, refresh } = useParkings();
 
   const [showFullMap, setShowFullMap] = useState(false);
   const [selectedParking, setSelectedParking] = useState(null);
   const [searchText, setSearchText] = useState("");
 
+  const filtered = useMemo(() => {
+    if (!parkings || parkings.length === 0) return [];
+    if (!searchText?.trim()) return parkings;
+    const q = searchText.trim().toLowerCase();
+    return parkings.filter((p) => {
+      const name = (p.name || "").toLowerCase();
+      const address = (p.address || "").toLowerCase();
+      return name.includes(q) || address.includes(q);
+    });
+  }, [parkings, searchText]);
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#2E7D6A" />
+        <Text style={{ marginTop: 10 }}>Loading parkings...</Text>
       </View>
     );
   }
@@ -58,35 +71,19 @@ const Nearby = () => {
         style={styles.mapPreview}
         onPress={() => setShowFullMap(true)}
       >
-       {/* <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 42.6629,
-            longitude: 21.1655,
-            latitudeDelta: 0.2,
-            longitudeDelta: 0.2,
-          }}
-        >
-          {parkings.map((p) => (
-            <Marker
-              key={p.id}
-              coordinate={{ latitude: p.latitude, longitude: p.longitude }}
-              title={p.name}
-              description={p.address}
-            />
-          ))}
-        </MapView>
-*/}
-
+        {/* Map placeholder */}
         <View style={styles.overlay}>
           <Text style={styles.mapText}>Tap to view full map</Text>
         </View>
       </TouchableOpacity>
 
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.sortBtn}>
-          <Text style={styles.sortText}>Sort by: Distance</Text>
-        </TouchableOpacity>
+        <TextInput
+          placeholder="Search parkings..."
+          value={searchText}
+          onChangeText={setSearchText}
+          style={styles.searchInput}
+        />
 
         <TouchableOpacity style={styles.refreshBtn} onPress={refresh}>
           <Text style={styles.refreshText}>Refresh</Text>
@@ -94,16 +91,14 @@ const Nearby = () => {
       </View>
 
       <FlatList
-        data={parkings}
+        data={filtered}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ParkingCard
             item={{
               ...item,
               image:
-                // prefer already-resolved item.image
                 item.image ||
-                // try Firestore imageUrl path mapping to local assets
                 (item.imageUrl && resolveImage(item.imageUrl)) ||
                 placeholderImage,
             }}
@@ -113,6 +108,11 @@ const Nearby = () => {
         contentContainerStyle={{ paddingBottom: 20 }}
         refreshing={loading}
         onRefresh={refresh}
+        ListEmptyComponent={() => (
+          <View style={{ padding: 20, alignItems: "center" }}>
+            <Text style={{ color: "#777" }}>No parkings found.</Text>
+          </View>
+        )}
       />
 
       {selectedParking && (
@@ -124,7 +124,6 @@ const Nearby = () => {
           </Text>
         </View>
       )}
-
     </SafeAreaView>
   );
 };
@@ -136,7 +135,8 @@ const styles = StyleSheet.create({
   mapPreview: { height: 220, marginHorizontal: 16, marginVertical: 10, borderRadius: 12, overflow: "hidden", position: "relative" },
   map: { width: "100%", height: "100%" },
   fullMapOverlay: {position: "absolute",top: 0,left: 0,right: 0,bottom: 0,zIndex: 10,elevation: 10,backgroundColor: "#fff",},
-  controls: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15, paddingHorizontal: 16 },
+  controls: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15, paddingHorizontal: 16, alignItems: "center" },
+  searchInput: { flex: 1, borderWidth: 1, borderColor: "#ddd", padding: 10, borderRadius: 10, marginRight: 8, backgroundColor: "#fff" },
   sortBtn: { backgroundColor: "#CDE6DC", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
   sortText: { color: "#5C8374", fontWeight: "500" },
   refreshBtn: { backgroundColor: "#5C8374", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
