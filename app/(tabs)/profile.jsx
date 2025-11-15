@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from '@expo/vector-icons';
+import { auth } from "../../firebase";
 
 const USERS_KEY = "users";               
 const CURRENT_USER_KEY = "currentUser";  
@@ -40,18 +41,62 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
-        if (!raw) {
-          Alert.alert("Session expired", "Please log in to view your profile.");
-          router.replace("/LoginScreen");
-          return;
+        // First check Firebase auth
+        if (auth.currentUser) {
+          // User is logged in with Firebase
+          const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
+          if (raw) {
+            const me = JSON.parse(raw);
+            setFullName(me.name || "User");
+            setPhoneNumber(me.phone || "");
+            setEmail(me.email || "");
+            setPassword(me.password || "");
+            setAvatarUri(me.avatarUri || null);
+          } else {
+            // Firebase user exists but no AsyncStorage data, create it
+            const rawUsers = await AsyncStorage.getItem(USERS_KEY);
+            const users = rawUsers ? JSON.parse(rawUsers) : [];
+            const foundUser = users.find(u => u.email?.toLowerCase() === auth.currentUser.email?.toLowerCase());
+            
+            if (foundUser) {
+              await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(foundUser));
+              setFullName(foundUser.name || "User");
+              setPhoneNumber(foundUser.phone || "");
+              setEmail(foundUser.email || "");
+              setPassword(foundUser.password || "");
+              setAvatarUri(foundUser.avatarUri || null);
+            } else {
+              // Create new user entry
+              const newUser = {
+                id: auth.currentUser.uid,
+                name: auth.currentUser.displayName || "User",
+                phone: "",
+                email: auth.currentUser.email,
+                password: "",
+                avatarUri: "",
+              };
+              users.push(newUser);
+              await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
+              await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+              setFullName(newUser.name);
+              setEmail(newUser.email);
+            }
+          }
+        } else {
+          // No Firebase user, check AsyncStorage
+          const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
+          if (!raw) {
+            Alert.alert("Session expired", "Please log in to view your profile.");
+            router.replace("/");
+            return;
+          }
+          const me = JSON.parse(raw);
+          setFullName(me.name || "User");
+          setPhoneNumber(me.phone || "");
+          setEmail(me.email || "");
+          setPassword(me.password || "");
+          setAvatarUri(me.avatarUri || null);
         }
-        const me = JSON.parse(raw);
-        setFullName(me.name || "User");
-        setPhoneNumber(me.phone || "");
-        setEmail(me.email || "");
-        setPassword(me.password || "");
-        setAvatarUri(me.avatarUri || null);
       } catch (e) {
         console.error("Profile read error:", e);
         Alert.alert("Error", "Profile data could not be read.");
