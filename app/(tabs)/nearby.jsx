@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StatusBar,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 //import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,42 +14,38 @@ import SearchHeader from "../../components/SearchHeader";
 import { resolveImage } from "../../components/images";
 import ParkingCard from "../../components/ParkingCard";
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import useParkings from "../hooks/useParkings";
 
 const placeholderImage = require("../../assets/images/image1.png");
 
 const Nearby = () => {
+  // use the reusable hook (reads parkings in realtime)
+  const { parkings, loading, error, refresh } = useParkings();
+
   const [showFullMap, setShowFullMap] = useState(false);
   const [selectedParking, setSelectedParking] = useState(null);
-
-  const [parkings, setParkings] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadParkings = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "parkings"));
-        const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setParkings(items);
-      } catch (err) {
-        console.log("Error loading parkings:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadParkings();
-  }, []);
+  const [searchText, setSearchText] = useState("");
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontSize: 18 }}>Loading...</Text>
       </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container} edges={["left", "right"]}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+        <SearchHeader title="Nearby Parkings" />
+        <View style={{ padding: 20, alignItems: "center" }}>
+          <Text style={{ color: "red", marginBottom: 12 }}>Failed to load parkings.</Text>
+          <TouchableOpacity style={styles.refreshBtn} onPress={refresh}>
+            <Text style={styles.refreshText}>Try again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -91,7 +88,7 @@ const Nearby = () => {
           <Text style={styles.sortText}>Sort by: Distance</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.refreshBtn}>
+        <TouchableOpacity style={styles.refreshBtn} onPress={refresh}>
           <Text style={styles.refreshText}>Refresh</Text>
         </TouchableOpacity>
       </View>
@@ -114,49 +111,20 @@ const Nearby = () => {
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         contentContainerStyle={{ paddingBottom: 20 }}
+        refreshing={loading}
+        onRefresh={refresh}
       />
 
-      {/*{showFullMap && (
-        <View style={styles.fullMapOverlay}>
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={{
-              latitude: 42.6629,
-              longitude: 21.1655,
-              latitudeDelta: 0.3,
-              longitudeDelta: 0.3,
-            }}
-          >
-            {parkings.map((p) => (
-              <Marker
-                key={p.id}
-                coordinate={{ latitude: p.latitude, longitude: p.longitude }}
-                title={p.name}
-                description={`${p.address} - ${p.price}`}
-                onPress={() => setSelectedParking(p)}
-              />
-            ))}
-          </MapView>
-          */}
-
-          {selectedParking && (
-            <View style={styles.infoBox}>
-              <Text style={styles.infoTitle}>{selectedParking.name}</Text>
-              <Text style={styles.infoText}>{selectedParking.address}</Text>
-              <Text style={styles.infoText}>
-                {selectedParking.price} • {selectedParking.spots} spots
-              </Text>
-            </View>
-          )}
-
-          {/*<TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => setShowFullMap(false)}
-          >
-            <Text style={styles.closeTxt}>Close</Text>
-          </TouchableOpacity>
+      {selectedParking && (
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>{selectedParking.name}</Text>
+          <Text style={styles.infoText}>{selectedParking.address}</Text>
+          <Text style={styles.infoText}>
+            {selectedParking.price} • {selectedParking.spots} spots
+          </Text>
         </View>
-      )}*/}
+      )}
+
     </SafeAreaView>
   );
 };

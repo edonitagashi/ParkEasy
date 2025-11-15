@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   FlatList,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
@@ -12,45 +14,45 @@ import { resolveImage } from "../../components/images";
 import SearchBar from "../../components/SearchBar";
 import ParkingCard from "../../components/ParkingCard";
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";  
+import useParkings from "../hooks/useParkings";  
 const placeholderImage = require("../../assets/images/image1.png");
 
 export default function SearchParkingScreen() {
   const [searchText, setSearchText] = useState("");
-  const [parkings, setParkings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { parkings, loading, error, refresh } = useParkings();
 
-  useEffect(() => {
-    const loadParkings = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "parkings"));
-        const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setParkings(items);
-      } catch (error) {
-        console.log("Error loading parkings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadParkings();
-  }, []);
-
-  const filteredParkings = parkings.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      p.address.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredParkings = useMemo(() => {
+    if (!parkings || parkings.length === 0) return [];
+    if (!searchText?.trim()) return parkings;
+    const q = searchText.trim().toLowerCase();
+    return parkings.filter((p) => {
+      const name = (p.name || "").toLowerCase();
+      const address = (p.address || "").toLowerCase();
+      return name.includes(q) || address.includes(q);
+    });
+  }, [parkings, searchText]);
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#2E7D6A" />
+        <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
       </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container} edges={["left", "right"]}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <SearchHeader title="Search Parking" />
+        <View style={{ padding: 20, alignItems: "center" }}>
+          <Text style={{ color: "red", marginBottom: 12 }}>Failed to load parkings.</Text>
+          <TouchableOpacity onPress={refresh} style={{ backgroundColor: "#2E7D6A", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 }}>
+            <Text style={{ color: "#fff", fontWeight: "700" }}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -84,6 +86,8 @@ export default function SearchParkingScreen() {
             <Text style={styles.noResultsText}>No results found</Text>
           </View>
         )}
+        refreshing={loading}
+        onRefresh={refresh}
       />
     </SafeAreaView>
   );
