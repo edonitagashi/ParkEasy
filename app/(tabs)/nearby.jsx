@@ -5,7 +5,8 @@ import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import useParkings from "../hooks/useParkings";
+import { collection, getDocs } from "firebase/firestore";
+ import { db } from "../firebase/firebase";
 
 import ParkingCard from "../../components/ParkingCard";
 import { useRouter } from "expo-router";
