@@ -23,27 +23,31 @@ export default function LoginScreen() {
   const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleLogin = async () => {
-    if (!email || !password) return showAlert("Error", "Please fill in all fields.");
-    if (!validateEmail(email)) return showAlert("Error", "Invalid email format.");
-    if (!validatePassword(password))
-      return showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
+  if (!email || !password)
+    return showAlert("Error", "Please fill in all fields.");
 
-    setLoading(true);
+  if (!validateEmail(email))
+    return showAlert("Error", "Invalid email format.");
 
-    try {
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      const uid = userCred.user.uid;
+  if (!validatePassword(password))
+    return showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
 
-      const ref = doc(db, "users", uid);
-      const snap = await getDoc(ref);
+  setLoading(true);
 
-      if (!snap.exists()) {
-        showAlert("Error", "Profile not found in Firestore.");
-        setLoading(false);
-        return;
-      }
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+
+    let role = "user";
+
+    // 🔹1) Nese ekziston dokumenti ne Firestore
+    if (snap.exists()) {
       const data = snap.data();
+      role = data.role || "user";
 
       if (data.status === "inactive") {
         showAlert("Account Disabled", "This account has been deactivated by an admin.");
@@ -51,30 +55,37 @@ export default function LoginScreen() {
         setLoading(false);
         return;
       }
-
-      // FIX: declare role properly
-      let role = data.role || "user";
-
-      // Ensure special admin account
-      const normalizedEmail = email.trim().toLowerCase();
-      if (normalizedEmail === "admin12@gmail.com") {
-        role = "admin";
-        await setDoc(ref, { ...data, role: "admin" }, { merge: true });
-      }
-
-      // REDIRECTION
-      if (role === "admin") {
-        router.replace("/admin");
-      } else {
-        router.replace("/(tabs)/nearby");
-      }
-
-    } catch (error) {
-      showAlert("Login Error", error.message);
     }
 
-    setLoading(false);
-  };
+    // 🔹2) Admini special (kalohet gjithmonë në admin)
+    if (normalizedEmail === "admin12@gmail.com") {
+      role = "admin";
+      await setDoc(
+        ref,
+        {
+          id: uid,
+          email: normalizedEmail,
+          role: "admin",
+          status: "active",
+          createdAt: new Date(),
+        },
+        { merge: true }
+      );
+    }
+
+    // 🔹3) Redirectimi final
+    if (role === "admin") {
+      router.replace("/admin");
+    } else {
+      router.replace("/(tabs)/nearby");
+    }
+
+  } catch (err) {
+    showAlert("Login Error", err.message);
+  }
+
+  setLoading(false);
+};
 
   return (
     <SafeAreaView style={styles.container}>

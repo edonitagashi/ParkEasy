@@ -1,4 +1,3 @@
-// app/admin/ParkingReservationsScreen.jsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -22,11 +21,15 @@ export default function ParkingReservationsScreen() {
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, "reservations"), where("parkingId", "==", parkingId));
+      const q = query(
+        collection(db, "bookings"),   // ✅ FIXED (not "reservations")
+        where("parkingId", "==", parkingId)
+      );
+
       const snap = await getDocs(q);
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setReservations(data);
-    } catch {
+    } catch (err) {
       Alert.alert("Error", "Failed to load reservations.");
     } finally {
       setLoading(false);
@@ -39,7 +42,7 @@ export default function ParkingReservationsScreen() {
 
   const handleDeleteReservation = async (id) => {
     try {
-      await deleteDoc(doc(db, "reservations", id));
+      await deleteDoc(doc(db, "bookings", id));  // ✅ FIXED
       fetchReservations();
     } catch {
       Alert.alert("Error", "Failed to delete.");
@@ -49,7 +52,7 @@ export default function ParkingReservationsScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator />
+        <ActivityIndicator size="large" color="#2E7D6A" />
       </View>
     );
 
@@ -70,10 +73,22 @@ export default function ParkingReservationsScreen() {
           contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Text style={styles.text}>User: {item.userEmail}</Text>
-              <Text style={styles.text}>From: {item.startTime}</Text>
-              <Text style={styles.text}>To: {item.endTime}</Text>
-              <Text style={styles.text}>Status: {item.status}</Text>
+
+              <Text style={styles.text}>
+                User ID: {item.userId}
+              </Text>
+
+              <Text style={styles.text}>
+                Date: {item.date}
+              </Text>
+
+              <Text style={styles.text}>
+                Time: {item.time}
+              </Text>
+
+              <Text style={styles.text}>
+                Duration: {item.duration} hours
+              </Text>
 
               <TouchableOpacity
                 style={[styles.btn, styles.danger]}
@@ -81,6 +96,7 @@ export default function ParkingReservationsScreen() {
               >
                 <Text style={styles.btnText}>Delete</Text>
               </TouchableOpacity>
+
             </View>
           )}
         />
@@ -107,7 +123,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CDEDE7",
   },
-  text: { color: "#555" },
+  text: { color: "#555", marginBottom: 4 },
   btn: {
     marginTop: 10,
     paddingVertical: 8,
