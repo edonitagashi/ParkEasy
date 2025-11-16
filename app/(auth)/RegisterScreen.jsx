@@ -1,23 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { router } from "expo-router";
-import { auth } from "../firebase/firebase";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
+import { useRouter } from "expo-router";
+import { auth, db } from "../firebase/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { doc, setDoc } from "firebase/firestore";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser";
-
 const showAlert = (title, message) => {
-  if (typeof window !== "undefined" && window.alert) {
-    window.alert(`${title}\n\n${message}`);
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n${message}`);
   } else {
     Alert.alert(title, message);
   }
 };
 
 export default function RegisterScreen() {
+  const router = useRouter();
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -25,57 +24,40 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const validatePassword = (password) => {
-    const re = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-    return re.test(password);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleRegister = async () => {
-    if (!name.trim()) return showAlert("Gabim", "Ju lutem vendosni emrin tuaj.");
-    if (!phone.trim()) return showAlert("Gabim", "Ju lutem vendosni numrin e telefonit.");
-    if (!email.trim()) return showAlert("Gabim", "Ju lutem vendosni email-in.");
-    if (!validateEmail(email.trim())) return showAlert("Gabim", "Email-i nuk është në format të saktë.");
-    if (!validatePassword(password)) return showAlert("Gabim", "Fjalëkalimi duhet të ketë të paktën 8 karaktere, një shkronjë të madhe dhe një numër.");
-    if (password !== confirmPassword) return showAlert("Gabim", "Fjalëkalimet nuk përputhen.");
+    if (!name.trim()) return showAlert("Error", "Please enter your name.");
+    if (!phone.trim()) return showAlert("Error", "Please enter your phone number.");
+    if (!email.trim()) return showAlert("Error", "Please enter your email.");
+    if (!validateEmail(email.trim())) return showAlert("Error", "Invalid email format.");
+    if (!validatePassword(password)) return showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
+    if (password !== confirmPassword) return showAlert("Error", "Passwords do not match.");
 
     setLoading(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
       const fbUser = result.user;
+      showAlert("Success", `Firebase Auth user created: ${fbUser.email}`);
 
-      const newUser = {
+      await setDoc(doc(db, "users", fbUser.uid), {
         id: fbUser.uid,
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim().toLowerCase(),
-        password,
         avatarUri: fbUser.photoURL || "",
-      };
-
-      try {
-        const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-        const users = rawUsers ? JSON.parse(rawUsers) : [];
-        const exists = users.some(u => u.email?.toLowerCase() === newUser.email);
-
-        if (!exists) {
-          users.push(newUser);
-          await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-        }
-
-        await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
-      } catch (syncErr) {
-        console.error("Gabim gjatë ruajtjes në AsyncStorage:", syncErr);
-      }
+        role: "user",      
+        status: "active",   
+        createdAt: new Date()
+      });
+      showAlert("Success", "User document saved in Firestore!");
 
       setLoading(false);
-      router.replace("nearby");
+      router.replace("/nearby"); 
     } catch (error) {
-      showAlert("Gabim", error.message);
+      console.error("Register error:", error);
+      showAlert("Error", error.message);
       setLoading(false);
     }
   };
@@ -84,20 +66,23 @@ export default function RegisterScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Sign up</Text>
 
-      <TextInput style={styles.input} placeholder="Emri" value={name} onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Numri i telefonit" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="Phone number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
       <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} value={email} onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Fjalëkalimi" secureTextEntry value={password} onChangeText={setPassword} />
-      <TextInput style={styles.input} placeholder="Konfirmo fjalëkalimin" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput style={styles.input} placeholder="Confirm password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? "Loading..." : "Create Account"}</Text>
       </TouchableOpacity>
 
-      <GoogleAuthButton />
+      {/* Google signup button */}
+      <GoogleAuthButton mode="signup" />
 
       <TouchableOpacity onPress={() => router.push("LoginScreen")}>
-        <Text style={styles.link}>Already have an account? Log In</Text>
+        <Text style={styles.switchText}>
+          Already have an account? <Text style={styles.link}>Log in</Text>
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -109,5 +94,6 @@ const styles = StyleSheet.create({
   input: { width: "100%", borderWidth: 1, borderColor: "#ccc", padding: 12, borderRadius: 10, marginBottom: 15 },
   button: { backgroundColor: "#2E7D6A", padding: 15, borderRadius: 10, width: "100%", alignItems: "center" },
   buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
-  link: { marginTop: 15, color: "#2E7D6A" },
+  link: { color: "#2E7D6A", fontWeight: "bold" },
+  switchText: { marginTop: 15, color: "#555" },
 });
