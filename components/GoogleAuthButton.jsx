@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity, Text, StyleSheet, Platform, Alert } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -6,6 +6,7 @@ import { auth, db } from "../app/firebase/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
+// Funksion alert per web dhe mobile
 const showAlert = (title, message) => {
   if (Platform.OS === "web") {
     window.alert(`${title}\n${message}`);
@@ -16,6 +17,7 @@ const showAlert = (title, message) => {
 
 export default function GoogleAuthButton({ mode = "login" }) {
   const router = useRouter();
+    const [loading, setLoading] = useState(false); // gjendje per loading
 
   const handleGoogleAuth = async () => {
     try {
@@ -26,13 +28,16 @@ export default function GoogleAuthButton({ mode = "login" }) {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      //Kontrollo nëse ekziston në Firestore
+      //Kontrollo nese ekziston ne Firestore
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
 
       if (mode === "signup") {
+
         if (snap.exists()) {
           showAlert("ℹ️ Account already exists", "Please log in instead.");
+          router.replace("/LoginScreen"); 
+          setLoading(false);
           return;
         }
         await setDoc(ref, {
@@ -41,20 +46,21 @@ export default function GoogleAuthButton({ mode = "login" }) {
           avatarUri: user.photoURL || "",
           role: "user",
           status: "active",
-          createdAt: new Date()
+          createdAt:serverTimestamp()
         });
         showAlert("✅ Account created successfully!", "");
       } else {
         if (!snap.exists()) {
           showAlert("❌ Not registered", "Please sign up first.");
           await auth.signOut();
+          setLoading(false);
           return;
         }
       }
-
+            // Merr te dhenat e user-it nga Firestore ose default
       const data = snap.exists() ? snap.data() : { role: "user", status: "active" };
 
-      //Kontrollo status
+      //Kontrollon statusin
       if (data.status === "inactive") {
         showAlert("❌ Account deactivated", "Contact admin for support.");
         await auth.signOut();
@@ -71,6 +77,8 @@ export default function GoogleAuthButton({ mode = "login" }) {
     } catch (error) {
       console.error("Google auth error:", error);
       showAlert("Google sign-in failed", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
