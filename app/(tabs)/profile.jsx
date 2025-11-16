@@ -37,7 +37,6 @@ export default function Profile() {
   const [saving, setSaving]           = useState(false);
 
   const [successMsg, setSuccessMsg]   = useState("");
-  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
   const [showAboutPanel, setShowAboutPanel] = useState(false);
   const [showHelpPanel, setShowHelpPanel] = useState(false);
   const [showPrivacyPanel, setShowPrivacyPanel] = useState(false);
@@ -237,11 +236,6 @@ export default function Profile() {
   };
 
   
-  const handleSettings = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setShowSettingsPanel(v => !v);
-  };
-
   const handleAboutUs = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setShowAboutPanel(v => !v);
@@ -362,37 +356,6 @@ export default function Profile() {
 
       {/* SEKSIONI I RI: Opsione të tjera */}
       <Text style={s.section}>More Options</Text>
-
-      {/* Settings */}
-      <TouchableOpacity style={s.optionItem} onPress={handleSettings}>
-        <View style={s.optionLeft}>
-          <Ionicons name="settings" size={24} color="#4C6E64" />
-          <Text style={s.optionText}>Settings</Text>
-        </View>
-        <Ionicons name={showSettingsPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
-      </TouchableOpacity>
-
-      {showSettingsPanel && (
-        <View style={s.expandedPanel}>
-          <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
-            <Text style={s.expandedLabel}>Theme</Text>
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
-              <TouchableOpacity
-                style={[s.smallBtn, theme === 'light' && s.smallBtnActive]}
-                onPress={() => setTheme('light')}
-              >
-                <Text style={s.smallBtnText}>Light</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.smallBtn, theme === 'dark' && s.smallBtnActive]}
-                onPress={() => setTheme('dark')}
-              >
-                <Text style={s.smallBtnText}>Dark</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-      )}
 
       {/* About Us */}
       <TouchableOpacity style={s.optionItem} onPress={handleAboutUs}>
