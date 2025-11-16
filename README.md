@@ -76,58 +76,76 @@ This is the initial prototype of the parking management app, developed in accord
 
 # Phase 2 – Functional Version with Firebase Integration
 
-In the second phase of the project, the ParkEasy application is expanded into a fully functional system by integrating Firebase Authentication and Firestore Database. Users can now create accounts, log in, reserve parking spots, manage their bookings, save favorites, and interact with real-time data. Additionally, the system introduces role-based functionality for Admins and Owners.
+In the second phase of the project, the ParkEasy application becomes a fully functional system by integrating Firebase Authentication and Firestore Database. Users can now register, log in, reserve parking spots, save favorites, manage bookings, and interact with real-time data. The system also includes dedicated functionality for Admin and Owner roles.
 
 **Technology:** Node.js + Expo/React Native + Firebase (Auth & Firestore)
 
-This version includes complete backend integration, real data operations, and improved UI/UX compared to Phase 1.
+This version adds backend integration, real data operations, and improved UI/UX compared to Phase 1.
 
+---
 
 ## Key Functionalities
-1. **Authentication** (Firebase Authentication)
 
-**The app implements secure authentication with two methods**:
--Email / Password Login
--Google Login (GoogleAuthProvider)
--User inputs are validated during registration and login. After successful authentication, users are redirected based on their role:
--User → Nearby screen
--Owner → Owner Home screen
--Admin → Admin Dashboard
--Logout functionality is also provided in the Profile screens.
+---
 
+## **1. Authentication (Firebase Authentication)**
 
-2.**CRUD with Firestore** (Create, Read, Update, Delete)
+The app implements secure authentication with two methods:
 
-The app uses Cloud Firestore as its main database, enabling full CRUD for dynamic data.
-Users
+- **Email / Password Login**  
+- **Google Login (GoogleAuthProvider)**  
 
-Users can update their profile information
+User input is validated during registration and login.  
+After successful authentication, users are redirected based on their role:
 
--User roles are stored in /users/{uid}
--Bookings (User)
--Create booking → BookParkingScreen
--View bookings in real time → BookingsScreen
--Update booking → EditBookingScreen
--Delete booking → Firestore delete function
--Favorites
--Managed through /favorites/{uid}
--Users can save/remove parking spots
--Real-time updates using onSnapshot
--Optimistic UI for instant changes
+- **User → Nearby screen**  
+- **Owner → Owner Home screen**  
+- **Admin → Admin Dashboard**
 
-Parkings (Admin + Owner)
--Admin can view, edit, or delete parkings
--Owner can edit their own parking information
--When an owner request is approved, a parking is automatically created
--Owner Requests
--Users can apply to become parking owners
--Admin can approve or reject requests
--Approved requests create a new parking in Firestore
+Logout functionality is also available in the Profile screens.
 
-3.**External API**(Optional Feature)
+---
 
+## **2. CRUD with Firestore (Create, Read, Update, Delete)**
+
+Cloud Firestore is used as the main backend database, enabling full CRUD for all dynamic data in the app.
+
+### **Users**
+- User roles are stored in `/users/{uid}`  
+- Users can update their profile information  
+
+### **Bookings (User)**
+- Create booking → **BookParkingScreen**  
+- View bookings in real time → **BookingsScreen**  
+- Update booking → **EditBookingScreen**  
+- Delete booking → Firestore delete  
+
+### **Favorites**
+- Managed in `/favorites/{uid}`  
+- Users can save/remove favorite parkings  
+- Real-time updates via `onSnapshot`  
+- Optimistic UI for instant feedback  
+
+### **Parkings (Admin + Owner)**
+- Admin can view, edit, or delete parkings  
+- Owner can edit their own parking  
+- When a request is approved, a new parking record is created  
+
+### **Owner Requests**
+- Users can apply to become parking owners  
+- Admin can approve or reject applications  
+- Approved requests automatically create a new parking in Firestore  
+
+---
+
+## **3. External API (Optional Feature)**
+
+An external **Weather API** is integrated in the Nearby Web version, displaying real-time weather information.
+
+---
 
 ## Screenshots
+
 <p align="center">
   <img src="assets/Foto1.1.jpg" alt="Foto 1.1" width="200"/>
   <img src="assets/Foto1.2.jpg" alt="Foto 1.2" width="200"/>
@@ -147,7 +165,8 @@ Parkings (Admin + Owner)
   <img src="assets/Foto1.16.jpg" alt="Foto 1.16" width="200"/>
 </p>
 
+---
 
 ## Conclusion
 
-Phase 2 upgrades ParkEasy from a basic UI prototype into a fully functional, data-driven application. With Firebase Authentication, real-time Firestore CRUD, role-based access, and an improved UI, the app now delivers complete booking, favorites, and parking management features for users, owners, and admins. All core requirements of the second project phase are successfully implemented.
+Phase 2 upgrades ParkEasy into a complete, data-driven parking management application. With secure authentication, real-time Firestore CRUD, and role-based access, the app now supports full booking, favorites, and parking administration features for Users, Owners, and Admins — fully meeting the requirements of the second project phase.
