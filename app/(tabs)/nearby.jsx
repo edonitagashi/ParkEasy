@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
 import { resolveImage } from "../../components/images";
+import { Ionicons } from "@expo/vector-icons";
 
 const placeholderImage = "/favicon.png"; 
 
@@ -63,16 +64,20 @@ export default function NearbyWeb() {
     }
   };
 
-  const makeMarkerIconHtml = (imgSrc) => {
+  const makeMarkerIconHtml = (imgSrc, isFav) => {
     const safeSrc = imgSrc || placeholderImage;
+    const borderColor = isFav ? "#FFD166" : "#fff"; // highlight favorites with gold-ish border
     return `
       <div style="
         width:36px;
         height:36px;
         border-radius:50%;
         overflow:hidden;
-        border:2px solid #fff;
+        border:2px solid ${borderColor};
         box-shadow:0 2px 6px rgba(0,0,0,0.25);
+        display:flex;
+        align-items:center;
+        justify-content:center;
       ">
         <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover" />
       </div>
@@ -118,9 +123,10 @@ export default function NearbyWeb() {
             const lng = p.coordinate?.longitude ?? p.longitude;
             if (!lat || !lng) return null;
             const imgSrc = getImageSrc(p);
+            const isFav = favorites?.includes?.(p.id);
             const icon = L.divIcon({
               className: "custom_marker",
-              html: makeMarkerIconHtml(imgSrc),
+              html: makeMarkerIconHtml(imgSrc, isFav),
               iconSize: [36, 36],
               iconAnchor: [18, 36],
             });
@@ -153,7 +159,29 @@ export default function NearbyWeb() {
               </div>
             </div>
 
-            <button style={styles.webReserveButton} onClick={() => handleReserve(selectedParking)}>Reserve</button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                style={styles.webReserveButton}
+                onClick={() => handleReserve(selectedParking)}
+              >
+                Reserve
+              </button>
+
+              {/* Favorite toggle button */}
+              <button
+                style={{
+                  ...styles.webReserveButton,
+                  backgroundColor: favorites?.includes(selectedParking.id) ? "#FFD166" : "#fff",
+                  color: favorites?.includes(selectedParking.id) ? "#1B1B1B" : "#000",
+                  border: "1px solid #DDD"
+                }}
+                onClick={() => toggleFavorite(selectedParking.id)}
+              >
+                {/* Use emoji as fallback; Ionicons in web may not render inside this raw html button */}
+                {favorites?.includes(selectedParking.id) ? "★ Favorited" : "☆ Add to favorites"}
+              </button>
+            </div>
+
             <button style={styles.webCloseButton} onClick={() => setModalVisible(false)}>Close</button>
           </div>
         </div>
@@ -171,7 +199,7 @@ const styles = {
   webHeaderOnlyTitle: { display: "flex", justifyContent: "center", marginBottom: 10 },
   webTitle: { fontSize: 22, fontWeight: "700", margin: 0 },
   webCloseButton: { marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none", backgroundColor: "#b02a37", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16 },
-  webReserveButton: { marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none", backgroundColor: "#2E7D6A", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16 },
+  webReserveButton: { marginTop: 12, padding: 12, borderRadius: 10, border: "none", backgroundColor: "#2E7D6A", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16, minWidth: 120 },
   card: { display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 10 },
   cardImage: { width: "100%", height: 160, objectFit: "cover", borderRadius: 10 },
   cardBody: { width: "100%" },
