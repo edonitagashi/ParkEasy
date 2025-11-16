@@ -87,42 +87,66 @@ This version includes complete backend integration, real data operations, and im
 1. **Authentication** (Firebase Authentication)
 
 **The app implements secure authentication with two methods**:
-Email / Password Login
-Google Login (GoogleAuthProvider)
-User inputs are validated during registration and login. After successful authentication, users are redirected based on their role:
-User → Nearby screen
-Owner → Owner Home screen
-Admin → Admin Dashboard
-Logout functionality is also provided in the Profile screens.
+-Email / Password Login
+-Google Login (GoogleAuthProvider)
+-User inputs are validated during registration and login. After successful authentication, users are redirected based on their role:
+-User → Nearby screen
+-Owner → Owner Home screen
+-Admin → Admin Dashboard
+-Logout functionality is also provided in the Profile screens.
 
 
-2.** CRUD with Firestore** (Create, Read, Update, Delete)
+2.**CRUD with Firestore** (Create, Read, Update, Delete)
 
 The app uses Cloud Firestore as its main database, enabling full CRUD for dynamic data.
 Users
+
 Users can update their profile information
-User roles are stored in /users/{uid}
-Bookings (User)
-Create booking → BookParkingScreen
-View bookings in real time → BookingsScreen
-Update booking → EditBookingScreen
-Delete booking → Firestore delete function
-Favorites
-Managed through /favorites/{uid}
-Users can save/remove parking spots
-Real-time updates using onSnapshot
-Optimistic UI for instant changes
+
+-User roles are stored in /users/{uid}
+-Bookings (User)
+-Create booking → BookParkingScreen
+-View bookings in real time → BookingsScreen
+-Update booking → EditBookingScreen
+-Delete booking → Firestore delete function
+-Favorites
+-Managed through /favorites/{uid}
+-Users can save/remove parking spots
+-Real-time updates using onSnapshot
+-Optimistic UI for instant changes
 
 Parkings (Admin + Owner)
-Admin can view, edit, or delete parkings
-Owner can edit their own parking information
-When an owner request is approved, a parking is automatically created
-Owner Requests
-Users can apply to become parking owners
-Admin can approve or reject requests
-Approved requests create a new parking in Firestore
+-Admin can view, edit, or delete parkings
+-Owner can edit their own parking information
+-When an owner request is approved, a parking is automatically created
+-Owner Requests
+-Users can apply to become parking owners
+-Admin can approve or reject requests
+-Approved requests create a new parking in Firestore
 
-3.** External API **(Optional Feature)
+3.**External API**(Optional Feature)
+
+
+## Screenshots
+<p align="center">
+  <img src="assets/Foto1.1.jpg" alt="Foto 1.1" width="200"/>
+  <img src="assets/Foto1.2.jpg" alt="Foto 1.2" width="200"/>
+  <img src="assets/Foto1.3.jpg" alt="Foto 1.3" width="200"/>
+  <img src="assets/Foto1.4.jpg" alt="Foto 1.4" width="200"/>
+  <img src="assets/Foto1.5.jpg" alt="Foto 1.5" width="200"/>
+  <img src="assets/Foto1.6.jpg" alt="Foto 1.6" width="200"/>
+  <img src="assets/Foto1.7.jpg" alt="Foto 1.7" width="200"/>
+  <img src="assets/Foto1.8.jpg" alt="Foto 1.8" width="200"/>
+  <img src="assets/Foto1.9.jpg" alt="Foto 1.9" width="200"/>
+  <img src="assets/Foto1.10.jpg" alt="Foto 1.10" width="200"/>
+  <img src="assets/Foto1.11.jpg" alt="Foto 1.11" width="200"/>
+  <img src="assets/Foto1.12.jpg" alt="Foto 1.12" width="200"/>
+  <img src="assets/Foto1.13.jpg" alt="Foto 1.13" width="200"/>
+  <img src="assets/Foto1.14.jpg" alt="Foto 1.14" width="200"/>
+  <img src="assets/Foto1.15.jpg" alt="Foto 1.15" width="200"/>
+  <img src="assets/Foto1.16.jpg" alt="Foto 1.16" width="200"/>
+</p>
+
 
 ## Conclusion
 
