@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -13,21 +13,27 @@ export default function LoginScreen() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
-
+  const showAlert = (title, message) => {
+    if (Platform.OS === "web") {
+      alert(`${title}\n\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
+      showAlert("Error", "Please fill in all fields.");
       return;
     }
     if (!validateEmail(email)) {
-      Alert.alert("Error", "Invalid email format.");
+      showAlert("Error", "Invalid email format.");
       return;
     }
     if (!validatePassword(password)) {
-      Alert.alert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
+      showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
       return;
     }
 
@@ -41,7 +47,7 @@ export default function LoginScreen() {
       const snap = await getDoc(ref);
 
       if (!snap.exists()) {
-        Alert.alert("Error", "Profile not found in Firestore.");
+        showAlert("Error", "Profile not found in Firestore.");
         setLoading(false);
         return;
       }
@@ -49,7 +55,7 @@ export default function LoginScreen() {
       const data = snap.data();
 
       if (data.status === "inactive") {
-        Alert.alert("❌ Account deactivated by admin.");
+        showAlert("Account Disabled", "❌ This account has been deactivated by an admin.");
         await auth.signOut();
         setLoading(false);
         return;
@@ -62,7 +68,7 @@ export default function LoginScreen() {
       }
 
     } catch (error) {
-      Alert.alert("Login Error", error.message);
+      showAlert("Login Error", error.message);
     }
 
     setLoading(false);
