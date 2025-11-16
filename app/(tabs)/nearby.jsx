@@ -1,87 +1,111 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
-
+import React, { useMemo, useState } from "react";
+import { useRouter } from "expo-router";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import { collection, getDocs } from "firebase/firestore";
- import { db } from "../firebase/firebase";
-
-import ParkingCard from "../../components/ParkingCard";
-import { useRouter } from "expo-router";
+import useParkings from "../hooks/useParkings";
+import useFavorites from "../hooks/useFavorites";
 import { resolveImage } from "../../components/images";
+
+const placeholderImage = "/favicon.png"; 
 
 export default function NearbyWeb() {
   const router = useRouter();
+  const { parkings, loading, error, refresh } = useParkings();
+  const { favorites, toggleFavorite } = useFavorites();
 
-  const [parkings, setParkings] = useState([]);
   const [selectedParking, setSelectedParking] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    const loadParkings = async () => {
-      const snap = await getDocs(collection(db, "parkings"));
-      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setParkings(items);
-    };
-    loadParkings();
-  }, []);
-
-  const handleReserve = (parking) => {
-    setModalVisible(false);
-    setSelectedParking(null);
-
-    setTimeout(() => {
-      router.push(`/BookParkingScreen?id=${parking.id}`);
-    }, 50);
-  };
+  const filtered = useMemo(() => {
+    return parkings || [];
+  }, [parkings]);
 
   const openModal = (p) => {
     setSelectedParking(p);
     setModalVisible(true);
   };
 
-  return (
-    <View style={styles.container}>
+  const handleReserve = (parking) => {
+    setModalVisible(false);
+    setSelectedParking(null);
+    // navigate to BookParkingScreen with query param (web)
+    router.push(`/BookParkingScreen?id=${parking.id}&name=${encodeURIComponent(parking.name || "")}`);
+  };
 
-      {/* MAP */}
+  const getImageSrc = (p) => {
+    if (!p) return placeholderImage;
+    if (p.imageUrl && (p.imageUrl.startsWith("http://") || p.imageUrl.startsWith("https://"))) return p.imageUrl;
+
+    try {
+      const resolved = resolveImage(p.image || p.imageUrl);
+      if (!resolved) return placeholderImage;
+      if (typeof resolved === "object" && resolved.uri) return resolved.uri;
+      if (typeof resolved === "string") return resolved;
+      if (typeof resolved === "object" && resolved.default) return resolved.default;
+      return placeholderImage;
+    } catch (e) {
+      return placeholderImage;
+    }
+  };
+
+  const makeMarkerIconHtml = (imgSrc) => {
+    const safeSrc = imgSrc || placeholderImage;
+    return `
+      <div style="
+        width:36px;
+        height:36px;
+        border-radius:50%;
+        overflow:hidden;
+        border:2px solid #fff;
+        box-shadow:0 2px 6px rgba(0,0,0,0.25);
+      ">
+        <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover" />
+      </div>
+    `;
+  };
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.header}><h2 style={styles.title}>Nearby Parkings</h2></div>
+        <div style={styles.center}><p>Loading parkings...</p></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.header}><h2 style={styles.title}>Nearby Parkings</h2></div>
+        <div style={styles.center}><p style={{ color: "red" }}>Failed to load parkings.</p></div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
       <div style={styles.mapWrapper}>
         <MapContainer center={[42.6629, 21.1655]} zoom={13} style={styles.map}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-          {parkings.map((p) => {
-            const resolved = resolveImage(p.imageUrl);
-            const imageSrc =
-              typeof resolved === "object" ? resolved.uri : resolved;
-
-            if (!p.coordinate) return null;
+          {filtered.map((p) => {
+            const lat = p.coordinate?.latitude ?? p.latitude;
+            const lng = p.coordinate?.longitude ?? p.longitude;
+            if (!lat || !lng) return null;
+            const imgSrc = getImageSrc(p);
+            const icon = L.divIcon({
+              className: "custom_marker",
+              html: makeMarkerIconHtml(imgSrc),
+              iconSize: [36, 36],
+              iconAnchor: [18, 36],
+            });
 
             return (
               <Marker
                 key={p.id}
-                position={[p.coordinate.latitude, p.coordinate.longitude]}
-                icon={L.divIcon({
-                  className: "custom_marker",
-                  html: `
-                    <div style="
-                      width: 36px;
-                      height: 36px;
-                      border-radius: 50%;
-                      overflow: hidden;
-                      border: 2px solid white;
-                      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
-                    ">
-                      <img src="${imageSrc}" style="
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                      "/>
-                    </div>
-                  `,
-                  iconSize: [34, 34],
-                  iconAnchor: [17, 17],
-                })}
+                position={[lat, lng]}
+                icon={icon}
                 eventHandlers={{ click: () => openModal(p) }}
               />
             );
@@ -89,106 +113,40 @@ export default function NearbyWeb() {
         </MapContainer>
       </div>
 
-      {/* WEB MODAL */}
       {modalVisible && selectedParking && (
         <div style={styles.webModalOverlay}>
           <div style={styles.webModalContent}>
+            <div style={styles.webHeaderOnlyTitle}><h2 style={styles.webTitle}>{selectedParking.name}</h2></div>
 
-            {/* TITLE ONLY (NO IMAGE HERE) */}
-            <div style={styles.webHeaderOnlyTitle}>
-              <h2 style={styles.webTitle}>{selectedParking.name}</h2>
+            <div style={styles.card}>
+              <img src={getImageSrc(selectedParking)} alt="parking" style={styles.cardImage} />
+              <div style={styles.cardBody}>
+                <h3 style={{ margin: 0 }}>{selectedParking.name}</h3>
+                <p style={{ margin: "6px 0" }}>{selectedParking.address}</p>
+                <p style={{ margin: "6px 0", color: "#555" }}>{selectedParking.price ?? ""} • {selectedParking.spots ?? "—"} spots</p>
+              </div>
             </div>
 
-            {/* ParkingCard WITH IMAGE */}
-            <ParkingCard
-              item={selectedParking}
-              hideReserve={false}
-              onReserve={() => handleReserve(selectedParking)}
-            />
-
-            <button
-              style={styles.webCloseButton}
-              onClick={() => setModalVisible(false)}
-            >
-              Close
-            </button>
-
+            <button style={styles.webReserveButton} onClick={() => handleReserve(selectedParking)}>Reserve</button>
+            <button style={styles.webCloseButton} onClick={() => setModalVisible(false)}>Close</button>
           </div>
         </div>
       )}
-
-    </View>
+    </div>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: "100%",
-    height: "100vh",
-    position: "relative",
-  },
-
-  mapWrapper: {
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100vh",
-  },
-
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-
-  webModalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-  },
-
-  webModalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 18,
-    width: "90%",
-    maxWidth: 420,
-  },
-
-  webHeaderOnlyTitle: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-
-  webTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    margin: 0,
-  },
-
-  webCloseButton: {
-    marginTop: 15,
-    width: "100%",
-    padding: 12,
-    borderRadius: 10,
-    border: "none",
-    backgroundColor: "#2E7D6A",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    fontSize: 16,
-  },
-
-  custom_marker: {
-    background: "transparent !important",
-    border: "none !important",
-  },
-});
+const styles = {
+  container: { width: "100%", height: "100vh", position: "relative", fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial" },
+  mapWrapper: { position: "absolute", inset: 0, width: "100%", height: "100vh" },
+  map: { width: "100%", height: "100%" },
+  webModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 },
+  webModalContent: { backgroundColor: "white", padding: 20, borderRadius: 18, width: "90%", maxWidth: 420, boxShadow: "0 8px 30px rgba(0,0,0,0.2)" },
+  webHeaderOnlyTitle: { display: "flex", justifyContent: "center", marginBottom: 10 },
+  webTitle: { fontSize: 22, fontWeight: "700", margin: 0 },
+  webCloseButton: { marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none", backgroundColor: "#b02a37", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16 },
+  webReserveButton: { marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none", backgroundColor: "#2E7D6A", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16 },
+  card: { display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 10 },
+  cardImage: { width: "100%", height: 160, objectFit: "cover", borderRadius: 10 },
+  cardBody: { width: "100%" },
+};

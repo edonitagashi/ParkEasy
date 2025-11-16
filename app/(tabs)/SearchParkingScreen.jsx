@@ -14,12 +14,14 @@ import { resolveImage } from "../../components/images";
 import SearchBar from "../../components/SearchBar";
 import ParkingCard from "../../components/ParkingCard";
 
-import useParkings from "../hooks/useParkings";  
+import useParkings from "../hooks/useParkings";
+import useFavorites from "../hooks/useFavorites";
 const placeholderImage = require("../../assets/images/image1.png");
 
 export default function SearchParkingScreen() {
   const [searchText, setSearchText] = useState("");
   const { parkings, loading, error, refresh } = useParkings(); // realtime onSnapshot
+  const { favorites, toggleFavorite } = useFavorites();
 
   const filteredParkings = useMemo(() => {
     const list = parkings || [];
@@ -74,6 +76,8 @@ export default function SearchParkingScreen() {
               ...item,
               image:
                 item.image || (item.imageUrl && resolveImage(item.imageUrl)) || placeholderImage,
+              isFavorite: favorites.includes(item.id),
+              onFavoriteToggle: () => toggleFavorite(item.id),
             }}
           />
         )}
