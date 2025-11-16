@@ -1,6 +1,6 @@
 // app/admin/_layout.jsx
 import { Stack } from "expo-router";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebase/firebase";
 import { signOut } from "firebase/auth";
@@ -15,9 +15,19 @@ export default function AdminLayout() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      
-      {/* ADMIN HEADER */}
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "#fff",
+
+        // 🔥 KY FIX E BEN ADMIN PANEL ME U SCROLLU NË WEB
+        ...(Platform.OS === "web" && {
+          minHeight: "100vh",
+          overflowY: "auto",
+        }),
+      }}
+    >
+      {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.title}>Admin Panel</Text>
 
@@ -31,7 +41,6 @@ export default function AdminLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { paddingTop: 0, marginTop: 0 }, // 🔥 HEQ HAPSIRËN SIPËR
         }}
       />
     </View>
@@ -41,7 +50,7 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#2E7D6A",
-    paddingTop: 20,    // 🔥 E ULA NGA 45 → 20 që të mos ketë hapësirë lart
+    paddingTop: 20,
     paddingBottom: 15,
     paddingHorizontal: 16,
     flexDirection: "row",
