@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  ScrollView
 } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -117,57 +118,69 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>Access your Parking App account</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={styles.container}>
+      <View style={styles.inner}>
+        <Text style={styles.title}>Login</Text>
+        <Text style={styles.subtitle}>Access your Parking App account</Text>
 
-      <TextInput
-        placeholder="Email"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+        <TextInput
+          placeholder="Email"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
 
-      <TextInput
-        placeholder="Password"
-        secureTextEntry
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-      />
+        <TextInput
+          placeholder="Password"
+          secureTextEntry
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Loading..." : "Login"}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
+        </TouchableOpacity>
 
-      <GoogleAuthButton mode="login" />
+        <GoogleAuthButton mode="login" />
 
-      <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
-        <Text style={styles.switchText}>
-          Don’t have an account? <Text style={styles.link}>Sign up</Text>
-        </Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+        <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
+          <Text style={styles.switchText}>
+            Don’t have an account? <Text style={styles.link}>Sign up</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 24,
     alignItems: "center",
-    backgroundColor: "#fff",
   },
-  title: { fontSize: 22, fontWeight: "bold", color: "#000", marginTop: 10 },
-  subtitle: { textAlign: "center", color: "gray", marginBottom: 20 },
+
+  inner: {
+    width: "100%",
+    maxWidth: 600,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000",
+    marginTop: 10,
+    textAlign: "center",
+  },
+
+  subtitle: {
+    textAlign: "center",
+    color: "gray",
+    marginBottom: 20,
+  },
+
   input: {
     width: "100%",
     borderWidth: 1,
@@ -176,6 +189,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
   },
+
   button: {
     backgroundColor: "#2E7D6A",
     padding: 14,
@@ -184,7 +198,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
-  switchText: { marginTop: 15, color: "#555" },
-  link: { color: "#2E7D6A", fontWeight: "bold" },
+
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  switchText: {
+    marginTop: 15,
+    color: "#555",
+    textAlign: "center",
+  },
+
+  link: {
+    color: "#2E7D6A",
+    fontWeight: "bold",
+  },
 });

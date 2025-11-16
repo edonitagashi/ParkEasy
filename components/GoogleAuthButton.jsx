@@ -48,10 +48,9 @@ export default function GoogleAuthButton({ mode = "login" }) {
           avatarUri: user.photoURL || "",
           role: "user",
           status: "active",
-          createdAt: serverTimestamp(), // <-- fixed: use firestore server timestamp
+          createdAt: serverTimestamp(), 
         });
 
-        // read the doc again so we work with the saved data
         snap = await getDoc(ref);
 
         showAlert("✅ Account created successfully!", "");
@@ -110,7 +109,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     marginTop: 12,
-    width: 300,
+     width: "100%",
+  maxWidth: 600,
   },
   googleText: {
     color: "#000",

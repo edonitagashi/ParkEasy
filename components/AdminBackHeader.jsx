@@ -1,4 +1,3 @@
-// components/AdminBackHeader.jsx
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -45,6 +44,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     flex: 1,
     textAlign: "center",
-    marginRight: 24, // të balancohet me back icon
+    marginRight: 24,
   },
 });

@@ -51,7 +51,7 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
-  scrollContainer: { alignItems: "center", paddingVertical: 60 },
+  scrollContainer: { alignItems: "center", paddingVertical: 20 },
   container: {
     alignItems: "center", justifyContent: "center", width: "90%",
     backgroundColor: "#FFFFFFDD", borderRadius: 20, paddingVertical: 40, paddingHorizontal: 20,

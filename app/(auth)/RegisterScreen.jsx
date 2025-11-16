@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  ScrollView
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, db } from "../firebase/firebase";
@@ -126,17 +127,16 @@ export default function RegisterScreen() {
   };
 
   return (
+  <ScrollView contentContainerStyle={styles.scroll}>
     <View style={styles.container}>
       <Text style={styles.title}>Sign up</Text>
 
-      {/* BASIC FIELDS */}
       <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
       <TextInput style={styles.input} placeholder="Phone number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
       <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
       <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
       <TextInput style={styles.input} placeholder="Confirm password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
-      {/* ROLE SELECT */}
       <Text style={styles.label}>Register as:</Text>
 
       <View style={styles.roleRow}>
@@ -155,7 +155,6 @@ export default function RegisterScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* OWNER FORM ONLY IF SELECTED */}
       {role === "owner" && (
         <View style={styles.ownerBox}>
           <TextInput style={styles.input} placeholder="Parking name" value={parkingName} onChangeText={setParkingName} />
@@ -177,16 +176,53 @@ export default function RegisterScreen() {
         </Text>
       </TouchableOpacity>
     </View>
-  );
+  </ScrollView>
+);
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20 },
-  input: { width: "100%", borderWidth: 1, borderColor: "#ccc", padding: 12, borderRadius: 10, marginBottom: 10 },
+  scroll: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
 
-  label: { width: "100%", fontSize: 16, marginBottom: 8, fontWeight: "600" },
-  roleRow: { width: "100%", flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
+  container: {
+    width: "100%",
+    maxWidth: 600,
+    
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  label: {
+    width: "100%",
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+
+  roleRow: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+
   roleButton: {
     flex: 1,
     marginHorizontal: 5,
@@ -196,15 +232,48 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
   },
-  roleButtonActive: { backgroundColor: "#2E7D6A" },
-  roleText: { color: "#2E7D6A", fontWeight: "bold" },
-  roleTextActive: { color: "white" },
 
-  ownerBox: { width: "100%", marginTop: 10 },
+  roleButtonActive: {
+    backgroundColor: "#2E7D6A",
+  },
 
-  button: { backgroundColor: "#2E7D6A", padding: 15, borderRadius: 10, width: "100%", alignItems: "center", marginTop: 10 },
-  buttonText: { color: "white", fontWeight: "bold", fontSize: 16 },
+  roleText: {
+    color: "#2E7D6A",
+    fontWeight: "bold",
+  },
 
-  link: { color: "#2E7D6A", fontWeight: "bold" },
-  switchText: { marginTop: 15, color: "#555" },
+  roleTextActive: {
+    color: "white",
+  },
+
+  ownerBox: {
+    width: "100%",
+    marginTop: 10,
+  },
+
+  button: {
+    backgroundColor: "#2E7D6A",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  switchText: {
+    marginTop: 15,
+    color: "#555",
+    textAlign: "center",
+  },
+
+  link: {
+    color: "#2E7D6A",
+    fontWeight: "bold",
+  },
 });
