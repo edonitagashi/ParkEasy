@@ -3,39 +3,30 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase"; 
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function LoginScreen() {
   const router = useRouter();
 
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const showAlert = (title, message) => {
-    if (Platform.OS === "web") {
-      alert(`${title}\n\n${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
+    if (Platform.OS === "web") alert(`${title}\n\n${message}`);
+    else Alert.alert(title, message);
   };
+
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      showAlert("Error", "Please fill in all fields.");
-      return;
-    }
-    if (!validateEmail(email)) {
-      showAlert("Error", "Invalid email format.");
-      return;
-    }
-    if (!validatePassword(password)) {
-      showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
-      return;
-    }
+    if (!email || !password) return showAlert("Error", "Please fill in all fields.");
+    if (!validateEmail(email)) return showAlert("Error", "Invalid email format.");
+    if (!validatePassword(password))
+      return showAlert("Error", "Password must be at least 8 characters, include one uppercase letter and one number.");
 
     setLoading(true);
 
@@ -55,16 +46,27 @@ export default function LoginScreen() {
       const data = snap.data();
 
       if (data.status === "inactive") {
-        showAlert("Account Disabled", "❌ This account has been deactivated by an admin.");
+        showAlert("Account Disabled", "This account has been deactivated by an admin.");
         await auth.signOut();
         setLoading(false);
         return;
       }
 
-      if (data.role === "admin") {
-        router.replace("/dashboard");  
+      // FIX: declare role properly
+      let role = data.role || "user";
+
+      // Ensure special admin account
+      const normalizedEmail = email.trim().toLowerCase();
+      if (normalizedEmail === "admin12@gmail.com") {
+        role = "admin";
+        await setDoc(ref, { ...data, role: "admin" }, { merge: true });
+      }
+
+      // REDIRECTION
+      if (role === "admin") {
+        router.replace("/admin");
       } else {
-        router.replace("/home");       
+        router.replace("/(tabs)/nearby");
       }
 
     } catch (error) {
@@ -79,29 +81,17 @@ export default function LoginScreen() {
       <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Access your Parking App account</Text>
 
-      <TextInput
-        placeholder="Email"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+      <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail}
+        autoCapitalize="none" keyboardType="email-address" />
 
-      <TextInput
-        placeholder="Password"
-        secureTextEntry
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-      />
+      <TextInput placeholder="Password" secureTextEntry style={styles.input}
+        value={password} onChangeText={setPassword} />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
       </TouchableOpacity>
 
-      {/* Google login button */}
-<GoogleAuthButton mode="login" />
+      <GoogleAuthButton mode="login" />
 
       <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
         <Text style={styles.switchText}>

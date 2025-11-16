@@ -77,9 +77,11 @@ export default function GoogleAuthButton({ mode = "login" }) {
 
       // Redirect sipas rolit
       if (data.role === "admin") {
-        router.replace("/dashboard");
+        router.replace("/admin");
+      } else if (data.role === "owner") {
+        router.replace("/(tabs)/OwnerDashboard");
       } else {
-        router.replace("/nearby");
+        router.replace("/(tabs)/nearby");
       }
     } catch (error) {
       console.error("Google auth error:", error);

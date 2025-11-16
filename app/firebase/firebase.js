@@ -18,3 +18,11 @@ export const db = getFirestore(app);
 
 
 export const googleProvider = new GoogleAuthProvider();
+
+export const createUserWithRole = async (uid, email, role) => {
+  await setDoc(doc(db, "users", uid), {
+    uid,
+    email,
+    role,
+  });
+};
