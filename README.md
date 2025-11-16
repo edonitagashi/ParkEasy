@@ -147,22 +147,22 @@ An external **Weather API** is integrated in the Nearby Web version, displaying 
 ## Screenshots
 
 <p align="center">
-  <img src="assets/Foto1.1.jpg" alt="Foto 1.1" width="200"/>
-  <img src="assets/Foto1.2.jpg" alt="Foto 1.2" width="200"/>
-  <img src="assets/Foto1.3.jpg" alt="Foto 1.3" width="200"/>
-  <img src="assets/Foto1.4.jpg" alt="Foto 1.4" width="200"/>
-  <img src="assets/Foto1.5.jpg" alt="Foto 1.5" width="200"/>
-  <img src="assets/Foto1.6.jpg" alt="Foto 1.6" width="200"/>
-  <img src="assets/Foto1.7.jpg" alt="Foto 1.7" width="200"/>
-  <img src="assets/Foto1.8.jpg" alt="Foto 1.8" width="200"/>
-  <img src="assets/Foto1.9.jpg" alt="Foto 1.9" width="200"/>
-  <img src="assets/Foto1.10.jpg" alt="Foto 1.10" width="200"/>
-  <img src="assets/Foto1.11.jpg" alt="Foto 1.11" width="200"/>
-  <img src="assets/Foto1.12.jpg" alt="Foto 1.12" width="200"/>
-  <img src="assets/Foto1.13.jpg" alt="Foto 1.13" width="200"/>
-  <img src="assets/Foto1.14.jpg" alt="Foto 1.14" width="200"/>
-  <img src="assets/Foto1.15.jpg" alt="Foto 1.15" width="200"/>
-  <img src="assets/Foto1.16.jpg" alt="Foto 1.16" width="200"/>
+  <img src="assets/Foto1.1.png" alt="Foto 1.1" width="200"/>
+  <img src="assets/Foto1.2.png" alt="Foto 1.2" width="200"/>
+  <img src="assets/Foto1.3.png" alt="Foto 1.3" width="200"/>
+  <img src="assets/Foto1.4.png" alt="Foto 1.4" width="200"/>
+  <img src="assets/Foto1.5.png" alt="Foto 1.5" width="200"/>
+  <img src="assets/Foto1.6.png" alt="Foto 1.6" width="200"/>
+  <img src="assets/Foto1.7.png" alt="Foto 1.7" width="200"/>
+  <img src="assets/Foto1.8.png" alt="Foto 1.8" width="200"/>
+  <img src="assets/Foto1.9.png" alt="Foto 1.9" width="200"/>
+  <img src="assets/Foto1.10.png" alt="Foto 1.10" width="200"/>
+  <img src="assets/Foto1.11.png" alt="Foto 1.11" width="200"/>
+  <img src="assets/Foto1.12.png" alt="Foto 1.12" width="200"/>
+  <img src="assets/Foto1.13.png" alt="Foto 1.13" width="200"/>
+  <img src="assets/Foto1.14.png" alt="Foto 1.14" width="200"/>
+  <img src="assets/Foto1.15.png" alt="Foto 1.15" width="200"/>
+  <img src="assets/Foto1.16.png" alt="Foto 1.16" width="200"/>
 </p>
 
 ---
