@@ -69,16 +69,6 @@ export default function TabLayout() {
           }}
         />
 
-        
-        <Tabs.Screen
-          name="WeatherScreen"
-          options={{
-            title: 'Weather',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="wb-sunny" size={size} color={color} />
-            ),
-          }}
-        />
        
 
         <Tabs.Screen

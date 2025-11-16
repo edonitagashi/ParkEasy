@@ -9,6 +9,8 @@ import useFavorites from "../hooks/useFavorites";
 import { resolveImage } from "../../components/images";
 import { Ionicons } from "@expo/vector-icons";
 
+import WeatherScreen from "../../components/WeatherScreen";
+
 const placeholderImage = "/favicon.png"; 
 
 function FlyToParking({ parking }) {
@@ -18,7 +20,7 @@ function FlyToParking({ parking }) {
       const lat = parking.coordinate?.latitude ?? parking.latitude;
       const lng = parking.coordinate?.longitude ?? parking.longitude;
       if (lat && lng) {
-        map.flyTo([lat, lng], 17, { animate: true }); // zoom 17
+        map.flyTo([lat, lng], 17, { animate: true });
       }
     }
   }, [parking, map]);
@@ -33,9 +35,10 @@ export default function NearbyWeb() {
   const [selectedParking, setSelectedParking] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const filtered = useMemo(() => {
-    return parkings || [];
-  }, [parkings]);
+ 
+  const [weatherVisible, setWeatherVisible] = useState(false);
+
+  const filtered = useMemo(() => parkings || [], [parkings]);
 
   const openModal = (p) => {
     setSelectedParking(p);
@@ -66,7 +69,7 @@ export default function NearbyWeb() {
 
   const makeMarkerIconHtml = (imgSrc, isFav) => {
     const safeSrc = imgSrc || placeholderImage;
-    const borderColor = isFav ? "#FFD166" : "#fff"; // highlight favorites with gold-ish border
+    const borderColor = isFav ? "#FFD166" : "#fff";
     return `
       <div style="
         width:36px;
@@ -104,19 +107,38 @@ export default function NearbyWeb() {
 
   return (
     <div style={styles.container}>
+      <button
+        onClick={() => setWeatherVisible(true)}
+        style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          zIndex: 2000,
+          backgroundColor: "#2E7D6A",
+          color: "white",
+          padding: "10px 14px",
+          borderRadius: 10,
+          border: "none",
+          cursor: "pointer",
+          fontWeight: "600"
+        }}
+      >
+        Weather
+      </button>
+
       <div style={styles.mapWrapper}>
-       <MapContainer
-  center={[42.6629, 21.1655]}
-  zoom={13}
-  style={styles.map}
-  scrollWheelZoom={true}   
-  dragging={true}          
-  doubleClickZoom={true}   
-  zoomControl={true}       
-  touchZoom={true}         
-  tap={true}              
-  keyboard={true}   
->
+        <MapContainer
+          center={[42.6629, 21.1655]}
+          zoom={13}
+          style={styles.map}
+          scrollWheelZoom={true}   
+          dragging={true}          
+          doubleClickZoom={true}   
+          zoomControl={true}       
+          touchZoom={true}         
+          tap={true}              
+          keyboard={true}   
+        >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {filtered.map((p) => {
             const lat = p.coordinate?.latitude ?? p.latitude;
@@ -167,7 +189,6 @@ export default function NearbyWeb() {
                 Reserve
               </button>
 
-              {/* Favorite toggle button */}
               <button
                 style={{
                   ...styles.webReserveButton,
@@ -177,12 +198,51 @@ export default function NearbyWeb() {
                 }}
                 onClick={() => toggleFavorite(selectedParking.id)}
               >
-                {/* Use emoji as fallback; Ionicons in web may not render inside this raw html button */}
                 {favorites?.includes(selectedParking.id) ? "★ Favorited" : "☆ Add to favorites"}
               </button>
             </div>
 
             <button style={styles.webCloseButton} onClick={() => setModalVisible(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      
+      {weatherVisible && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: "white",
+            padding: 20,
+            borderRadius: 20,
+            width: "90%",
+            maxWidth: 420
+          }}>
+            <WeatherScreen />
+            <button
+              onClick={() => setWeatherVisible(false)}
+              style={{
+                marginTop: 16,
+                width: "100%",
+                padding: 12,
+                borderRadius: 10,
+                border: "none",
+                backgroundColor: "#b02a37",
+                color: "white",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontSize: 16
+              }}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
