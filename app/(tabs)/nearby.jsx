@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -10,9 +10,23 @@ import { resolveImage } from "../../components/images";
 
 const placeholderImage = "/favicon.png"; 
 
+function FlyToParking({ parking }) {
+  const map = useMap();
+  useEffect(() => {
+    if (parking) {
+      const lat = parking.coordinate?.latitude ?? parking.latitude;
+      const lng = parking.coordinate?.longitude ?? parking.longitude;
+      if (lat && lng) {
+        map.flyTo([lat, lng], 17, { animate: true }); // zoom 17
+      }
+    }
+  }, [parking, map]);
+  return null;
+}
+
 export default function NearbyWeb() {
   const router = useRouter();
-  const { parkings, loading, error, refresh } = useParkings();
+  const { parkings, loading, error } = useParkings();
   const { favorites, toggleFavorite } = useFavorites();
 
   const [selectedParking, setSelectedParking] = useState(null);
@@ -30,7 +44,6 @@ export default function NearbyWeb() {
   const handleReserve = (parking) => {
     setModalVisible(false);
     setSelectedParking(null);
-    // navigate to BookParkingScreen with query param (web)
     router.push(`/BookParkingScreen?id=${parking.id}&name=${encodeURIComponent(parking.name || "")}`);
   };
 
@@ -87,7 +100,18 @@ export default function NearbyWeb() {
   return (
     <div style={styles.container}>
       <div style={styles.mapWrapper}>
-        <MapContainer center={[42.6629, 21.1655]} zoom={13} style={styles.map}>
+       <MapContainer
+  center={[42.6629, 21.1655]}
+  zoom={13}
+  style={styles.map}
+  scrollWheelZoom={true}   
+  dragging={true}          
+  doubleClickZoom={true}   
+  zoomControl={true}       
+  touchZoom={true}         
+  tap={true}              
+  keyboard={true}   
+>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {filtered.map((p) => {
             const lat = p.coordinate?.latitude ?? p.latitude;
@@ -110,6 +134,8 @@ export default function NearbyWeb() {
               />
             );
           })}
+
+          <FlyToParking parking={selectedParking} />
         </MapContainer>
       </div>
 
