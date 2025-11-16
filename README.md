@@ -1,10 +1,12 @@
 # ParkEasy – Parking App Prototype
 
 **Technology:** Node.js + Expo/React Native  
+**Course:** Mobile Device Programming – FIEK  
+**Group:** [Numri i Grupit]  
 
-This project, developed by third-year Computer Engineering students at FIEK, is a prototype of a mobile parking management app. It provides screen views for navigation between locations, searching for parking spots, saving favorite spots, and managing the user profile for now.
+---
 
-## Developed by
+## Anëtarët e Grupit
 - Arila Behrami  
 - Edonita Gashi  
 - Erza Duraku  
@@ -12,65 +14,73 @@ This project, developed by third-year Computer Engineering students at FIEK, is 
 - Albi Kallaba  
 - Fatlinda Osdautaj  
 
-## Clone the Repository
-```bash
-git clone https://github.com/edonitagashi/ParkEasy.git 
-```
+---
 
-## Project Description
+## Përshkrimi i Projektit
+ParkEasy është një prototip i aplikacionit mobil për menaxhimin e parkingjeve. Ky projekt u zhvillua nga studentët e vitit të tretë të Inxhinierisë Kompjuterike në FIEK. Aplikacioni demonstron navigimin ndërmjet ekranëve, kërkimin dhe ruajtjen e vendndodhjeve të parkingjeve të preferuara, si dhe menaxhimin e profilit të përdoruesit.  
 
-ParkEasy is a mobile app prototype built using Node.js and Expo/React Native. Currently, it does **not** connect to a database (e.g., Firebase) but demonstrates the UI and screen navigation.
+Ky prototip aktualisht nuk është i lidhur me një bazë të dhënash, por demonstron funksionalitetin e UI dhe navigimin ndër ekranet.  
 
-The app features four main sections in a tab bar:
+---
 
-- **Nearby** – Displays a map with nearby parking spots.  
-- **Search** – Allows users to search for specific parking spots.  
-- **Favorites** – Saves frequently used or favorite parking spots.  
-- **Profile** – Shows user information and additional options like Settings, Help, About Us.  
+## Funksionalitetet Kryesore
 
-## Key Functionalities
+### 1. Autentifikimi (Firebase Authentication)
+- Mbështet të paktën 2 metoda login-i:
+  - Email / Password  
+  - Google, GitHub, Facebook ose metoda të tjera nga Firebase  
+- Validim i inputeve gjatë regjistrimit dhe hyrjes  
+- Ridrejtim tek ekrani kryesor (Home) pas login  
+- Logout i përdoruesit  
 
-- **Nearby Map:** Display of parking spots on a map with the option to save locations.  
-- **Search Parking:** Search for parking spots by name or location.  
-- **Favorites:** List of favorite parking spots for easy access.  
-- **Profile Management:** View user information and access additional options (Settings, Help, About Us).  
-- **Navigation:** Tab bar allows quick switching between the four main sections.  
+### 2. CRUD me Firebase Firestore
+- Shtimi i të dhënave të reja  
+- Leximi dhe shfaqja e listës së të dhënave  
+- Përditësimi ose fshirja e një elementi  
+- Përdorimi i `useEffect` dhe `useState` për menaxhimin e gjendjeve  
+- Trajtimi i gjendjeve `loading`, `error`, dhe `success`  
 
-## How to Run the Prototype
+### 3. API e Jashtme (opsionale)
+- Mund të integrohet një API publike për të marrë të dhëna shtesë, për shembull:
+  - OpenWeatherMap (moti)  
+  - TheMealDB (ushqim)  
+  - RandomUser / JSONPlaceholder (të dhëna testuese)  
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/edonitagashi/ParkEasy.git
-```
-2. **Install the dependencies:**
-```bash
+### 4. Navigimi dhe UI
+- Navigim i plotë me **Expo Router**  
+- UI e përmirësuar krahasuar me Fazën I (ngjyra, layout, përputhshmëri)  
+- Strukturë e organizuar e projektit:
+  - `/app` – për ekranet  
+  - `/components` – për komponentët e ripërdorshëm  
+  - `/firebase` – konfigurimi i Firebase  
+  - `/assets` – imazhet dhe ikonat  
+
+---
+
+## Sekcionet Kryesore të Aplikacionit
+1. **Nearby** – Shfaq një hartë me vendet e parkingut pranë  
+2. **Search** – Kërkoni vendet e parkingut sipas emrit ose lokacionit  
+3. **Favorites** – Ruani vendet e preferuara për qasje të shpejtë  
+4. **Profile** – Informacion për përdoruesin dhe opsione të tjera (Settings, Help, About Us)  
+
+---
+
+## Si të Ekzekutohet Prototipi
+1. Klononi repository-n:
+   ```bash
+   git clone https://github.com/edonitagashi/ParkEasy.git
+
+
+Shkoni në folder-in e projektit:
+
 cd ParkEasy
+
+
+Instaloni varësitë:
+
 npm install
-```
-3. **Start the app using Expo:**
-```bash
+
+
+Start aplikacionin me Expo:
+
 npx expo start
-```
-## QR Code
-![QR Code](assets/qrcode.png)
-
-
-
-## Screenshots
-
-<p align="center">
-  <img src="assets/foto1.jpg" alt="Foto 1" width="200"/>
-  <img src="assets/foto2.png" alt="Foto 2" width="200"/>
-  <img src="assets/foto3.png" alt="Foto 3" width="200"/>
-  <img src="assets/foto4.jpg" alt="Foto 4" width="200"/>
-  <img src="assets/foto5.jpg" alt="Foto 5" width="200"/>
-  <img src="assets/foto6.jpg" alt="Foto 6" width="200"/>
-  <img src="assets/foto7.jpg" alt="Foto 7" width="200"/>
-</p>
-
-
-
-## Conclusion
-
-This is the initial prototype of the parking management app, developed in accordance with the requirements of the first phase of the “Mobile Device Programming” course project, demonstrating screen navigation, saving preferences, and map integration without a backend or database connection.
-
