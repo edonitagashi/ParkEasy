@@ -1,41 +1,61 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
-import { doc, onSnapshot, updateDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { Alert, Platform } from "react-native";
+import {
+  doc,
+  onSnapshot,
+  updateDoc,
+  setDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 /**
- * useFavorites - listens to /favorites/{uid} and exposes:
- *  - favorites: string[] (parking ids)
- *  - loading, error
- *  - toggleFavorite(parkingId): add/remove parkingId for current user
- *  - refresh(): re-subscribe
- *
- * Doc shape: /favorites/{uid} => { parkingIds: ["id1","id2", ...] }
+ * useFavorites - Realtime, per-user favorites stored at /favorites/{uid}
+ * Returns: { favorites, loading, error, isSaving, toggleFavorite, refresh }
  */
 export default function useFavorites() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const unsubRef = useRef(null);
-  const favsRef = useRef(favorites);
+  const favsRef = useRef([]);
   favsRef.current = favorites;
+
+  const userRef = useRef(auth.currentUser);
+
+  // subscribe to Firebase auth state changes so the hook reacts properly after refresh
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      userRef.current = user;
+      // restart listener when auth changes
+      startListener();
+    });
+
+    return () => {
+      try { unsubAuth(); } catch (e) {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const startListener = useCallback(() => {
     setLoading(true);
     setError(null);
 
-    const user = auth.currentUser;
+    // cleanup previous listener
+    if (unsubRef.current) {
+      try { unsubRef.current(); } catch (e) {}
+      unsubRef.current = null;
+    }
+
+    const user = userRef.current;
     if (!user) {
       setFavorites([]);
       setLoading(false);
       return;
-    }
-
-    // cleanup previous
-    if (unsubRef.current) {
-      try { unsubRef.current(); } catch (e) {}
-      unsubRef.current = null;
     }
 
     const ref = doc(db, "favorites", user.uid);
@@ -60,6 +80,7 @@ export default function useFavorites() {
   }, []);
 
   useEffect(() => {
+    // initial subscription (userRef set by onAuthStateChanged effect)
     startListener();
     return () => {
       if (unsubRef.current) {
@@ -73,43 +94,55 @@ export default function useFavorites() {
     startListener();
   }, [startListener]);
 
+  const showAlert = (title, msg) => {
+    if (Platform.OS === "web" && typeof window !== "undefined" && window.alert) {
+      window.alert(`${title}\n\n${msg}`);
+    } else {
+      Alert.alert(title, msg);
+    }
+  };
+
   const toggleFavorite = useCallback(
     async (parkingId) => {
-      const user = auth.currentUser;
+      const user = userRef.current;
       if (!user) {
-        Alert.alert("Sign in required", "Please log in to manage favorites.");
+        showAlert("Sign in required", "Please sign in to manage favorites.");
         return;
       }
 
       const ref = doc(db, "favorites", user.uid);
       const currently = favsRef.current || [];
       const isFav = currently.includes(parkingId);
-      const newArray = isFav ? currently.filter((id) => id !== parkingId) : [...currently, parkingId];
 
-      // Optimistic local update for snappy UI
-      setFavorites(newArray);
+      // optimistic update
+      const optimistic = isFav
+        ? currently.filter((id) => id !== parkingId)
+        : [...currently, parkingId];
+      setFavorites(optimistic);
 
+      setIsSaving(true);
       try {
         if (isFav) {
-          // remove
           await updateDoc(ref, { parkingIds: arrayRemove(parkingId) });
         } else {
-          // add
           await updateDoc(ref, { parkingIds: arrayUnion(parkingId) });
         }
       } catch (err) {
-        // updateDoc may fail if doc doesn't exist -> fallback to setDoc
+        // fallback: doc may not exist -> setDoc with merge
         try {
-          await setDoc(ref, { parkingIds: newArray }, { merge: true });
+          await setDoc(ref, { parkingIds: optimistic }, { merge: true });
         } catch (err2) {
-          console.error("toggleFavorite failed:", err2);
-          Alert.alert("Error", "Could not update favorites. Please try again.");
+          console.error("useFavorites toggle failed:", err2 || err);
+          showAlert("Error", "Could not update favorites. Please try again.");
+          // revert optimistic update
           setFavorites(currently);
         }
+      } finally {
+        setIsSaving(false);
       }
     },
     []
   );
 
-  return { favorites, loading, error, toggleFavorite, refresh };
+  return { favorites, loading, error, isSaving, toggleFavorite, refresh };
 }
