@@ -18,25 +18,27 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from '@expo/vector-icons';
-import { auth } from "../firebase/firebase";
+import { auth, db } from "../firebase/firebase";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const USERS_KEY = "users";               
 const CURRENT_USER_KEY = "currentUser";  
 
+
 export default function Profile() {
   const router = useRouter();
 
-  const [fullName, setFullName]       = useState("User");
+  const [fullName, setFullName] = useState("User");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail]             = useState("");
-  const [password, setPassword]       = useState("");
-  const [showPwd, setShowPwd]         = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
 
-  const [avatarUri, setAvatarUri]     = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [saving, setSaving]           = useState(false);
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [successMsg, setSuccessMsg]   = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [showAboutPanel, setShowAboutPanel] = useState(false);
   const [showHelpPanel, setShowHelpPanel] = useState(false);
   const [showPrivacyPanel, setShowPrivacyPanel] = useState(false);
@@ -45,9 +47,62 @@ export default function Profile() {
 
   const placeholder = require("../../assets/images/profile.jpg");
 
+  // 🔹 Lexon foton nga Firestore (avatarUri) dhe e sinkronizon me state + AsyncStorage
+  async function loadAvatarFromFirestore() {
+  try {
+    // 1) Gjej userId nga Firebase ose nga AsyncStorage (fallback)
+    let userId = auth.currentUser?.uid;
+
+    if (!userId) {
+      const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      if (!rawCur) return;
+      const me = JSON.parse(rawCur);
+      if (!me.id) return;
+      userId = me.id;
+    }
+
+    const userRef = doc(db, "users", userId);
+    const snap = await getDoc(userRef);
+
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    // 2) Provo me lexu si avatarUri ose si image (si te profesoresha)
+    const base64Img = data.avatarUri || data.image;
+    if (!base64Img) return;
+
+    // 3) vendos në state që të shfaqet në UI
+    setAvatarUri(base64Img);
+
+    // 4) sinkronizo CURRENT_USER_KEY
+    const rawCur2 = await AsyncStorage.getItem(CURRENT_USER_KEY);
+    if (rawCur2) {
+      const me2 = JSON.parse(rawCur2);
+      me2.avatarUri = base64Img;
+      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me2));
+    }
+
+    // 5) sinkronizo USERS list
+    const rawUsers2 = await AsyncStorage.getItem(USERS_KEY);
+    const users2 = rawUsers2 ? JSON.parse(rawUsers2) : [];
+    const idx2 = users2.findIndex((u) => u.id === userId);
+    if (idx2 !== -1) {
+      users2[idx2] = { ...users2[idx2], avatarUri: base64Img };
+      await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users2));
+    }
+  } catch (e) {
+    console.log("loadAvatarFromFirestore error:", e);
+  }
+}
+
+
   useEffect(() => {
     // enable LayoutAnimation on Android
-    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    if (
+      Platform.OS === "android" &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 
@@ -57,7 +112,9 @@ export default function Profile() {
         if (auth.currentUser) {
           // User is logged in with Firebase
           const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
+
           if (raw) {
+            // kemi currentUser në AsyncStorage
             const me = JSON.parse(raw);
             setFullName(me.name || "User");
             setPhoneNumber(me.phone || "");
@@ -68,10 +125,17 @@ export default function Profile() {
             // Firebase user exists but no AsyncStorage data, create it
             const rawUsers = await AsyncStorage.getItem(USERS_KEY);
             const users = rawUsers ? JSON.parse(rawUsers) : [];
-            const foundUser = users.find(u => u.email?.toLowerCase() === auth.currentUser.email?.toLowerCase());
-            
+            const foundUser = users.find(
+              (u) =>
+                u.email?.toLowerCase() ===
+                auth.currentUser.email?.toLowerCase()
+            );
+
             if (foundUser) {
-              await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(foundUser));
+              await AsyncStorage.setItem(
+                CURRENT_USER_KEY,
+                JSON.stringify(foundUser)
+              );
               setFullName(foundUser.name || "User");
               setPhoneNumber(foundUser.phone || "");
               setEmail(foundUser.email || "");
@@ -89,11 +153,17 @@ export default function Profile() {
               };
               users.push(newUser);
               await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-              await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+              await AsyncStorage.setItem(
+                CURRENT_USER_KEY,
+                JSON.stringify(newUser)
+              );
               setFullName(newUser.name);
               setEmail(newUser.email);
             }
           }
+
+          // 🔹 pas gjithë logjikës lokale, provo me marrë avatarin më të fundit nga Firestore
+          await loadAvatarFromFirestore();
         } else {
           // No Firebase user, check AsyncStorage
           const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
@@ -118,13 +188,42 @@ export default function Profile() {
     })();
   }, []);
 
-  
+  // 🔹 ruan foton në Firestore si base64 (nën fushën avatarUri)
+  const syncAvatarToFirestore = async (base64Img) => {
+  try {
+    if (!auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    const userRef = doc(db, "users", userId);
+    const snap = await getDoc(userRef);
+
+    const payload = {
+      avatarUri: base64Img,
+      image: base64Img,   // 🔹 përputhje me shembullin e profesoreshës
+    };
+
+    if (snap.exists()) {
+      await updateDoc(userRef, payload);
+    } else {
+      await setDoc(userRef, payload, { merge: true });
+    }
+
+    console.log("Image synced to Firestore");
+  } catch (error) {
+    console.log("Firestore image error:", error);
+  }
+};
+
   const pickFromLibrary = async () => {
     try {
       if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("Permission required", "We need access to your photos.");
+          Alert.alert(
+            "Permission required",
+            "We need access to your photos."
+          );
           return;
         }
       }
@@ -133,26 +232,38 @@ export default function Profile() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
+        base64: true,
         quality: 0.9,
       });
 
       if (!res.canceled && res.assets?.length) {
-        const uri = res.assets[0].uri;
-        setAvatarUri(uri);
+        const base64Img = `data:image/jpg;base64,${res.assets[0].base64}`;
 
+        // në state (UI)
+        setAvatarUri(base64Img);
+
+        // në CURRENT_USER_KEY
         const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
         if (!rawCur) return;
-        const me = JSON.parse(rawCur);
-        me.avatarUri = uri;
-        await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
 
+        const me = JSON.parse(rawCur);
+        me.avatarUri = base64Img;
+        await AsyncStorage.setItem(
+          CURRENT_USER_KEY,
+          JSON.stringify(me)
+        );
+
+        // në USERS
         const rawUsers = await AsyncStorage.getItem(USERS_KEY);
         const users = rawUsers ? JSON.parse(rawUsers) : [];
-        const idx = users.findIndex(u => u.id === me.id);
+        const idx = users.findIndex((u) => u.id === me.id);
         if (idx !== -1) {
-          users[idx] = { ...users[idx], avatarUri: uri };
+          users[idx] = { ...users[idx], avatarUri: base64Img };
           await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
         }
+
+        // në Firestore
+        await syncAvatarToFirestore(base64Img);
       }
     } catch (e) {
       console.error("Image pick error:", e);
@@ -160,7 +271,71 @@ export default function Profile() {
     }
   };
 
- 
+  const takePhoto = async () => {
+    try {
+      // në web s'ka kamera reale
+      if (Platform.OS === "web") {
+        Alert.alert(
+          "Not supported on web",
+          "Camera works only on a physical device or emulator with Expo Go."
+        );
+        return;
+      }
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Permission to access camera is required!"
+        );
+        return;
+      }
+
+      const results = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        base64: true,
+        quality: 0.5,
+      });
+
+      if (!results.canceled && results.assets?.length) {
+        const base64Img = `data:image/jpg;base64,${results.assets[0].base64}`;
+
+        // state
+        setAvatarUri(base64Img);
+
+        // CURRENT_USER_KEY
+        const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
+        if (rawCur) {
+          const me = JSON.parse(rawCur);
+          me.avatarUri = base64Img;
+          await AsyncStorage.setItem(
+            CURRENT_USER_KEY,
+            JSON.stringify(me)
+          );
+
+          // USERS
+          const rawUsers = await AsyncStorage.getItem(USERS_KEY);
+          const users = rawUsers ? JSON.parse(rawUsers) : [];
+          const idx = users.findIndex((u) => u.id === me.id);
+          if (idx !== -1) {
+            users[idx] = { ...users[idx], avatarUri: base64Img };
+            await AsyncStorage.setItem(
+              USERS_KEY,
+              JSON.stringify(users)
+            );
+          }
+        }
+
+        // Firestore
+        await syncAvatarToFirestore(base64Img);
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      Alert.alert("Error", "The photo could not be taken.");
+    }
+  };
+
   const handleRemovePhoto = async () => {
     try {
       setAvatarUri(null);
@@ -173,15 +348,22 @@ export default function Profile() {
 
       const rawUsers = await AsyncStorage.getItem(USERS_KEY);
       const users = rawUsers ? JSON.parse(rawUsers) : [];
-      const idx = users.findIndex(u => u.id === me.id);
+      const idx = users.findIndex((u) => u.id === me.id);
       if (idx !== -1) {
         const { avatarUri: _drop, ...rest } = users[idx];
         users[idx] = rest;
         await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
       }
-    } catch {}
-  };
 
+      // (opsionale) fshije edhe nga Firestore duke i vendos avatarUri: ""
+      if (auth.currentUser) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, { avatarUri: "" });
+      }
+    } catch (e) {
+      console.log("handleRemovePhoto error:", e);
+    }
+  };
   
   const handleSave = async () => {
     if (saving) return;
@@ -270,20 +452,35 @@ export default function Profile() {
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       {/* Avatar + Add/Change Photo */}
       <View style={s.avatarWrap}>
-        <Image source={avatarUri ? { uri: avatarUri } : placeholder} style={s.avatar} />
-        <TouchableOpacity style={s.addPhotoBtn} onPress={pickFromLibrary}>
-          <Text style={s.addPhotoTxt}>{avatarUri ? "Change photo" : "Add photo"}</Text>
-        </TouchableOpacity>
+  <Image
+    source={avatarUri ? { uri: avatarUri } : placeholder}
+    style={s.avatar}
+  />
 
-        {avatarUri ? (
-          <TouchableOpacity
-            style={[s.addPhotoBtn, { marginTop: 6, borderColor: "#b02a37" }]}
-            onPress={handleRemovePhoto}
-          >
-            <Text style={[s.addPhotoTxt, { color: "#b02a37" }]}>Remove photo</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
+  {/* Butonat horizontal: Add + Take */}
+  <View style={s.photoButtonsRow}>
+    <TouchableOpacity style={s.addPhotoBtn} onPress={pickFromLibrary}>
+      <Text style={s.addPhotoTxt}>
+        {avatarUri ? "Change photo" : "Add photo"}
+      </Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity style={s.addPhotoBtn} onPress={takePhoto}>
+      <Text style={s.addPhotoTxt}>Take photo</Text>
+    </TouchableOpacity>
+  </View>
+
+  {/* Remove photo poshtë tyre */}
+  {avatarUri ? (
+    <TouchableOpacity
+      style={[s.addPhotoBtn, s.removePhotoBtn]}
+      onPress={handleRemovePhoto}
+    >
+      <Text style={[s.addPhotoTxt, { color: "#b02a37" }]}>Remove photo</Text>
+    </TouchableOpacity>
+  ) : null}
+</View>
+
 
       <Text style={s.fullname}>{fullName || "User"}</Text>
 
@@ -455,26 +652,107 @@ export default function Profile() {
 
 const s = StyleSheet.create({
   container:{ flex:1, backgroundColor:"#E9F8F6", padding:20 },
-  avatarWrap:{ alignItems:"center", marginTop:8, marginBottom:6 },
-  avatar:{ width:96, height:96, borderRadius:48, backgroundColor:"#d9ebe7" },
+
+  avatarWrap:{ 
+    alignItems:"center", 
+    marginTop:8, 
+    marginBottom:6 
+  },
+
+  avatar:{ 
+    width:96, 
+    height:96, 
+    borderRadius:48, 
+    backgroundColor:"#d9ebe7" 
+  },
+
+  // 🔹 RRESHTI HORIZONTAL I BUTONAVE (Add + Take)
+  photoButtonsRow: {
+    flexDirection: "row",
+    marginTop: 8,
+    justifyContent: "center",
+    columnGap: 10,        // nëse s’punon, përdor vetëm marginHorizontal te butonat
+  },
+
+  // 🔹 BUTONI BAZË (Add, Take, Remove)
   addPhotoBtn:{
-    marginTop:8,
     paddingHorizontal:12,
     paddingVertical:6,
     borderRadius:999,
     borderWidth:2,
     borderColor:"#2E7D6A",
+    marginHorizontal: 4,
   },
+
+  // 🔹 VARIANTI REMOVE PHOTO
+  removePhotoBtn: {
+    marginTop: 8,
+    borderColor: "#b02a37",
+  },
+
   addPhotoTxt:{ color:"#2E7D6A", fontWeight:"700" },
-  fullname:{ textAlign:"center", fontSize:18, fontWeight:"700", color:"#2E7D6A", marginBottom:10 },
-  section:{ color:"#4C6E64", fontWeight:"700", marginBottom:8, marginTop: 16 },
-  row:{ backgroundColor:"#fff", borderWidth:1, borderColor:"#CFE1DB", borderRadius:12, padding:12, marginBottom:10 },
-  label:{ color:"#4C6E64", marginBottom:6, fontWeight:"600" },
-  input:{ fontSize:16, color:"#1b1b1b" },
-  showBtn:{ position:"absolute", right:12, bottom:12, paddingVertical:6, paddingHorizontal:8, borderRadius:8 },
-  showTxt:{ color:"#2E7D6A", fontWeight:"700" },
-  saveBtn:{ backgroundColor:"#2E7D6A", borderRadius:12, alignItems:"center", paddingVertical:12, marginTop:4 },
-  saveTxt:{ color:"#fff", fontWeight:"700" },
+
+  fullname:{ 
+    textAlign:"center", 
+    fontSize:18, 
+    fontWeight:"700", 
+    color:"#2E7D6A", 
+    marginBottom:10 
+  },
+
+  section:{ 
+    color:"#4C6E64", 
+    fontWeight:"700", 
+    marginBottom:8, 
+    marginTop: 16 
+  },
+
+  row:{ 
+    backgroundColor:"#fff", 
+    borderWidth:1, 
+    borderColor:"#CFE1DB", 
+    borderRadius:12, 
+    padding:12, 
+    marginBottom:10 
+  },
+
+  label:{ 
+    color:"#4C6E64", 
+    marginBottom:6, 
+    fontWeight:"600" 
+  },
+
+  input:{ 
+    fontSize:16, 
+    color:"#1b1b1b" 
+  },
+
+  showBtn:{ 
+    position:"absolute", 
+    right:12, 
+    bottom:12, 
+    paddingVertical:6, 
+    paddingHorizontal:8, 
+    borderRadius:8 
+  },
+
+  showTxt:{ 
+    color:"#2E7D6A", 
+    fontWeight:"700" 
+  },
+
+  saveBtn:{ 
+    backgroundColor:"#2E7D6A", 
+    borderRadius:12, 
+    alignItems:"center", 
+    paddingVertical:12, 
+    marginTop:4 
+  },
+
+  saveTxt:{ 
+    color:"#fff", 
+    fontWeight:"700" 
+  },
   
   successMsg:{
     color:"#2E7D6A",
@@ -485,7 +763,6 @@ const s = StyleSheet.create({
     borderRadius:8,
     fontWeight:"700",
   },
-  
 
   optionItem: {
     flexDirection: 'row',
@@ -498,16 +775,19 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CFE1DB',
   },
+
   optionLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+
   optionText: {
     fontSize: 16,
     color: '#1b1b1b',
     marginLeft: 12,
     fontWeight: '500',
   },
+
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -520,23 +800,27 @@ const s = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#b02a37',
   },
+
   versionContainer: {
     alignItems: 'center',
     marginTop: 30,
     marginBottom: 20,
     padding: 16,
   },
+
   versionText: {
     color: '#4C6E64',
     fontSize: 14,
     fontWeight: '600',
   },
+
   copyright: {
     color: '#4C6E64',
     fontSize: 12,
     marginTop: 5,
     textAlign: 'center',
   },
+
   expandedPanel: {
     backgroundColor: '#fff',
     padding: 12,
@@ -545,19 +829,23 @@ const s = StyleSheet.create({
     borderColor: '#CFE1DB',
     marginBottom: 8,
   },
+
   panelScroll: {
     maxHeight: 220,
   },
+
   expandedLabel: {
     fontSize: 14,
     fontWeight: '700',
     color: '#4C6E64',
   },
+
   expandedText: {
     fontSize: 14,
     color: '#1b1b1b',
     marginTop: 6,
   },
+
   smallBtn: {
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -566,9 +854,11 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CFE1DB',
   },
+
   smallBtnActive: {
     backgroundColor: '#2E7D6A',
   },
+
   smallBtnText: {
     color: '#1b1b1b',
     fontWeight: '600',
