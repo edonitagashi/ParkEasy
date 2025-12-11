@@ -5,11 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import OptimizedImage from "./OptimizedImage";
 
-
 function ParkingCard({ item, hideReserve }) {
   const [isFavorite, setIsFavorite] = useState(item?.isFavorite);
 
-  // keep local state synced when prop changes
   useEffect(() => {
     setIsFavorite(item?.isFavorite);
   }, [item?.isFavorite]);
@@ -29,7 +27,7 @@ function ParkingCard({ item, hideReserve }) {
   const showDetails = useCallback(() => {
     Alert.alert(
       "Parking Details",
-      `Name: ${item.name}\nDistance: ${item.distance}\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
+      `Name: ${item.name}\nDistance: ${item.distance}\nPrice: ${item.price}\nAvailable Spots: ${item.spots || item.freeSpots}`
     );
   }, [item]);
 
@@ -60,7 +58,7 @@ function ParkingCard({ item, hideReserve }) {
               <Text style={styles.detail}>Price: {item.price}</Text>
             </View>
 
-            <Text style={styles.detail}>Available: {item.spots} spots</Text>
+            <Text style={styles.detail}>Available: {item.spots || item.freeSpots} spots</Text>
           </View>
 
           <TouchableOpacity onPress={toggleFavorite} style={styles.bookmarkWrapper}>
@@ -143,11 +141,32 @@ const styles = StyleSheet.create({
   },
 });
 
+
 function areEqual(prevProps, nextProps) {
-  // Re-render only if important bits changed
-  if (prevProps.item?.id !== nextProps.item?.id) return false;
-  if (prevProps.item?.isFavorite !== nextProps.item?.isFavorite) return false;
-  return prevProps.hideReserve === nextProps.hideReserve;
+  const p = prevProps.item || {};
+  const n = nextProps.item || {};
+
+  // If id changed, re-render
+  if (p.id !== n.id) return false;
+
+  // If favorite status changed, re-render
+  if (p.isFavorite !== n.isFavorite) return false;
+
+  // If important display fields changed, re-render
+  if (p.distance !== n.distance) return false;
+  if (p.price !== n.price) return false;
+  if ((p.spots || p.freeSpots) !== (n.spots || n.freeSpots)) return false;
+
+  // If image source changed, re-render
+  const pImg = typeof p.image === "string" ? p.image : p.image?.uri;
+  const nImg = typeof n.image === "string" ? n.image : n.image?.uri;
+  if (pImg !== nImg) return false;
+
+  // hideReserve prop rarely changes — keep equality
+  if (prevProps.hideReserve !== nextProps.hideReserve) return false;
+
+  // Otherwise no re-render
+  return true;
 }
 
 export default React.memo(ParkingCard, areEqual);

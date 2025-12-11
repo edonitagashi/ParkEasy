@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function AdminBackHeader({ title }) {
+function AdminBackHeader({ title }) {
   const router = useRouter();
 
   const handleBack = () => {
@@ -47,3 +47,5 @@ const styles = StyleSheet.create({
     marginRight: 24,
   },
 });
+
+export default React.memo(AdminBackHeader);

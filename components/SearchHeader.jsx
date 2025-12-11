@@ -1,11 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet } from "react-native";
 
-export default function SearchHeader({ title }) {
-  const router = useRouter();
- 
-
+function SearchHeader({ title }) {
   return (
     <View style={styles.header}>
       <Text style={styles.title}>{title}</Text>
@@ -17,7 +13,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center", 
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: "#fff",
@@ -32,12 +28,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#5C8374",
   },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    textAlign: "center",
-  },
 });
+
+export default React.memo(SearchHeader);

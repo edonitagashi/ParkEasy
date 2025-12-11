@@ -47,7 +47,6 @@ export default function Profile() {
 
   const placeholder = require("../../assets/images/profile.jpg");
 
-  // 🔹 Lexon foton nga Firestore (avatarUri) dhe e sinkronizon me state + AsyncStorage
   async function loadAvatarFromFirestore() {
   try {
     // 1) Gjej userId nga Firebase ose nga AsyncStorage (fallback)

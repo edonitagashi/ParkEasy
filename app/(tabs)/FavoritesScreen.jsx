@@ -1,19 +1,14 @@
 import React, { useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  FlatList,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-} from "react-native";
+import { FlatList, StatusBar, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import ParkingCard from "../../components/ParkingCard";
 import SearchHeader from "../../components/SearchHeader";
+import { resolveImage } from "../../components/images";
 
 import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
 
+// Use an existing fallback image that is present in the repo
 const placeholderImage = require("../../assets/images/image1.png");
 const ITEM_HEIGHT = 160;
 
@@ -29,25 +24,30 @@ export default function FavoritesScreen() {
     return parkings.filter((p) => favorites.includes(p.id));
   }, [parkings, favorites]);
 
-  // Stable key extractor
   const keyExtractor = useCallback((item) => item.id, []);
 
-  // Memoized renderItem to avoid recreating callbacks each render
   const renderItem = useCallback(
-    ({ item }) => (
-      <ParkingCard
-        item={{
-          ...item,
-          image: item.image || placeholderImage,
-          isFavorite: favorites.includes(item.id),
-          onFavoriteToggle: () => toggleFavorite(item.id),
-        }}
-      />
-    ),
+    ({ item }) => {
+      // Use same image resolution/fallback logic as Search screen:
+      const imageSource =
+        item.image ||
+        (item.imageUrl && resolveImage(item.imageUrl)) ||
+        placeholderImage;
+
+      return (
+        <ParkingCard
+          item={{
+            ...item,
+            image: imageSource,
+            isFavorite: favorites.includes(item.id),
+            onFavoriteToggle: () => toggleFavorite(item.id),
+          }}
+        />
+      );
+    },
     [favorites, toggleFavorite]
   );
 
-  // Provide getItemLayout for FlatList virtualization (adjust ITEM_HEIGHT if card size changes)
   const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {

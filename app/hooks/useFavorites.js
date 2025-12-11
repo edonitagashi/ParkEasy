@@ -11,10 +11,6 @@ import {
 import { db, auth } from "../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-/**
- * useFavorites - Realtime, per-user favorites stored at /favorites/{uid}
- * Returns: { favorites, loading, error, isSaving, toggleFavorite, refresh }
- */
 export default function useFavorites() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +76,6 @@ export default function useFavorites() {
   }, []);
 
   useEffect(() => {
-    // initial subscription (userRef set by onAuthStateChanged effect)
     startListener();
     return () => {
       if (unsubRef.current) {
