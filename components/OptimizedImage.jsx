@@ -19,7 +19,11 @@ export default function OptimizedImage({ source, thumbnail, style, resizeMode = 
     return source; 
   })();
 
-  const thumbSrc = thumbnail ? (thumbnail.startsWith("http") ? { uri: thumbnail } : resolveImage(thumbnail) || { uri: thumbnail }) : null;
+  const thumbSrc = thumbnail
+    ? thumbnail.startsWith && thumbnail.startsWith("http")
+      ? { uri: thumbnail }
+      : resolveImage(thumbnail) || { uri: thumbnail }
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +58,11 @@ export default function OptimizedImage({ source, thumbnail, style, resizeMode = 
 
   return (
     <View style={[styles.wrapper, style]}>
-      <Image source={lowRes} resizeMode={resizeMode} style={[StyleSheet.absoluteFill, { borderRadius: style?.borderRadius || 0 }]} />
+      <Image
+        source={lowRes}
+        resizeMode={resizeMode}
+        style={[StyleSheet.absoluteFill, { borderRadius: style?.borderRadius || 0 }]}
+      />
       {resolved && resolved.uri && isPrefetched ? (
         <Animated.Image
           source={resolved}
@@ -63,7 +71,12 @@ export default function OptimizedImage({ source, thumbnail, style, resizeMode = 
           style={[StyleSheet.absoluteFill, { opacity }, { borderRadius: style?.borderRadius || 0 }]}
         />
       ) : resolved && !resolved.uri ? (
-        <Image source={resolved} resizeMode={resizeMode} style={[StyleSheet.absoluteFill, { borderRadius: style?.borderRadius || 0 }]} onLoad={() => setIsLoaded(true)} />
+        <Image
+          source={resolved}
+          resizeMode={resizeMode}
+          style={[StyleSheet.absoluteFill, { borderRadius: style?.borderRadius || 0 }]}
+          onLoad={() => setIsLoaded(true)}
+        />
       ) : null}
     </View>
   );

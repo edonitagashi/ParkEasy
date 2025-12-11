@@ -36,8 +36,7 @@ export default function ParkingListScreen() {
       const snap = await getDocs(collection(db, "parkings"));
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setParkings(data);
-    } catch (err) {
-      console.error("Fetch parkings error", err);
+    } catch {
       Alert.alert("Error", "Failed to load parkings.");
     } finally {
       setLoading(false);
@@ -53,8 +52,8 @@ export default function ParkingListScreen() {
       id: item.id,
       name: item.name,
       address: item.address,
-      price: String(item.price || ""),
-      totalSpots: String(item.totalSpots || ""),
+      price: String(item.price),
+      totalSpots: String(item.totalSpots),
     });
     setEditModal(true);
   }, []);
@@ -72,7 +71,6 @@ export default function ParkingListScreen() {
       setEditModal(false);
       fetchParkings();
     } catch (err) {
-      console.error("Save edit error", err);
       Alert.alert("Error", "Failed to update parking.");
     }
   }, [editData, fetchParkings]);
@@ -87,8 +85,7 @@ export default function ParkingListScreen() {
           try {
             await deleteDoc(doc(db, "parkings", id));
             fetchParkings();
-          } catch (err) {
-            console.error("Delete parking error", err);
+          } catch {
             Alert.alert("Error", "Failed to delete parking.");
           }
         },
@@ -122,13 +119,12 @@ export default function ParkingListScreen() {
 
   const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
-  if (loading) {
+  if (loading)
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#2E7D6A" />
       </View>
     );
-  }
 
   return (
     <View style={styles.container}>
@@ -147,7 +143,7 @@ export default function ParkingListScreen() {
         getItemLayout={getItemLayout}
       />
 
-      {/* Edit modal */}
+      {/* Edit modal unchanged in behavior */}
       <Modal visible={editModal} transparent animationType="fade" onRequestClose={() => setEditModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>

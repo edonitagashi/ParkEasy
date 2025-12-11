@@ -5,16 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import OptimizedImage from "./OptimizedImage";
 
-/**
- * ParkingCard (optimized)
- * Perdor OptimizedImage per lazy load/prefetch dhe fade-in
- * React.memo ne fund per te shmangur re-renders e panevojshme
- */
 
 function ParkingCard({ item, hideReserve }) {
   const [isFavorite, setIsFavorite] = useState(item?.isFavorite);
 
-  // sync local state kur prop-i ndryshon
+  // keep local state synced when prop changes
   useEffect(() => {
     setIsFavorite(item?.isFavorite);
   }, [item?.isFavorite]);
@@ -149,6 +144,7 @@ const styles = StyleSheet.create({
 });
 
 function areEqual(prevProps, nextProps) {
+  // Re-render only if important bits changed
   if (prevProps.item?.id !== nextProps.item?.id) return false;
   if (prevProps.item?.isFavorite !== nextProps.item?.isFavorite) return false;
   return prevProps.hideReserve === nextProps.hideReserve;

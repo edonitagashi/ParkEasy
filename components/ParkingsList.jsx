@@ -2,21 +2,15 @@ import React, { useCallback, useMemo } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import ParkingCard from "./ParkingCard";
 
-/**
- * ParkingsList - Generic optimized FlatList wrapper for ParkingCard
- * Use this komponent ne screens qe shfaqin lista parkingu, per te perfituar nga optimizimet.
- */
-const ITEM_HEIGHT = 160; 
+const ITEM_HEIGHT = 160;
 
-export default function ParkingsList({ data = [], onItemPress = () => {}, hideReserve = false }) {
+export default function ParkingsList({ data = [], hideReserve = false }) {
   const listData = useMemo(() => data, [data]);
 
   const keyExtractor = useCallback((item) => item.id?.toString() || String(item._id || Math.random()), []);
 
   const renderItem = useCallback(
-    ({ item }) => {
-      return <ParkingCard item={item} hideReserve={hideReserve} />;
-    },
+    ({ item }) => <ParkingCard item={item} hideReserve={hideReserve} />,
     [hideReserve]
   );
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,16 +13,18 @@ import { db } from "../firebase/firebase";
 import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import AdminBackHeader from "../../components/AdminBackHeader";
 
+const ITEM_HEIGHT = 120;
+
 export default function ParkingReservationsScreen() {
   const { parkingId, name } = useLocalSearchParams();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     setLoading(true);
     try {
       const q = query(
-        collection(db, "bookings"),   // ✅ FIXED (not "reservations")
+        collection(db, "bookings"),
         where("parkingId", "==", parkingId)
       );
 
@@ -34,20 +36,40 @@ export default function ParkingReservationsScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [parkingId]);
 
   useEffect(() => {
     if (parkingId) fetchReservations();
-  }, [parkingId]);
+  }, [parkingId, fetchReservations]);
 
-  const handleDeleteReservation = async (id) => {
+  const handleDeleteReservation = useCallback(async (id) => {
     try {
-      await deleteDoc(doc(db, "bookings", id));  // ✅ FIXED
+      await deleteDoc(doc(db, "bookings", id));
       fetchReservations();
     } catch {
       Alert.alert("Error", "Failed to delete.");
     }
-  };
+  }, [fetchReservations]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <View style={styles.card}>
+        <Text style={styles.text}>User ID: {item.userId}</Text>
+        <Text style={styles.text}>Date: {item.date}</Text>
+        <Text style={styles.text}>Time: {item.time}</Text>
+        <Text style={styles.text}>Duration: {item.duration} hours</Text>
+
+        <TouchableOpacity style={[styles.btn, styles.danger]} onPress={() => handleDeleteReservation(item.id)}>
+          <Text style={styles.btnText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleDeleteReservation]
+  );
+
+  const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading)
     return (
@@ -69,36 +91,15 @@ export default function ParkingReservationsScreen() {
       ) : (
         <FlatList
           data={reservations}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           contentContainerStyle={{ padding: 16 }}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-
-              <Text style={styles.text}>
-                User ID: {item.userId}
-              </Text>
-
-              <Text style={styles.text}>
-                Date: {item.date}
-              </Text>
-
-              <Text style={styles.text}>
-                Time: {item.time}
-              </Text>
-
-              <Text style={styles.text}>
-                Duration: {item.duration} hours
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.btn, styles.danger]}
-                onPress={() => handleDeleteReservation(item.id)}
-              >
-                <Text style={styles.btnText}>Delete</Text>
-              </TouchableOpacity>
-
-            </View>
-          )}
+          renderItem={renderItem}
+          initialNumToRender={6}
+          maxToRenderPerBatch={8}
+          windowSize={9}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
+          getItemLayout={getItemLayout}
         />
       )}
     </View>
@@ -118,18 +119,12 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     padding: 12,
-    borderRadius: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#CDEDE7",
-  },
-  text: { color: "#555", marginBottom: 4 },
-  btn: {
-    marginTop: 10,
-    paddingVertical: 8,
     borderRadius: 8,
-    alignItems: "center",
+    marginBottom: 12,
+    elevation: 2,
   },
-  danger: { backgroundColor: "#d9534f" },
-  btnText: { color: "#fff", fontWeight: "600" },
+  text: { color: "#333", marginTop: 4 },
+  btn: { marginTop: 8, padding: 8, borderRadius: 8, alignItems: "center" },
+  danger: { backgroundColor: "#b02a37" },
+  btnText: { color: "#fff", fontWeight: "700" },
 });

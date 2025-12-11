@@ -1,6 +1,13 @@
 import React, { useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, StatusBar, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import {
+  FlatList,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import ParkingCard from "../../components/ParkingCard";
 import SearchHeader from "../../components/SearchHeader";
 
@@ -22,8 +29,10 @@ export default function FavoritesScreen() {
     return parkings.filter((p) => favorites.includes(p.id));
   }, [parkings, favorites]);
 
+  // Stable key extractor
   const keyExtractor = useCallback((item) => item.id, []);
 
+  // Memoized renderItem to avoid recreating callbacks each render
   const renderItem = useCallback(
     ({ item }) => (
       <ParkingCard
@@ -38,6 +47,7 @@ export default function FavoritesScreen() {
     [favorites, toggleFavorite]
   );
 
+  // Provide getItemLayout for FlatList virtualization (adjust ITEM_HEIGHT if card size changes)
   const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {

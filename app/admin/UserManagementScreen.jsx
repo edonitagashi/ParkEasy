@@ -1,18 +1,17 @@
-// app/admin/UserManagementScreen.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Text } from 'react-native';
 import { auth, db } from '../firebase/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AdminBackHeader from "../../components/AdminBackHeader";
 
+const ITEM_HEIGHT = 72;
+
 export default function UserManagementScreen() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchUsers(); }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const q = collection(db, 'users');
@@ -24,9 +23,11 @@ export default function UserManagementScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const toggleStatus = async (u) => {
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  const toggleStatus = useCallback(async (u) => {
     try {
       const newStatus = u.status === 'inactive' ? 'active' : 'inactive';
       await updateDoc(doc(db, 'users', u.id), { status: newStatus });
@@ -34,9 +35,9 @@ export default function UserManagementScreen() {
     } catch (e) {
       Alert.alert('Error', e.message);
     }
-  };
+  }, [fetchUsers]);
 
-  const removeUser = (u) => {
+  const removeUser = useCallback((u) => {
     Alert.alert('Delete user', 'Are you sure?', [
       { text: 'Cancel' },
       {
@@ -52,7 +53,38 @@ export default function UserManagementScreen() {
         }
       }
     ]);
-  };
+  }, [fetchUsers]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
+  const renderItem = useCallback(
+    ({ item }) => (
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>
+            {item.name || item.fullName || item.email}
+          </Text>
+          <Text style={styles.meta}>
+            {item.email} · {item.role}
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.iconBtn} onPress={() => toggleStatus(item)}>
+          <Ionicons
+            name={item.status === 'inactive' ? 'close-circle' : 'checkmark-circle'}
+            size={20}
+            color={item.status === 'inactive' ? '#ff6b6b' : '#2E7D6A'}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconBtn} onPress={() => removeUser(item)}>
+          <MaterialIcons name="delete" size={20} color="#b02a37" />
+        </TouchableOpacity>
+      </View>
+    ),
+    [toggleStatus, removeUser]
+  );
+
+  const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {
     return (
@@ -68,32 +100,15 @@ export default function UserManagementScreen() {
 
       <FlatList
         data={users}
-        keyExtractor={item => item.id}
+        keyExtractor={keyExtractor}
         contentContainerStyle={{ padding: 12 }}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>
-                {item.name || item.fullName || item.email}
-              </Text>
-              <Text style={styles.meta}>
-                {item.email} · {item.role}
-              </Text>
-            </View>
-
-            <TouchableOpacity style={styles.iconBtn} onPress={() => toggleStatus(item)}>
-              <Ionicons
-                name={item.status === 'inactive' ? 'close-circle' : 'checkmark-circle'}
-                size={20}
-                color={item.status === 'inactive' ? '#ff6b6b' : '#2E7D6A'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.iconBtn} onPress={() => removeUser(item)}>
-              <MaterialIcons name="delete" size={20} color="#b02a37" />
-            </TouchableOpacity>
-          </View>
-        )}
+        renderItem={renderItem}
+        initialNumToRender={8}
+        maxToRenderPerBatch={12}
+        windowSize={11}
+        removeClippedSubviews={true}
+        updateCellsBatchingPeriod={50}
+        getItemLayout={getItemLayout}
       />
     </View>
   );
@@ -106,13 +121,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 8,
+    paddingVertical: 10,
   },
+  iconBtn: { marginLeft: 12 },
 
-  name: { fontWeight: '600' },
-  meta: { fontSize: 12, color: '#666' },
-  iconBtn: { padding: 8, marginLeft: 8 },
+  name: { fontSize: 16, fontWeight: '700' },
+  meta: { color: '#666', marginTop: 2 },
 });

@@ -36,8 +36,10 @@ export default function SearchParkingScreen() {
     });
   }, [parkings, searchText]);
 
+  // Stable key extractor
   const keyExtractor = useCallback((item) => item.id, []);
 
+  // Memoized renderItem
   const renderItem = useCallback(
     ({ item }) => (
       <ParkingCard
@@ -53,6 +55,7 @@ export default function SearchParkingScreen() {
     [favorites, toggleFavorite]
   );
 
+  // getItemLayout to speed up virtualization/scroll
   const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {
