@@ -1,52 +1,55 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import OptimizedImage from "./OptimizedImage";
 
-export default function ParkingCard({ item, hideReserve }) {
-  const [isFavorite, setIsFavorite] = useState(item.isFavorite);
+/**
+ * ParkingCard (optimized)
+ * Perdor OptimizedImage per lazy load/prefetch dhe fade-in
+ * React.memo ne fund per te shmangur re-renders e panevojshme
+ */
 
-  // useEffect për favorite UI sync
+function ParkingCard({ item, hideReserve }) {
+  const [isFavorite, setIsFavorite] = useState(item?.isFavorite);
+
+  // sync local state kur prop-i ndryshon
   useEffect(() => {
-    setIsFavorite(item.isFavorite);
-  }, [item.isFavorite]);
+    setIsFavorite(item?.isFavorite);
+  }, [item?.isFavorite]);
 
-  const toggleFavorite = () => {
+  const toggleFavorite = useCallback(() => {
     setIsFavorite((prev) => !prev);
-    if (item.onFavoriteToggle) item.onFavoriteToggle();
-  };
+    if (item?.onFavoriteToggle) item.onFavoriteToggle();
+  }, [item]);
 
-  const handleReserve = () => {
+  const handleReserve = useCallback(() => {
     router.push({
       pathname: "/(tabs)/BookParkingScreen",
       params: { id: item.id, name: item.name },
     });
-  };
+  }, [item?.id, item?.name]);
+
+  const showDetails = useCallback(() => {
+    Alert.alert(
+      "Parking Details",
+      `Name: ${item.name}\nDistance: ${item.distance}\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
+    );
+  }, [item]);
 
   return (
     <View style={{ marginBottom: 15, marginHorizontal: 16 }}>
-      <TouchableOpacity
-        onPress={() =>
-          Alert.alert(
-            "Parking Details",
-            `Name: ${item.name}\nDistance: ${item.distance}\nPrice: ${item.price}\nAvailable Spots: ${item.spots}`
-          )
-        }
-        activeOpacity={0.9}
-      >
+      <TouchableOpacity onPress={showDetails} activeOpacity={0.9}>
         <LinearGradient
           colors={["#5C8374", "#6FA48B"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          {/* Support both local requires and remote URLs from Firestore */}
-          {(() => {
-            const src = item.image;
-            const imageSource = typeof src === "string" ? { uri: src } : src;
-            return <Image source={imageSource} style={styles.image} />;
-          })()}
+          <View>
+            <OptimizedImage source={item.image} thumbnail={item.imageThumb || null} style={styles.image} />
+          </View>
 
           <View style={styles.infoContainer}>
             <Text style={styles.bookingId}>ID: {item.id}</Text>
@@ -63,11 +66,8 @@ export default function ParkingCard({ item, hideReserve }) {
             </View>
 
             <Text style={styles.detail}>Available: {item.spots} spots</Text>
-
-            
           </View>
 
-          {/* Favorite */}
           <TouchableOpacity onPress={toggleFavorite} style={styles.bookmarkWrapper}>
             <Ionicons
               name={isFavorite ? "bookmark" : "bookmark-outline"}
@@ -75,15 +75,10 @@ export default function ParkingCard({ item, hideReserve }) {
               color={isFavorite ? "#e5d058ff" : "#fff"}
             />
           </TouchableOpacity>
-          {/* Reserve button (absolute badge) */}
+
           {!hideReserve && (
             <TouchableOpacity style={styles.reserveBadge} onPress={handleReserve}>
-              <Ionicons
-                name="calendar-outline"
-                size={16}
-                color="#fff"
-                style={{ marginRight: 4 }}
-              />
+              <Ionicons name="calendar-outline" size={16} color="#fff" style={{ marginRight: 4 }} />
               <Text style={styles.reserveBadgeText}>Reserve</Text>
             </TouchableOpacity>
           )}
@@ -93,7 +88,6 @@ export default function ParkingCard({ item, hideReserve }) {
   );
 }
 
-/* ---------- STYLES ---------- */
 
 const styles = StyleSheet.create({
   card: {
@@ -153,3 +147,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
+function areEqual(prevProps, nextProps) {
+  if (prevProps.item?.id !== nextProps.item?.id) return false;
+  if (prevProps.item?.isFavorite !== nextProps.item?.isFavorite) return false;
+  return prevProps.hideReserve === nextProps.hideReserve;
+}
+
+export default React.memo(ParkingCard, areEqual);
