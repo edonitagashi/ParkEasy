@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -18,6 +18,8 @@ import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
 const placeholderImage = require("../../assets/images/image1.png");
 
+const ITEM_HEIGHT = 160;
+
 export default function SearchParkingScreen() {
   const [searchText, setSearchText] = useState("");
   const { parkings, loading, error, refresh } = useParkings(); // realtime onSnapshot
@@ -33,6 +35,25 @@ export default function SearchParkingScreen() {
       return name.includes(q) || address.includes(q);
     });
   }, [parkings, searchText]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <ParkingCard
+        item={{
+          ...item,
+          image:
+            item.image || (item.imageUrl && resolveImage(item.imageUrl)) || placeholderImage,
+          isFavorite: favorites.includes(item.id),
+          onFavoriteToggle: () => toggleFavorite(item.id),
+        }}
+      />
+    ),
+    [favorites, toggleFavorite]
+  );
+
+  const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {
     return (
@@ -69,18 +90,14 @@ export default function SearchParkingScreen() {
 
       <FlatList
         data={filteredParkings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ParkingCard
-            item={{
-              ...item,
-              image:
-                item.image || (item.imageUrl && resolveImage(item.imageUrl)) || placeholderImage,
-              isFavorite: favorites.includes(item.id),
-              onFavoriteToggle: () => toggleFavorite(item.id),
-            }}
-          />
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        initialNumToRender={6}
+        maxToRenderPerBatch={8}
+        windowSize={9}
+        removeClippedSubviews={true}
+        updateCellsBatchingPeriod={50}
+        getItemLayout={getItemLayout}
         contentContainerStyle={
           filteredParkings.length === 0 ? { flex: 1 } : styles.listContent
         }
@@ -99,13 +116,8 @@ export default function SearchParkingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-  searchContainer: { paddingHorizontal: 12, marginTop: 8 },
-  listContent: { padding: 10, backgroundColor: "#fff" },
-  noResultsText: { color: "#777", fontSize: 16 },
-  noResultsWrapper: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  },
+  searchContainer: { padding: 12 },
+  listContent: { paddingBottom: 24 },
+  noResultsWrapper: { flex: 1, justifyContent: "center", alignItems: "center" },
+  noResultsText: { color: "#666" },
 });

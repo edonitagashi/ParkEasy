@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { View, Image, StyleSheet, Animated } from "react-native";
 import { resolveImage } from "./images";
 
-const placeholder = require("../assets/placeholder.png");
+const placeholder = require("../assets/placeholder.webp");
 
 export default function OptimizedImage({ source, thumbnail, style, resizeMode = "cover" }) {
   const [isLoaded, setIsLoaded] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, StatusBar, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import ParkingCard from "../../components/ParkingCard";
@@ -8,6 +8,7 @@ import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
 
 const placeholderImage = require("../../assets/images/image1.png");
+const ITEM_HEIGHT = 160;
 
 export default function FavoritesScreen() {
   const { parkings, loading: parkingsLoading, error: parkingsError, refresh } = useParkings();
@@ -20,6 +21,24 @@ export default function FavoritesScreen() {
     if (!parkings || !favorites) return [];
     return parkings.filter((p) => favorites.includes(p.id));
   }, [parkings, favorites]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <ParkingCard
+        item={{
+          ...item,
+          image: item.image || placeholderImage,
+          isFavorite: favorites.includes(item.id),
+          onFavoriteToggle: () => toggleFavorite(item.id),
+        }}
+      />
+    ),
+    [favorites, toggleFavorite]
+  );
+
+  const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {
     return (
@@ -58,20 +77,17 @@ export default function FavoritesScreen() {
       ) : (
         <FlatList
           data={favoriteParkings}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ParkingCard
-              item={{
-                ...item,
-                image: item.image || placeholderImage,
-                isFavorite: favorites.includes(item.id),
-                onFavoriteToggle: () => toggleFavorite(item.id),
-              }}
-            />
-          )}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           contentContainerStyle={{ paddingBottom: 20 }}
           style={{ flex: 1 }}
+          initialNumToRender={6}
+          maxToRenderPerBatch={8}
+          windowSize={9}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
+          getItemLayout={getItemLayout}
         />
       )}
     </SafeAreaView>
