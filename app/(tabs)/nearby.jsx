@@ -1,48 +1,55 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, ActivityIndicator } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-
 import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
-import { resolveImage } from "../../components/images";
-import { Ionicons } from "@expo/vector-icons";
-
 import WeatherScreen from "../../components/WeatherScreen";
 
-const placeholderImage = "/favicon.png"; 
+const placeholderImage = require("../../assets/favicon.png");
 
-function FlyToParking({ parking }) {
-  const map = useMap();
-  useEffect(() => {
-    if (parking) {
-      const lat = parking.coordinate?.latitude ?? parking.latitude;
-      const lng = parking.coordinate?.longitude ?? parking.longitude;
-      if (lat && lng) {
-        map.flyTo([lat, lng], 17, { animate: true });
-      }
-    }
-  }, [parking, map]);
-  return null;
-}
-
-export default function NearbyWeb() {
+export default function Nearby() {
   const router = useRouter();
   const { parkings, loading, error } = useParkings();
   const { favorites, toggleFavorite } = useFavorites();
 
   const [selectedParking, setSelectedParking] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
- 
   const [weatherVisible, setWeatherVisible] = useState(false);
+
+  const [userLocation, setUserLocation] = useState(null);
+
+  const mapRef = useRef(null);
+
+  // GET USER LOCATION
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        alert("Permission for location is required!");
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      setUserLocation(loc.coords);
+    })();
+  }, []);
 
   const filtered = useMemo(() => parkings || [], [parkings]);
 
   const openModal = (p) => {
     setSelectedParking(p);
     setModalVisible(true);
+
+    if (mapRef.current && p.latitude && p.longitude) {
+      mapRef.current.animateCamera({
+        center: { latitude: p.latitude, longitude: p.longitude },
+        zoom: 17,
+        duration: 900,
+      });
+    }
   };
 
   const handleReserve = (parking) => {
@@ -53,214 +60,245 @@ export default function NearbyWeb() {
 
   const getImageSrc = (p) => {
     if (!p) return placeholderImage;
-    if (p.imageUrl && (p.imageUrl.startsWith("http://") || p.imageUrl.startsWith("https://"))) return p.imageUrl;
 
-    try {
-      const resolved = resolveImage(p.image || p.imageUrl);
-      if (!resolved) return placeholderImage;
-      if (typeof resolved === "object" && resolved.uri) return resolved.uri;
-      if (typeof resolved === "string") return resolved;
-      if (typeof resolved === "object" && resolved.default) return resolved.default;
-      return placeholderImage;
-    } catch (e) {
-      return placeholderImage;
+    if (p.imageUrl?.startsWith("http")) {
+      return { uri: p.imageUrl };
     }
+
+    return placeholderImage;
   };
 
-  const makeMarkerIconHtml = (imgSrc, isFav) => {
-    const safeSrc = imgSrc || placeholderImage;
-    const borderColor = isFav ? "#FFD166" : "#fff";
-    return `
-      <div style="
-        width:36px;
-        height:36px;
-        border-radius:50%;
-        overflow:hidden;
-        border:2px solid ${borderColor};
-        box-shadow:0 2px 6px rgba(0,0,0,0.25);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-      ">
-        <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover" />
-      </div>
-    `;
-  };
-
-  if (loading) {
+  if (loading || !userLocation) {
     return (
-      <div style={styles.container}>
-        <div style={styles.header}><h2 style={styles.title}>Nearby Parkings</h2></div>
-        <div style={styles.center}><p>Loading parkings...</p></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.header}><h2 style={styles.title}>Nearby Parkings</h2></div>
-        <div style={styles.center}><p style={{ color: "red" }}>Failed to load parkings.</p></div>
-      </div>
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#2E7D6A" />
+        <Text>Loading map...</Text>
+      </View>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <button
-        onClick={() => setWeatherVisible(true)}
+    <View style={{ flex: 1 }}>
+      
+      {/* WEATHER BUTTON */}
+      <TouchableOpacity
+        onPress={() => setWeatherVisible(true)}
+        style={styles.weatherBtn}
+      >
+        <Text style={{ color: "white", fontWeight: "600" }}>Weather</Text>
+      </TouchableOpacity>
+
+      {/* MAP */}
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        style={{ flex: 1 }}
+        initialRegion={{
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.04,
+          longitudeDelta: 0.04,
+        }}
+        showsUserLocation={true}
+      >
+        {filtered.map((p) => {
+  const lat = Number(p.coordinate?.latitude ?? p.latitude);
+  const lng = Number(p.coordinate?.longitude ?? p.longitude);
+
+  // Skip invalid coordinates
+  if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+    console.log("Invalid coordinate:", p);
+    return null;
+  }
+
+  return (
+    <Marker
+      key={p.id}
+      coordinate={{ latitude: lat, longitude: lng }}
+      onPress={() => openModal(p)}
+    >
+      <View
         style={{
-          position: "absolute",
-          top: 20,
-          right: 20,
-          zIndex: 2000,
-          backgroundColor: "#2E7D6A",
-          color: "white",
-          padding: "10px 14px",
-          borderRadius: 10,
-          border: "none",
-          cursor: "pointer",
-          fontWeight: "600"
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          overflow: "hidden",
+          borderWidth: 2,
+          borderColor: favorites?.includes(p.id) ? "#FFD166" : "white",
+          backgroundColor: "white",
         }}
       >
-        Weather
-      </button>
+        <Image
+          source={getImageSrc(p)}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </View>
+    </Marker>
+  );
+})}
 
-      <div style={styles.mapWrapper}>
-        <MapContainer
-          center={[42.6629, 21.1655]}
-          zoom={13}
-          style={styles.map}
-          scrollWheelZoom={true}   
-          dragging={true}          
-          doubleClickZoom={true}   
-          zoomControl={true}       
-          touchZoom={true}         
-          tap={true}              
-          keyboard={true}   
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {filtered.map((p) => {
-            const lat = p.coordinate?.latitude ?? p.latitude;
-            const lng = p.coordinate?.longitude ?? p.longitude;
-            if (!lat || !lng) return null;
-            const imgSrc = getImageSrc(p);
-            const isFav = favorites?.includes?.(p.id);
-            const icon = L.divIcon({
-              className: "custom_marker",
-              html: makeMarkerIconHtml(imgSrc, isFav),
-              iconSize: [36, 36],
-              iconAnchor: [18, 36],
-            });
+      </MapView>
 
-            return (
-              <Marker
-                key={p.id}
-                position={[lat, lng]}
-                icon={icon}
-                eventHandlers={{ click: () => openModal(p) }}
-              />
-            );
-          })}
+      {/* PARKING MODAL */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
 
-          <FlyToParking parking={selectedParking} />
-        </MapContainer>
-      </div>
+            <Text style={styles.modalTitle}>{selectedParking?.name}</Text>
 
-      {modalVisible && selectedParking && (
-        <div style={styles.webModalOverlay}>
-          <div style={styles.webModalContent}>
-            <div style={styles.webHeaderOnlyTitle}><h2 style={styles.webTitle}>{selectedParking.name}</h2></div>
+            <Image source={getImageSrc(selectedParking)} style={styles.cardImage} />
 
-            <div style={styles.card}>
-              <img src={getImageSrc(selectedParking)} alt="parking" style={styles.cardImage} />
-              <div style={styles.cardBody}>
-                <h3 style={{ margin: 0 }}>{selectedParking.name}</h3>
-                <p style={{ margin: "6px 0" }}>{selectedParking.address}</p>
-                <p style={{ margin: "6px 0", color: "#555" }}>{selectedParking.price ?? ""} • {selectedParking.spots ?? "—"} spots</p>
-              </div>
-            </div>
+            <Text style={styles.cardText}>{selectedParking?.address}</Text>
+            <Text style={styles.cardText}>
+              {selectedParking?.price} • {selectedParking?.spots} spots
+            </Text>
 
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                style={styles.webReserveButton}
-                onClick={() => handleReserve(selectedParking)}
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={styles.reserveBtn}
+                onPress={() => handleReserve(selectedParking)}
               >
-                Reserve
-              </button>
+                <Text style={styles.reserveText}>Reserve</Text>
+              </TouchableOpacity>
 
-              <button
-                style={{
-                  ...styles.webReserveButton,
-                  backgroundColor: favorites?.includes(selectedParking.id) ? "#FFD166" : "#fff",
-                  color: favorites?.includes(selectedParking.id) ? "#1B1B1B" : "#000",
-                  border: "1px solid #DDD"
-                }}
-                onClick={() => toggleFavorite(selectedParking.id)}
+              <TouchableOpacity
+                style={[
+                  styles.favoriteBtn,
+                  favorites?.includes(selectedParking?.id)
+                    ? { backgroundColor: "#FFD166" }
+                    : {},
+                ]}
+                onPress={() => toggleFavorite(selectedParking.id)}
               >
-                {favorites?.includes(selectedParking.id) ? "★ Favorited" : "☆ Add to favorites"}
-              </button>
-            </div>
+                <Text style={{ fontWeight: "700" }}>
+                  {favorites?.includes(selectedParking?.id)
+                    ? "★ Favorited"
+                    : "☆ Add to favorites"}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            <button style={styles.webCloseButton} onClick={() => setModalVisible(false)}>Close</button>
-          </div>
-        </div>
-      )}
-
-      
-      {weatherVisible && (
-        <div style={{
-          position: "fixed",
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 9999
-        }}>
-          <div style={{
-            background: "white",
-            padding: 20,
-            borderRadius: 20,
-            width: "90%",
-            maxWidth: 420
-          }}>
-            <WeatherScreen />
-            <button
-              onClick={() => setWeatherVisible(false)}
-              style={{
-                marginTop: 16,
-                width: "100%",
-                padding: 12,
-                borderRadius: 10,
-                border: "none",
-                backgroundColor: "#b02a37",
-                color: "white",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontSize: 16
-              }}
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.closeBtn}
             >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
+
+      {/* WEATHER MODAL */}
+      <Modal visible={weatherVisible} transparent animationType="fade">
+        <View style={styles.weatherOverlay}>
+          <View style={styles.weatherContent}>
+            <WeatherScreen />
+            <TouchableOpacity
+              onPress={() => setWeatherVisible(false)}
+              style={styles.weatherCloseBtn}
+            >
+              <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+    </View>
   );
 }
 
-const styles = {
-  container: { width: "100%", height: "100vh", position: "relative", fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial" },
-  mapWrapper: { position: "absolute", inset: 0, width: "100%", height: "100vh" },
-  map: { width: "100%", height: "100%" },
-  webModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 },
-  webModalContent: { backgroundColor: "white", padding: 20, borderRadius: 18, width: "90%", maxWidth: 420, boxShadow: "0 8px 30px rgba(0,0,0,0.2)" },
-  webHeaderOnlyTitle: { display: "flex", justifyContent: "center", marginBottom: 10 },
-  webTitle: { fontSize: 22, fontWeight: "700", margin: 0 },
-  webCloseButton: { marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none", backgroundColor: "#b02a37", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16 },
-  webReserveButton: { marginTop: 12, padding: 12, borderRadius: 10, border: "none", backgroundColor: "#2E7D6A", color: "white", fontWeight: "700", cursor: "pointer", fontSize: 16, minWidth: 120 },
-  card: { display: "flex", gap: 12, alignItems: "center", marginTop: 8, marginBottom: 10 },
-  cardImage: { width: "100%", height: 160, objectFit: "cover", borderRadius: 10 },
-  cardBody: { width: "100%" },
-};
+const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  weatherBtn: {
+    position: "absolute",
+    zIndex: 999,
+    top: 20,
+    right: 20,
+    backgroundColor: "#2E7D6A",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 18,
+    width: "90%",
+    maxWidth: 420,
+  },
+
+  modalTitle: { fontSize: 22, fontWeight: "700", textAlign: "center" },
+
+  cardImage: {
+    width: "100%",
+    height: 160,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+
+  cardText: { marginVertical: 4, color: "#555" },
+
+  reserveBtn: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "#2E7D6A",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  reserveText: { color: "white", fontWeight: "700" },
+
+  favoriteBtn: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#DDD",
+    alignItems: "center",
+  },
+
+  closeBtn: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#b02a37",
+    alignItems: "center",
+  },
+  closeText: { color: "white", fontWeight: "700" },
+
+  weatherOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  weatherContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 20,
+    width: "90%",
+    maxWidth: 420,
+  },
+
+  weatherCloseBtn: {
+    marginTop: 16,
+    width: "100%",
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#b02a37",
+    alignItems: "center",
+  },
+});
