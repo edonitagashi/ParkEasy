@@ -151,7 +151,7 @@ export default function SearchParkingScreen() {
 
  
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["left","right"]}>
       <SearchHeader title="Search Parking" />
 
       <View style={styles.searchContainer}>
