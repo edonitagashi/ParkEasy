@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "./theme";
+import { colors } from "./theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import OptimizedImage from "./OptimizedImage";
+import AnimatedTouchable from "./animation/AnimatedTouchable";
 
-function ParkingCard({ item, hideReserve }) {
+function ParkingCard({ item, hideReserve, blur = false }) {
   const [isFavorite, setIsFavorite] = useState(item?.isFavorite);
 
   useEffect(() => {
@@ -15,6 +18,7 @@ function ParkingCard({ item, hideReserve }) {
   const toggleFavorite = useCallback(() => {
     setIsFavorite((prev) => !prev);
     if (item?.onFavoriteToggle) item.onFavoriteToggle();
+    // haptics optional: removed to avoid missing module errors
   }, [item]);
 
   const handleReserve = useCallback(() => {
@@ -22,6 +26,7 @@ function ParkingCard({ item, hideReserve }) {
       pathname: "/(tabs)/BookParkingScreen",
       params: { id: item.id, name: item.name },
     });
+    // haptics optional: removed to avoid missing module errors
   }, [item?.id, item?.name]);
 
   const showDetails = useCallback(() => {
@@ -33,15 +38,33 @@ function ParkingCard({ item, hideReserve }) {
 
   return (
     <View style={{ marginBottom: 15, marginHorizontal: 16 }}>
-      <TouchableOpacity onPress={showDetails} activeOpacity={0.9}>
-        <LinearGradient
-          colors={["#5C8374", "#6FA48B"]}
+      <AnimatedTouchable onPress={showDetails} style={{ borderRadius: 14 }}>
+          <LinearGradient
+          colors={[theme.colors.secondary, theme.colors.secondary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
           <View>
             <OptimizedImage source={item.image} thumbnail={item.imageThumb || null} style={styles.image} />
+            {/* Stronger top/bottom fade overlays for better legibility */}
+            <LinearGradient
+              colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.0)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.overlayTop}
+            />
+            {!blur && (
+              <LinearGradient
+              colors={["rgba(0,0,0,0.0)", "rgba(0,0,0,0.5)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.overlayBottom}
+              />
+            )}
+            {blur && (
+              <View style={styles.blurBottomFallback} />
+            )}
           </View>
 
           <View style={styles.infoContainer}>
@@ -49,7 +72,7 @@ function ParkingCard({ item, hideReserve }) {
             <Text style={styles.name}>{item.name}</Text>
 
             <View style={styles.addressContainer}>
-              <Ionicons name="location-outline" size={14} color="#fff" />
+              <Ionicons name="location-outline" size={14} color={theme.colors.pickerDoneText} />
               <Text style={styles.address}>{item.address}</Text>
             </View>
 
@@ -65,18 +88,18 @@ function ParkingCard({ item, hideReserve }) {
             <Ionicons
               name={isFavorite ? "bookmark" : "bookmark-outline"}
               size={22}
-              color={isFavorite ? "#e5d058ff" : "#fff"}
+              color={isFavorite ? "#e5d058ff" : theme.colors.pickerDoneText}
             />
           </TouchableOpacity>
 
           {!hideReserve && (
-            <TouchableOpacity style={styles.reserveBadge} onPress={handleReserve}>
-              <Ionicons name="calendar-outline" size={16} color="#fff" style={{ marginRight: 4 }} />
+            <AnimatedTouchable style={styles.reserveBadge} onPress={handleReserve}>
+              <Ionicons name="calendar-outline" size={16} color={theme.colors.pickerDoneText} style={{ marginRight: 4 }} />
               <Text style={styles.reserveBadgeText}>Reserve</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
           )}
         </LinearGradient>
-      </TouchableOpacity>
+      </AnimatedTouchable>
     </View>
   );
 }
@@ -97,27 +120,65 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 12,
   },
+  overlayTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  overlayBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 70,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  blurBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 70,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    overflow: "hidden",
+  },
+  blurBottomFallback: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 70,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
 
   infoContainer: {
     flex: 1,
     padding: 12,
-    justifyContent: "center",
+    padding: theme.spacing.xs + 2,
   },
 
-  bookingId: { fontSize: 12, color: "#fff" },
-  name: { fontSize: 16, fontWeight: "bold", color: "#fff", marginVertical: 4 },
+  bookingId: { fontSize: 12, color: theme.colors.pickerDoneText },
+  name: { fontSize: 16, fontWeight: "bold", color: theme.colors.pickerDoneText, marginVertical: 4 },
 
   addressContainer: { flexDirection: "row", alignItems: "center" },
-  address: { color: "#fff", marginLeft: 4, fontSize: 12 },
+  address: { color: theme.colors.pickerDoneText, marginLeft: 4, fontSize: 12 },
 
   detailsRow: { flexDirection: "row", justifyContent: "space-between" },
-  detail: { color: "#fff", fontSize: 12, marginTop: 2 },
+  detail: { color: theme.colors.pickerDoneText, fontSize: 12, marginTop: 2 },
 
   bookmarkWrapper: {
     position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: theme.colors.backdrop,
     padding: 6,
     borderRadius: 20,
   },
@@ -127,15 +188,15 @@ const styles = StyleSheet.create({
     right: 10,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2E7D6A",
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    backgroundColor: colors.primary,
+    paddingVertical: theme.spacing.xs + 2,
+    paddingHorizontal: theme.spacing.md + 2,
     borderRadius: 25,
     elevation: 6,
   },
 
   reserveBadgeText: {
-    color: "#fff",
+    color: theme.colors.pickerDoneText,
     fontWeight: "700",
     fontSize: 14,
   },

@@ -4,10 +4,12 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import theme, { colors } from "../../components/theme";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import { useLocalSearchParams } from "expo-router";
 import { db } from "../firebase/firebase";
 import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
@@ -19,6 +21,7 @@ export default function ParkingReservationsScreen() {
   const { parkingId, name } = useLocalSearchParams();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [doneVisible, setDoneVisible] = useState(false);
 
   const fetchReservations = useCallback(async () => {
     setLoading(true);
@@ -45,7 +48,11 @@ export default function ParkingReservationsScreen() {
   const handleDeleteReservation = useCallback(async (id) => {
     try {
       await deleteDoc(doc(db, "bookings", id));
-      fetchReservations();
+      setDoneVisible(true);
+      setTimeout(() => {
+        setDoneVisible(false);
+        fetchReservations();
+      }, 900);
     } catch {
       Alert.alert("Error", "Failed to delete.");
     }
@@ -61,9 +68,9 @@ export default function ParkingReservationsScreen() {
         <Text style={styles.text}>Time: {item.time}</Text>
         <Text style={styles.text}>Duration: {item.duration} hours</Text>
 
-        <TouchableOpacity style={[styles.btn, styles.danger]} onPress={() => handleDeleteReservation(item.id)}>
+        <AnimatedTouchable style={[styles.btn, styles.danger]} onPress={() => handleDeleteReservation(item.id)}>
           <Text style={styles.btnText}>Delete</Text>
-        </TouchableOpacity>
+        </AnimatedTouchable>
       </View>
     ),
     [handleDeleteReservation]
@@ -74,7 +81,7 @@ export default function ParkingReservationsScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
 
@@ -92,7 +99,7 @@ export default function ParkingReservationsScreen() {
         <FlatList
           data={reservations}
           keyExtractor={keyExtractor}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: theme.spacing.lg }}
           renderItem={renderItem}
           initialNumToRender={6}
           maxToRenderPerBatch={8}
@@ -102,29 +109,30 @@ export default function ParkingReservationsScreen() {
           getItemLayout={getItemLayout}
         />
       )}
+      <TaskCompleteOverlay visible={doneVisible} message="Deleted" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { flex: 1, backgroundColor: "#E9F8F6" },
+  container: { flex: 1, backgroundColor: colors.background },
   title: {
-    marginTop: 10,
-    marginLeft: 16,
+    marginTop: theme.spacing.md - 2,
+    marginLeft: theme.spacing.lg,
     fontSize: 18,
     fontWeight: "700",
-    color: "#2E7D6A",
+    color: colors.primary,
   },
   card: {
-    backgroundColor: "#fff",
-    padding: 12,
+    backgroundColor: colors.surface,
+    padding: theme.spacing.md,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
     elevation: 2,
   },
-  text: { color: "#333", marginTop: 4 },
-  btn: { marginTop: 8, padding: 8, borderRadius: 8, alignItems: "center" },
-  danger: { backgroundColor: "#b02a37" },
-  btnText: { color: "#fff", fontWeight: "700" },
+  text: { color: colors.text, marginTop: 4 },
+  btn: { marginTop: theme.spacing.sm, padding: theme.spacing.sm, borderRadius: 8, alignItems: "center" },
+  danger: { backgroundColor: colors.danger },
+  btnText: { color: colors.textOnPrimary, fontWeight: "700" },
 });

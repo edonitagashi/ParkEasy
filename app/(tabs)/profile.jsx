@@ -13,6 +13,7 @@ import {
   Linking,
   LayoutAnimation,
   UIManager,
+  InteractionManager,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,6 +21,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from "../firebase/firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import theme from '../../components/theme';
+const { colors } = theme;
 
 const USERS_KEY = "users";               
 const CURRENT_USER_KEY = "currentUser";  
@@ -161,8 +164,10 @@ export default function Profile() {
             }
           }
 
-          // 🔹 pas gjithë logjikës lokale, provo me marrë avatarin më të fundit nga Firestore
-          await loadAvatarFromFirestore();
+          // 🔹 pas gjithë logjikës lokale, ngarko avatarin nga Firestore pas animacioneve
+          InteractionManager.runAfterInteractions(() => {
+            loadAvatarFromFirestore();
+          });
         } else {
           // No Firebase user, check AsyncStorage
           const raw = await AsyncStorage.getItem(CURRENT_USER_KEY);
@@ -440,10 +445,15 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <View style={[s.container, { alignItems: "center", justifyContent: "center" }]}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 10, color: "#4C6E64" }}>Loading profile...</Text>
-      </View>
+      <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
+        <View style={{ alignItems: 'center', marginTop: 24 }}>
+          <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: '#EAEAEA' }} />
+        </View>
+        <View style={{ marginTop: 24, paddingHorizontal: 16 }}>
+          <View style={{ height: 18, width: '50%', backgroundColor: '#EAEAEA', borderRadius: 8, marginBottom: 12 }} />
+          <View style={{ height: 16, width: '70%', backgroundColor: '#EAEAEA', borderRadius: 8 }} />
+        </View>
+      </ScrollView>
     );
   }
 
@@ -707,7 +717,7 @@ const s = StyleSheet.create({
   },
 
   row:{ 
-    backgroundColor:"#fff", 
+    backgroundColor:colors.surface, 
     borderWidth:1, 
     borderColor:"#CFE1DB", 
     borderRadius:12, 
@@ -749,7 +759,7 @@ const s = StyleSheet.create({
   },
 
   saveTxt:{ 
-    color:"#fff", 
+    color:colors.textOnPrimary, 
     fontWeight:"700" 
   },
   
@@ -767,7 +777,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
@@ -791,7 +801,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: 12,
     marginTop: 16,
@@ -821,7 +831,7 @@ const s = StyleSheet.create({
   },
 
   expandedPanel: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,

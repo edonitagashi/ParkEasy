@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import theme, { colors, shadows } from "../components/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 
@@ -21,7 +22,7 @@ export default function Index() {
   
   return (
     <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
-      <StatusBar barStyle="dark-content" backgroundColor="#E9F8F6" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}>
           <Text style={styles.appName}>ParkEasy</Text>
@@ -51,31 +52,31 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
-  scrollContainer: { alignItems: "center", paddingVertical: 20 },
+  scrollContainer: { alignItems: "center", paddingVertical: theme.spacing.lg + theme.spacing.sm },
   container: {
     alignItems: "center", justifyContent: "center", width: "90%",
-    backgroundColor: "#FFFFFFDD", borderRadius: 20, paddingVertical: 40, paddingHorizontal: 20,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 8,
+    backgroundColor: "#FFFFFFDD", borderRadius: 20, paddingVertical: theme.spacing.xxl + theme.spacing.md, paddingHorizontal: theme.spacing.lg + theme.spacing.sm,
+    shadowColor: shadows.card.shadowColor, shadowOffset: shadows.card.shadowOffset, shadowOpacity: shadows.card.shadowOpacity, shadowRadius: shadows.card.shadowRadius, elevation: 8,
   },
-  headerImage: { width: "100%" , height: 120, marginBottom: 10, borderRadius: 12 },
+  headerImage: { width: "100%" , height: 120, marginBottom: theme.spacing.md - theme.spacing.xs, borderRadius: 12 },
   appName: {
-    fontSize: 38, fontWeight: "900", color: "#2E7D6A", textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.15)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4, marginBottom: 10,
+    fontSize: 38, fontWeight: "900", color: colors.primary, textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.15)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4, marginBottom: theme.spacing.md - theme.spacing.xs,
   },
-  subtitle: { fontSize: 16, color: "#4C6E64", textAlign: "center", marginTop: 8, marginBottom: 25 },
+  subtitle: { fontSize: 16, color: colors.text, textAlign: "center", marginTop: theme.spacing.sm, marginBottom: theme.spacing.xxl - theme.spacing.md },
   banner: {
-    backgroundColor: "#BFE5D7", borderRadius: 14, padding: 18, width: "100%", alignItems: "center", marginBottom: 35,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5,
+    backgroundColor: colors.accent, borderRadius: 14, padding: theme.spacing.lg + theme.spacing.xs, width: "100%", alignItems: "center", marginBottom: theme.spacing.xxl + theme.spacing.sm,
+    shadowColor: shadows.card.shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5,
   },
-  bannerTitle: { fontSize: 18, fontWeight: "700", color: "#1E5E4D", marginBottom: 6 },
-  bannerText: { fontSize: 14, color: "#2F6657", textAlign: "center" },
+  bannerTitle: { fontSize: 18, fontWeight: "700", color: colors.primaryDark, marginBottom: theme.spacing.sm - theme.spacing.xs },
+  bannerText: { fontSize: 14, color: colors.text, textAlign: "center" },
   buttonContainer: { width: "100%", alignItems: "center" },
   primaryButton: {
-    backgroundColor: "#2E7D6A", width: "80%", paddingVertical: 14, borderRadius: 14, alignItems: "center",
-    justifyContent: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3,
-    shadowRadius: 6, elevation: 5, marginBottom: 15,
+    backgroundColor: colors.primary, width: "80%", paddingVertical: theme.spacing.md, borderRadius: 14, alignItems: "center",
+    justifyContent: "center", shadowColor: shadows.card.shadowColor, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3,
+    shadowRadius: 6, elevation: 5, marginBottom: theme.spacing.lg - theme.spacing.sm,
   },
-  primaryText: { color: "#fff", fontSize: 18, fontWeight: "700" },
-  secondaryButton: { width: "80%", paddingVertical: 14, borderWidth: 2, borderColor: "#2E7D6A", borderRadius: 14, alignItems: "center" },
-  secondaryText: { color: "#2E7D6A", fontSize: 18, fontWeight: "700" },
+  primaryText: { color: colors.textOnPrimary, fontSize: 18, fontWeight: "700" },
+  secondaryButton: { width: "80%", paddingVertical: theme.spacing.md, borderWidth: 2, borderColor: colors.primary, borderRadius: 14, alignItems: "center" },
+  secondaryText: { color: colors.primary, fontSize: 18, fontWeight: "700" },
 });

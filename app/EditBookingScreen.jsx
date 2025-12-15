@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
+import theme from "../components/theme";
+const { colors } = theme;
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   StyleSheet,
   Platform,
+  TouchableOpacity,
 } from "react-native";
+import AnimatedTouchable from "../components/animation/AnimatedTouchable";
+import TaskCompleteOverlay from "../components/animation/TaskCompleteOverlay";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import { useLocalSearchParams, router } from "expo-router";
@@ -25,6 +29,7 @@ export default function EditBookingScreen() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [doneVisible, setDoneVisible] = useState(false);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -79,10 +84,11 @@ export default function EditBookingScreen() {
         duration,
       });
 
-      Alert.alert("Success", "Booking updated successfully!");
-
-      // fullscreen navigation + refresh
-      router.replace("/(tabs)/BookingsScreen");
+      setDoneVisible(true);
+      setTimeout(() => {
+        setDoneVisible(false);
+        router.replace("/(tabs)/BookingsScreen");
+      }, 900);
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -213,7 +219,7 @@ export default function EditBookingScreen() {
         </View>
 
         {/* SAVE BUTTON */}
-        <TouchableOpacity
+        <AnimatedTouchable
           style={[styles.button, saving && { opacity: 0.7 }]}
           onPress={handleUpdate}
           disabled={saving}
@@ -221,7 +227,8 @@ export default function EditBookingScreen() {
           <Text style={styles.buttonText}>
             {saving ? "Saving..." : "Save Changes"}
           </Text>
-        </TouchableOpacity>
+        </AnimatedTouchable>
+        <TaskCompleteOverlay visible={doneVisible} message="Saved" />
       </View>
     </>
   );
@@ -230,7 +237,7 @@ export default function EditBookingScreen() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 22, backgroundColor: "#FFF" },
+  container: { flex: 1, padding: theme.spacing.lg + theme.spacing.xs, backgroundColor: colors.surface },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFF",
+    color: colors.textOnPrimary,
     fontSize: 16,
     fontWeight: "700",
   },

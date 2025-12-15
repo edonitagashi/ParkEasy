@@ -5,9 +5,10 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import theme, { colors } from "../../components/theme";
 import * as Location from "expo-location";
 import haversine from "haversine-distance";
 import { AntDesign } from "@expo/vector-icons";
@@ -125,11 +126,26 @@ export default function SearchParkingScreen() {
   );
 
   if (loading || !parkings) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
-        <Text style={{ marginTop: 10 }}>Loading...</Text>
+    // skeleton list during initial load
+    const skeletons = Array.from({ length: 6 }).map((_, i) => (
+      <View key={i} style={{ height: ITEM_HEIGHT, marginHorizontal: 16, marginBottom: theme.spacing.md }}>
+        <View style={{ flexDirection: 'row', height: '100%', borderRadius: 14, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider }}>
+          <View style={{ width: 120, height: '100%', backgroundColor: colors.divider }} />
+          <View style={{ flex: 1, padding: theme.spacing.md }}>
+            <View style={{ height: 14, width: '30%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
+            <View style={{ height: 18, width: '60%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
+            <View style={{ height: 12, width: '50%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.xs }} />
+            <View style={{ height: 12, width: '40%', backgroundColor: colors.divider, borderRadius: 6 }} />
+          </View>
+        </View>
       </View>
+    ));
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <SearchHeader title="Search Parking" />
+        <View style={{ paddingTop: theme.spacing.md }}>{skeletons}</View>
+      </SafeAreaView>
     );
   }
 
@@ -138,12 +154,12 @@ export default function SearchParkingScreen() {
       <SafeAreaView style={styles.container}>
         <SearchHeader title="Search Parking" />
         <View style={styles.center}>
-          <Text style={{ color: "red", marginBottom: 10 }}>
+          <Text style={{ color: colors.danger, marginBottom: theme.spacing.md - 2 }}>
             Failed to load data.
           </Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={refresh}>
-            <Text style={{ color: "#fff" }}>Retry</Text>
-          </TouchableOpacity>
+          <AnimatedTouchable style={styles.retryBtn} onPress={refresh}>
+            <Text style={{ color: colors.textOnPrimary }}>Retry</Text>
+          </AnimatedTouchable>
         </View>
       </SafeAreaView>
     );
@@ -158,7 +174,7 @@ export default function SearchParkingScreen() {
         <SearchBar value={searchText} onChangeText={setSearchText} />
 
         {/* SORTING BUTTON */}
-        <TouchableOpacity
+        <AnimatedTouchable
           style={styles.sortButton}
           onPress={() => setShowSortMenu((prev) => !prev)}
         >
@@ -173,26 +189,26 @@ export default function SearchParkingScreen() {
               : "Name A-Z"}
           </Text>
           <AntDesign name="down" size={16} />
-        </TouchableOpacity>
+        </AnimatedTouchable>
 
         {/* SORT DROPDOWN MENU */}
         {showSortMenu && (
           <View style={styles.sortMenu}>
-            <TouchableOpacity onPress={() => { setSortOption("distance"); setShowSortMenu(false); }}>
+            <AnimatedTouchable onPress={() => { setSortOption("distance"); setShowSortMenu(false); }}>
               <Text style={styles.sortOption}>Nearest</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
 
-            <TouchableOpacity onPress={() => { setSortOption("priceLow"); setShowSortMenu(false); }}>
+            <AnimatedTouchable onPress={() => { setSortOption("priceLow"); setShowSortMenu(false); }}>
               <Text style={styles.sortOption}>Price (Low → High)</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
 
-            <TouchableOpacity onPress={() => { setSortOption("priceHigh"); setShowSortMenu(false); }}>
+            <AnimatedTouchable onPress={() => { setSortOption("priceHigh"); setShowSortMenu(false); }}>
               <Text style={styles.sortOption}>Price (High → Low)</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
 
-            <TouchableOpacity onPress={() => { setSortOption("nameAZ"); setShowSortMenu(false); }}>
+            <AnimatedTouchable onPress={() => { setSortOption("nameAZ"); setShowSortMenu(false); }}>
               <Text style={styles.sortOption}>Name (A → Z)</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
           </View>
         )}
       </View>
@@ -217,18 +233,18 @@ export default function SearchParkingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: colors.surface },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  searchContainer: { padding: 12 },
+  searchContainer: { padding: theme.spacing.md },
 
   sortButton: {
-    marginTop: 8,
-    padding: 12,
+    marginTop: theme.spacing.sm,
+    padding: theme.spacing.md,
     backgroundColor: "#F2F2F2",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#DDD",
+    borderColor: colors.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -237,32 +253,32 @@ const styles = StyleSheet.create({
   sortButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: colors.text,
   },
 
   sortMenu: {
-    marginTop: 6,
-    backgroundColor: "#fff",
+    marginTop: theme.spacing.sm - theme.spacing.xs,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#DDD",
-    paddingVertical: 6,
+    borderColor: colors.border,
+    paddingVertical: theme.spacing.xs + 2,
     elevation: 4,
   },
 
   sortOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
+    paddingHorizontal: theme.spacing.md + 2,
     fontSize: 14,
-    color: "#333",
+    color: colors.text,
   },
 
-  listContent: { paddingBottom: 20 },
+  listContent: { paddingBottom: theme.spacing.xl - theme.spacing.sm },
 
   retryBtn: {
-    backgroundColor: "#2E7D6A",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: theme.spacing.xl - theme.spacing.sm,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
     borderRadius: 8,
   },
 });

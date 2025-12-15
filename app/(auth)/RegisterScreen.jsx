@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import theme from "../../components/theme";
+const { colors } = theme;
 import {
   View,
   Text,
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
   },
 
   roleTextActive: {
-    color: "white",
+    color: colors.textOnPrimary,
   },
 
   ownerBox: {
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "white",
+    color: colors.textOnPrimary,
     fontWeight: "bold",
     fontSize: 16,
   },

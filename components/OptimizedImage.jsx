@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { View, Image, StyleSheet, Animated, ActivityIndicator, Platform } from "react-native";
+import theme from "./theme";
 import { resolveImage } from "./images";
 
 /**
@@ -9,12 +10,13 @@ import { resolveImage } from "./images";
  * - If no thumbnail is present we show neutral BG + spinner and fade-in high-res (no low-res image swap).
  */
 
-const DEFAULT_BG = "#e6f0ec";
+const DEFAULT_BG = theme.colors.chipBg || "#e6f0ec";
 
 export default function OptimizedImage({ source, thumbnail, style = {}, resizeMode = "cover" }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPrefetched, setIsPrefetched] = useState(false);
   const opacity = useMemo(() => new Animated.Value(0), []);
+  const skeletonOpacity = useRef(new Animated.Value(0.6)).current;
 
   // resolve provided source (string -> {uri} or resolveImage)
   const resolved = (() => {
@@ -70,6 +72,23 @@ export default function OptimizedImage({ source, thumbnail, style = {}, resizeMo
     }
   }, [isLoaded, opacity]);
 
+  // skeleton shimmer pulse while not loaded
+  useEffect(() => {
+    let anim;
+    if (!isLoaded) {
+      anim = Animated.loop(
+        Animated.sequence([
+          Animated.timing(skeletonOpacity, { toValue: 0.4, duration: 500, useNativeDriver: true }),
+          Animated.timing(skeletonOpacity, { toValue: 0.7, duration: 500, useNativeDriver: true }),
+        ])
+      );
+      anim.start();
+    }
+    return () => {
+      try { anim && anim.stop(); } catch {}
+    };
+  }, [isLoaded, skeletonOpacity]);
+
   // Derive explicit width/height from style if present
   const explicitWidth = (style && (style.width || style?.width === 0)) ? style.width : null;
   const explicitHeight = (style && (style.height || style?.height === 0)) ? style.height : null;
@@ -87,6 +106,10 @@ export default function OptimizedImage({ source, thumbnail, style = {}, resizeMo
 
   return (
     <View style={[styles.wrapper, style, !lowResSource && { backgroundColor: DEFAULT_BG }]}>
+      {/* Skeleton loader while image is not loaded */}
+      {!isLoaded && (
+        <Animated.View style={[StyleSheet.absoluteFill, styles.skeleton, { opacity: skeletonOpacity }]} />
+      )}
       {/* Low-res thumbnail (use same resizeMode to keep crop identical) */}
       {lowResSource ? (
         <Image
@@ -123,5 +146,8 @@ const styles = StyleSheet.create({
   center: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  skeleton: {
+    backgroundColor: theme.colors.divider,
   },
 });

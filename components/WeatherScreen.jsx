@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import theme from "./theme";
 
 const cities = {
   "Prishtinë": { lat: 42.6629, lon: 21.1655 },
@@ -48,15 +49,15 @@ export default function WeatherScreen() {
   }, [city]);
 
   const getIcon = (code) => {
-    if (code === 0) return <MaterialIcons name="wb-sunny" size={60} color="#F1C40F" />;
-    if (code <= 3) return <MaterialIcons name="wb-cloudy" size={60} color="#5DA3FA" />;
-    if (code <= 67) return <FontAwesome5 name="cloud-rain" size={60} color="#3498DB" />;
-    if (code <= 77) return <FontAwesome5 name="snowflake" size={60} color="#85C1E9" />;
+    if (code === 0) return <MaterialIcons name="wb-sunny" size={60} color={theme.colors.warning} />;
+    if (code <= 3) return <MaterialIcons name="wb-cloudy" size={60} color={theme.colors.accent} />;
+    if (code <= 67) return <FontAwesome5 name="cloud-rain" size={60} color={theme.colors.accent} />;
+    if (code <= 77) return <FontAwesome5 name="snowflake" size={60} color={theme.colors.accent} />;
     if (code <= 82)
-      return <FontAwesome5 name="cloud-showers-heavy" size={60} color="#2E86C1" />;
+      return <FontAwesome5 name="cloud-showers-heavy" size={60} color={theme.colors.accent} />;
     if (code >= 95)
-      return <MaterialIcons name="thunderstorm" size={60} color="#2E4053" />;
-    return <MaterialIcons name="wb-cloudy" size={60} color="#5DA3FA" />;
+      return <MaterialIcons name="thunderstorm" size={60} color={theme.colors.textStrong} />;
+    return <MaterialIcons name="wb-cloudy" size={60} color={theme.colors.accent} />;
   };
 
   const local = data ? new Date(data.time) : null;
@@ -71,7 +72,7 @@ export default function WeatherScreen() {
         ))}
       </Picker>
 
-      {loading && <ActivityIndicator size="large" color="#2E7D6A" />}
+      {loading && <ActivityIndicator size="large" color={theme.colors.primary} />}
       {error && <Text style={styles.error}>{error}</Text>}
 
       {data && !loading && (
@@ -86,7 +87,7 @@ export default function WeatherScreen() {
       )}
 
       <TouchableOpacity style={styles.btn} onPress={fetchWeather}>
-        <MaterialIcons name="refresh" size={22} color="#fff" />
+        <MaterialIcons name="refresh" size={22} color={theme.colors.pickerDoneText} />
         <Text style={styles.btnText}>Rifresko</Text>
       </TouchableOpacity>
     </View>
@@ -94,27 +95,27 @@ export default function WeatherScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#DFF6F0", alignItems: "center", justifyContent: "center" },
-  header: { fontSize: 26, fontWeight: "800", color: "#2E7D6A", marginBottom: 10 },
-  picker: { height: 50, width: 250, backgroundColor: "#fff", borderRadius: 10, marginBottom: 20 },
+  container: { flex: 1, backgroundColor: theme.colors.background, alignItems: "center", justifyContent: "center" },
+  header: { fontSize: 26, fontWeight: "800", color: theme.colors.primary, marginBottom: 10 },
+  picker: { height: 50, width: 250, backgroundColor: theme.colors.surface, borderRadius: 10, marginBottom: 20 },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface,
     width: "80%",
     borderRadius: 20,
-    padding: 25,
+    padding: theme.spacing.xl,
     alignItems: "center",
     elevation: 7,
-    marginBottom: 25,
+    marginBottom: theme.spacing.xl,
   },
-  text: { fontSize: 20, color: "#4C6E64", marginVertical: 5 },
-  error: { color: "red", fontSize: 18, marginBottom: 10 },
+  text: { fontSize: 20, color: theme.colors.text, marginVertical: 5 },
+  error: { color: theme.colors.danger, fontSize: 18, marginBottom: 10 },
   btn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2E7D6A",
-    paddingVertical: 10,
-    paddingHorizontal: 25,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
+    paddingHorizontal: theme.spacing.xl,
     borderRadius: 12,
   },
-  btnText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+  btnText: { color: theme.colors.pickerDoneText, fontSize: 18, fontWeight: "600" },
 });

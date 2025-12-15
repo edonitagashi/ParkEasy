@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "./theme";
 
 function SearchHeader({ title }) {
   return (
@@ -16,7 +17,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#5C8374",
+    color: colors.secondary,
   },
 });
 

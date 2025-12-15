@@ -1,6 +1,8 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, StatusBar, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import theme, { colors } from "../../components/theme";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import ParkingCard from "../../components/ParkingCard";
 import SearchHeader from "../../components/SearchHeader";
 import { resolveImage } from "../../components/images";
@@ -15,6 +17,7 @@ const ITEM_HEIGHT = 160;
 export default function FavoritesScreen() {
   const { parkings, loading: parkingsLoading, error: parkingsError, refresh } = useParkings();
   const { favorites, loading: favsLoading, error: favsError, toggleFavorite } = useFavorites();
+  const [doneVisible, setDoneVisible] = useState(false);
 
   const loading = parkingsLoading || favsLoading;
   const error = parkingsError || favsError;
@@ -40,7 +43,11 @@ export default function FavoritesScreen() {
             ...item,
             image: imageSource,
             isFavorite: favorites.includes(item.id),
-            onFavoriteToggle: () => toggleFavorite(item.id),
+            onFavoriteToggle: () => {
+              toggleFavorite(item.id);
+              setDoneVisible(true);
+              setTimeout(() => setDoneVisible(false), 600);
+            },
           }}
         />
       );
@@ -51,14 +58,26 @@ export default function FavoritesScreen() {
   const getItemLayout = useCallback((_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }), []);
 
   if (loading) {
+    // Render lightweight skeleton list
+    const skeletons = Array.from({ length: 6 }).map((_, i) => (
+      <View key={i} style={{ height: ITEM_HEIGHT, marginHorizontal: 16, marginBottom: theme.spacing.md }}>
+        <View style={{ flexDirection: 'row', height: '100%', borderRadius: 14, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider }}>
+          <View style={{ width: 120, height: '100%', backgroundColor: colors.divider }} />
+          <View style={{ flex: 1, padding: theme.spacing.md }}>
+            <View style={{ height: 14, width: '30%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
+            <View style={{ height: 18, width: '60%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
+            <View style={{ height: 12, width: '50%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.xs }} />
+            <View style={{ height: 12, width: '40%', backgroundColor: colors.divider, borderRadius: 6 }} />
+          </View>
+        </View>
+      </View>
+    ));
+
     return (
       <SafeAreaView style={styles.container} edges={["left", "right"]}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
         <SearchHeader title="Favorites" />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#2E7D6A" />
-          <Text style={{ marginTop: 10 }}>Loading favorites...</Text>
-        </View>
+        <View style={{ paddingTop: theme.spacing.md }}>{skeletons}</View>
       </SafeAreaView>
     );
   }
@@ -66,10 +85,10 @@ export default function FavoritesScreen() {
   if (error) {
     return (
       <SafeAreaView style={styles.container} edges={["left", "right"]}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
         <SearchHeader title="Favorites" />
         <View style={{ padding: 20, alignItems: "center" }}>
-          <Text style={{ color: "red", marginBottom: 12 }}>Failed to load favorites.</Text>
+          <Text style={{ color: colors.danger, marginBottom: 12 }}>Failed to load favorites.</Text>
         </View>
       </SafeAreaView>
     );
@@ -77,7 +96,7 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
       <SearchHeader title="Favorites" />
 
       {favoriteParkings.length === 0 ? (
@@ -88,9 +107,14 @@ export default function FavoritesScreen() {
         <FlatList
           data={favoriteParkings}
           keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={(args) => {
+            const node = renderItem(args);
+            return React.cloneElement(node, { blur: true });
+          }}
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 1, backgroundColor: theme.colors.divider, marginVertical: theme.spacing.sm }} />
+          )}
+          contentContainerStyle={{ paddingBottom: theme.spacing.lg }}
           style={{ flex: 1 }}
           initialNumToRender={6}
           maxToRenderPerBatch={8}
@@ -100,12 +124,13 @@ export default function FavoritesScreen() {
           getItemLayout={getItemLayout}
         />
       )}
+      <TaskCompleteOverlay visible={doneVisible} message="Updated" />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: colors.surface },
   noFavorites: { flex: 1, justifyContent: "center", alignItems: "center" },
-  noText: { fontSize: 16, color: "#777" },
+  noText: { fontSize: 16, color: colors.textMuted },
 });

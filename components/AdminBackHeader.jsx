@@ -1,7 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import AnimatedTouchable from "./animation/AnimatedTouchable";
 import { Ionicons } from "@expo/vector-icons";
+import theme from "./theme";
 import { useRouter } from "expo-router";
+import { colors } from "./theme";
 
 function AdminBackHeader({ title }) {
   const router = useRouter();
@@ -16,9 +19,9 @@ function AdminBackHeader({ title }) {
 
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-        <Ionicons name="chevron-back" size={24} color="#fff" />
-      </TouchableOpacity>
+      <AnimatedTouchable onPress={handleBack} style={styles.backBtn}>
+        <Ionicons name="chevron-back" size={24} color={theme.colors.textOnPrimary} />
+      </AnimatedTouchable>
 
       <Text style={styles.title}>{title}</Text>
     </View>
@@ -27,7 +30,7 @@ function AdminBackHeader({ title }) {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#2E7D6A",
+    backgroundColor: colors.primary,
     paddingTop: 18,
     paddingBottom: 12,
     paddingHorizontal: 14,
@@ -41,7 +44,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
     flex: 1,
     textAlign: "center",
     marginRight: 24,

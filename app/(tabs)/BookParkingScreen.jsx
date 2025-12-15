@@ -3,16 +3,20 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   StyleSheet,
   Platform,
+  TouchableOpacity,
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
+import { colors, radii, spacing } from "../../components/theme";
 
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import FadeModal from "../../components/animation/FadeModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 
@@ -27,6 +31,7 @@ export default function BookParkingScreen() {
 
   const [duration, setDuration] = useState("");
   const [loading, setLoading] = useState(false);
+  const [doneVisible, setDoneVisible] = useState(false);
 
   const formatDate = (d) => d.toISOString().split("T")[0];
   const formatTime = (t) =>
@@ -54,9 +59,11 @@ export default function BookParkingScreen() {
         createdAt: new Date(),
       });
 
-      Alert.alert("Success", "Parking booked successfully!");
-
-      router.replace("/(tabs)/BookingsScreen");
+      setDoneVisible(true);
+      setTimeout(() => {
+        setDoneVisible(false);
+        router.replace("/(tabs)/BookingsScreen");
+      }, 1000);
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -73,7 +80,7 @@ export default function BookParkingScreen() {
       {Platform.OS === "web" ? (
         <View style={styles.input}>
           <View style={styles.iconRow}>
-            <Ionicons name="calendar-outline" size={20} color="#2E7D6A" />
+            <Ionicons name="calendar-outline" size={20} color={colors.primary} />
             <input
               type="date"
               value={formatDate(date)}
@@ -91,16 +98,36 @@ export default function BookParkingScreen() {
             </View>
           </TouchableOpacity>
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={date}
-              mode="date"
-              onChange={(e, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) setDate(selectedDate);
-              }}
-            />
-          )}
+          <FadeModal visible={showDatePicker} onClose={() => setShowDatePicker(false)}>
+            <View style={{ gap: 12 }}>
+              <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 4, color: colors.pickerHeader }}>Select date</Text>
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                themeVariant={Platform.OS === "ios" ? "light" : undefined}
+                textColor={Platform.OS === "ios" ? colors.pickerWheelText : undefined}
+                onChange={(e, selectedDate) => {
+                  if (Platform.OS !== "ios") setShowDatePicker(false);
+                  if (selectedDate) setDate(selectedDate);
+                }}
+                minimumDate={new Date()}
+              />
+              {Platform.OS === "ios" && (
+                <AnimatedTouchable
+                  style={{
+                    backgroundColor: colors.pickerDoneBg || colors.primary,
+                    paddingVertical: 12,
+                    borderRadius: radii.md,
+                    alignItems: "center",
+                  }}
+                  onPress={() => setShowDatePicker(false)}
+                >
+                  <Text style={{ color: colors.pickerDoneText, fontWeight: "700" }}>Done</Text>
+                </AnimatedTouchable>
+              )}
+            </View>
+          </FadeModal>
         </>
       )}
 
@@ -108,7 +135,7 @@ export default function BookParkingScreen() {
       {Platform.OS === "web" ? (
         <View style={styles.input}>
           <View style={styles.iconRow}>
-            <Ionicons name="time-outline" size={20} color="#2E7D6A" />
+            <Ionicons name="time-outline" size={20} color={colors.primary} />
             <input
               type="time"
               value={formatTime(time)}
@@ -132,24 +159,43 @@ export default function BookParkingScreen() {
             </View>
           </TouchableOpacity>
 
-          {showTimePicker && (
-            <DateTimePicker
-              value={time}
-              mode="time"
-              is24Hour={true}
-              onChange={(e, selectedTime) => {
-                setShowTimePicker(false);
-                if (selectedTime) setTime(selectedTime);
-              }}
-            />
-          )}
+          <FadeModal visible={showTimePicker} onClose={() => setShowTimePicker(false)}>
+            <View style={{ gap: 12 }}>
+              <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 4, color: colors.pickerHeader }}>Select time</Text>
+              <DateTimePicker
+                value={time}
+                mode="time"
+                is24Hour={true}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                themeVariant={Platform.OS === "ios" ? "light" : undefined}
+                textColor={Platform.OS === "ios" ? colors.pickerWheelText : undefined}
+                onChange={(e, selectedTime) => {
+                  if (Platform.OS !== "ios") setShowTimePicker(false);
+                  if (selectedTime) setTime(selectedTime);
+                }}
+              />
+              {Platform.OS === "ios" && (
+                <AnimatedTouchable
+                  style={{
+                    backgroundColor: colors.pickerDoneBg || colors.primary,
+                    paddingVertical: 12,
+                    borderRadius: radii.md,
+                    alignItems: "center",
+                  }}
+                  onPress={() => setShowTimePicker(false)}
+                >
+                  <Text style={{ color: colors.pickerDoneText, fontWeight: "700" }}>Done</Text>
+                </AnimatedTouchable>
+              )}
+            </View>
+          </FadeModal>
         </>
       )}
 
       {/* DURATION FIELD */}
       <View style={styles.input}>
         <View style={styles.iconRow}>
-          <Ionicons name="hourglass-outline" size={20} color="#2E7D6A" />
+          <Ionicons name="hourglass-outline" size={20} color={colors.primary} />
           <TextInput
             style={styles.textField}
             placeholder="Duration (hours)"
@@ -162,7 +208,7 @@ export default function BookParkingScreen() {
       </View>
 
       {/* SUBMIT */}
-      <TouchableOpacity
+      <AnimatedTouchable
         style={[styles.button, loading && { opacity: 0.7 }]}
         onPress={handleBooking}
         disabled={loading}
@@ -170,7 +216,8 @@ export default function BookParkingScreen() {
         <Text style={styles.buttonText}>
           {loading ? "Saving..." : "Reserve Now"}
         </Text>
-      </TouchableOpacity>
+      </AnimatedTouchable>
+      <TaskCompleteOverlay visible={doneVisible} message="Reserved" />
     </View>
   );
 }
@@ -178,20 +225,20 @@ export default function BookParkingScreen() {
 /* ---------- STYLES ---------- */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 22, backgroundColor: "#FFF" },
+  container: { flex: 1, padding: 22, backgroundColor: colors.surface },
 
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#2E7D6A",
+    color: colors.primary,
     marginBottom: 5,
   },
 
-  subtitle: { fontSize: 18, color: "#2E7D6A", marginBottom: 20 },
+  subtitle: { fontSize: 18, color: colors.primary, marginBottom: 20 },
 
   input: {
     borderWidth: 1,
-    borderColor: "#CCC",
+    borderColor: colors.border,
     padding: 12,
     borderRadius: 10,
     marginBottom: 15,
@@ -205,19 +252,19 @@ const styles = StyleSheet.create({
 
   inputText: {
     fontSize: 16,
-    color: "#333",
+    color: colors.text,
     marginLeft: 10,
   },
 
   textField: {
     fontSize: 16,
-    color: "#333",
+    color: colors.text,
     marginLeft: 10,
     flex: 1,
   },
 
   button: {
-    backgroundColor: "#2E7D6A",
+    backgroundColor: colors.primary,
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
@@ -225,7 +272,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFF",
+    color: colors.textOnPrimary,
     fontSize: 16,
     fontWeight: "700",
   },

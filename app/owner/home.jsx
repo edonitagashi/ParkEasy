@@ -10,6 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { auth, db } from "../firebase/firebase";
+import theme, { colors } from "../../components/theme";
 import {
   doc,
   getDoc,
@@ -119,7 +120,7 @@ export default function Home() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
 
@@ -135,7 +136,7 @@ export default function Home() {
   if (userData.ownerStatus === "rejected") {
     return (
       <View style={styles.center}>
-        <Text style={[styles.title, { color: "#c0392b" }]}>Request Rejected</Text>
+        <Text style={[styles.title, { color: colors.danger }]}>Request Rejected</Text>
         <Text style={styles.msg}>Check Profile to resubmit.</Text>
       </View>
     );
@@ -246,75 +247,75 @@ export default function Home() {
 //
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { flex: 1, padding: 20, backgroundColor: "#E9F8F6" },
+  container: { flex: 1, padding: theme.spacing.lg + theme.spacing.sm, backgroundColor: colors.background },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#2E7D6A",
-    marginVertical: 10,
+    color: colors.primary,
+    marginVertical: theme.spacing.md - 2,
     textAlign: "center",
   },
-  msg: { fontSize: 16, color: "#555", textAlign: "center", marginBottom: 20 },
+  msg: { fontSize: 16, color: colors.textMuted, textAlign: "center", marginBottom: theme.spacing.xl - theme.spacing.sm },
 
   parkingCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     width: "100%",
-    padding: 14,
+    padding: theme.spacing.md + theme.spacing.xs,
     borderRadius: 12,
-    marginBottom: 14,
+    marginBottom: theme.spacing.md + theme.spacing.xs,
     borderWidth: 1,
-    borderColor: "#CDEDE7",
+    borderColor: colors.borderSoft,
   },
-  pTitle: { fontSize: 20, fontWeight: "bold", color: "#2E7D6A" },
-  pText: { color: "#555", marginTop: 4 },
+  pTitle: { fontSize: 20, fontWeight: "bold", color: colors.primary },
+  pText: { color: colors.textMuted, marginTop: theme.spacing.sm - theme.spacing.xs },
 
   editBtn: {
-    marginTop: 12,
-    backgroundColor: "#2E7D6A",
-    paddingVertical: 8,
+    marginTop: theme.spacing.md,
+    backgroundColor: colors.primary,
+    paddingVertical: theme.spacing.sm,
     borderRadius: 8,
     alignItems: "center",
   },
-  editText: { color: "#fff", fontWeight: "700" },
+  editText: { color: colors.textOnPrimary, fontWeight: "700" },
 
   card: {
-    backgroundColor: "#fff",
-    padding: 12,
-    marginBottom: 10,
+    backgroundColor: colors.surface,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md - 2,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#CDEDE7",
+    borderColor: colors.borderSoft,
   },
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: colors.backdrop,
     justifyContent: "center",
-    padding: 20,
+    padding: theme.spacing.lg + theme.spacing.sm,
   },
   modalBox: {
-    backgroundColor: "#fff",
-    padding: 18,
+    backgroundColor: colors.surface,
+    padding: theme.spacing.lg + theme.spacing.xs,
     borderRadius: 12,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2E7D6A",
-    marginBottom: 12,
+    color: colors.primary,
+    marginBottom: theme.spacing.md,
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: colors.border,
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    padding: theme.spacing.sm + theme.spacing.xs,
+    marginBottom: theme.spacing.md - 2,
   },
 
-  row: { flexDirection: "row", gap: 10 },
-  btn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
-  save: { backgroundColor: "#2E7D6A" },
-  cancel: { backgroundColor: "#d9534f" },
-  btnText: { color: "#fff", fontWeight: "700" },
+  row: { flexDirection: "row", gap: theme.spacing.sm + theme.spacing.xs },
+  btn: { flex: 1, paddingVertical: theme.spacing.sm + theme.spacing.xs, borderRadius: 10, alignItems: "center" },
+  save: { backgroundColor: colors.primary },
+  cancel: { backgroundColor: colors.danger },
+  btnText: { color: colors.textOnPrimary, fontWeight: "700" },
 });

@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebase/firebase";
+import theme, { colors } from "../../components/theme";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
 
@@ -18,7 +19,7 @@ export default function AdminLayout() {
     <View
       style={{
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: colors.surface,
 
         // 🔥 KY FIX E BEN ADMIN PANEL ME U SCROLLU NË WEB
         ...(Platform.OS === "web" && {
@@ -32,7 +33,7 @@ export default function AdminLayout() {
         <Text style={styles.title}>Admin Panel</Text>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <MaterialIcons name="logout" size={20} color="#fff" />
+          <MaterialIcons name="logout" size={20} color={colors.textOnPrimary} />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -49,31 +50,31 @@ export default function AdminLayout() {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#2E7D6A",
-    paddingTop: 20,
-    paddingBottom: 15,
-    paddingHorizontal: 16,
+    backgroundColor: colors.primary,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     elevation: 5,
   },
   title: {
-    color: "#fff",
+    color: colors.textOnPrimary,
     fontSize: 22,
     fontWeight: "bold",
   },
   logoutBtn: {
     flexDirection: "row",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#FF6B6B",
+    gap: theme.spacing.sm - theme.spacing.xs,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    backgroundColor: colors.danger,
     borderRadius: 8,
     alignItems: "center",
   },
   logoutText: {
-    color: "#fff",
+    color: colors.textOnPrimary,
     fontWeight: "600",
   },
 });

@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import theme, { colors } from "../../components/theme";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import { db } from "../firebase/firebase";
 import {
   collection,
@@ -24,6 +27,7 @@ const ITEM_HEIGHT = 150;
 export default function ParkingRequestsScreen() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [doneVisible, setDoneVisible] = useState(false);
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -63,9 +67,11 @@ export default function ParkingRequestsScreen() {
 
       await deleteDoc(doc(db, "ownerRequests", item.id));
 
-      Alert.alert("Approved", "Parking request has been approved!");
-
-      fetchRequests();
+      setDoneVisible(true);
+      setTimeout(() => {
+        setDoneVisible(false);
+        fetchRequests();
+      }, 900);
     } catch (err) {
       console.log(err);
       Alert.alert("Error", "Failed to approve request.");
@@ -80,8 +86,11 @@ export default function ParkingRequestsScreen() {
 
       await deleteDoc(doc(db, "ownerRequests", item.id));
 
-      Alert.alert("Rejected", "Request has been rejected.");
-      fetchRequests();
+      setDoneVisible(true);
+      setTimeout(() => {
+        setDoneVisible(false);
+        fetchRequests();
+      }, 900);
     } catch (err) {
       console.log(err);
       Alert.alert("Error", "Failed to reject request.");
@@ -97,13 +106,13 @@ export default function ParkingRequestsScreen() {
         <Text style={styles.text}>{item.address}</Text>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={[styles.btn, styles.accept]} onPress={() => handleAccept(item)}>
+          <AnimatedTouchable style={[styles.btn, styles.accept]} onPress={() => handleAccept(item)}>
             <Text style={styles.btnText}>Accept</Text>
-          </TouchableOpacity>
+          </AnimatedTouchable>
 
-          <TouchableOpacity style={[styles.btn, styles.reject]} onPress={() => handleReject(item)}>
+          <AnimatedTouchable style={[styles.btn, styles.reject]} onPress={() => handleReject(item)}>
             <Text style={styles.btnText}>Reject</Text>
-          </TouchableOpacity>
+          </AnimatedTouchable>
         </View>
       </View>
     ),
@@ -115,7 +124,7 @@ export default function ParkingRequestsScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
 
@@ -131,7 +140,7 @@ export default function ParkingRequestsScreen() {
         <FlatList
           data={requests}
           keyExtractor={keyExtractor}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: theme.spacing.lg }}
           renderItem={renderItem}
           initialNumToRender={6}
           maxToRenderPerBatch={8}
@@ -141,19 +150,20 @@ export default function ParkingRequestsScreen() {
           getItemLayout={getItemLayout}
         />
       )}
+      <TaskCompleteOverlay visible={doneVisible} message="Updated" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  card: { backgroundColor: "#fff", padding: 12, borderRadius: 8, marginBottom: 12, elevation: 2 },
+  container: { flex: 1, backgroundColor: colors.surface },
+  card: { backgroundColor: colors.surface, padding: theme.spacing.md, borderRadius: 8, marginBottom: theme.spacing.md, elevation: 2 },
   name: { fontSize: 16, fontWeight: "700" },
-  text: { color: "#333", marginTop: 6 },
-  actions: { flexDirection: "row", marginTop: 10 },
-  btn: { flex: 1, padding: 10, borderRadius: 8, alignItems: "center", marginRight: 8 },
-  accept: { backgroundColor: "#2E7D6A" },
-  reject: { backgroundColor: "#b02a37" },
-  btnText: { color: "#fff", fontWeight: "700" },
+  text: { color: colors.text, marginTop: theme.spacing.sm - theme.spacing.xs },
+  actions: { flexDirection: "row", marginTop: theme.spacing.md - 2 },
+  btn: { flex: 1, padding: theme.spacing.sm + theme.spacing.xs, borderRadius: 8, alignItems: "center", marginRight: theme.spacing.sm },
+  accept: { backgroundColor: colors.primary },
+  reject: { backgroundColor: colors.danger },
+  btnText: { color: theme.colors.textOnPrimary, fontWeight: "700" },
 });

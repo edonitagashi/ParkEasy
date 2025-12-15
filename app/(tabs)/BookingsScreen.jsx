@@ -3,22 +3,26 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   StyleSheet,
   Alert,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
+  import theme from "../../components/theme";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import { colors } from "../../components/theme";
 import { collection, query, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchHeader from "../../components/SearchHeader";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 
 export default function BookingsScreen() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [doneVisible, setDoneVisible] = useState(false);
 
   useEffect(() => {
     // subscribe to real-time updates for this user's bookings
@@ -81,7 +85,8 @@ export default function BookingsScreen() {
       await deleteDoc(doc(db, "bookings", bookingId));
 
       console.log("deleteDoc succeeded for:", bookingId);
-      Alert.alert("Deleted", "Booking removed successfully.");
+      setDoneVisible(true);
+      setTimeout(() => setDoneVisible(false), 1200);
     } catch (err) {
       console.error("Delete error:", err);
       const code = err?.code || "unknown";
@@ -110,11 +115,11 @@ export default function BookingsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
         <SearchHeader title="My Bookings" />
         
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#2E7D6A" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={{ marginTop: 10 }}>Loading bookings...</Text>
         </View>
       </SafeAreaView>
@@ -123,58 +128,61 @@ export default function BookingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
       <SearchHeader title="My Bookings" />
 
       
 
       {bookings.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Ionicons name="calendar-outline" size={50} color="#2E7D6A" />
+          <Ionicons name="calendar-outline" size={50} color={colors.primary} />
           <Text style={styles.emptyText}>You have no bookings yet.</Text>
         </View>
       ) : (
-        <FlatList
-          data={bookings}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.row}>
-                <Ionicons name="car-outline" size={20} color="#2E7D6A" />
-                <Text style={styles.parkingName}>{item.parkingName}</Text>
-                {/* booking id hidden in UI */}
+        <>
+          <FlatList
+            data={bookings}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ padding: theme.spacing.lg }}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <View style={styles.row}>
+                  <Ionicons name="car-outline" size={20} color={colors.primary} />
+                  <Text style={styles.parkingName}>{item.parkingName}</Text>
+                  {/* booking id hidden in UI */}
+                </View>
+
+                <Text style={styles.info}> {item.date}</Text>
+                <Text style={styles.info}> {item.time}</Text>
+                <Text style={styles.info}> {item.duration} hours</Text>
+
+                <View style={styles.actions}>
+                  <AnimatedTouchable
+                    style={styles.editBtn}
+                    onPress={() =>
+                      router.push({
+                        pathname: "EditBookingScreen",
+                        params: { bookingId: item.id },
+                      })
+                    }
+                  >
+                    <Ionicons name="create-outline" size={18} color={theme.colors.textOnPrimary} />
+                    <Text style={styles.btnText}>Edit</Text>
+                  </AnimatedTouchable>
+
+                  <AnimatedTouchable
+                    style={styles.deleteBtn}
+                    onPress={() => runDelete(item.id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color={theme.colors.textOnPrimary} />
+                    <Text style={styles.btnText}>Delete</Text>
+                  </AnimatedTouchable>
+                </View>
               </View>
-
-              <Text style={styles.info}> {item.date}</Text>
-              <Text style={styles.info}> {item.time}</Text>
-              <Text style={styles.info}> {item.duration} hours</Text>
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.editBtn}
-                  onPress={() =>
-                    router.push({
-                      pathname: "EditBookingScreen",
-                      params: { bookingId: item.id },
-                    })
-                  }
-                >
-                  <Ionicons name="create-outline" size={18} color="#fff" />
-                  <Text style={styles.btnText}>Edit</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.deleteBtn}
-                  onPress={() => runDelete(item.id)}
-                >
-                  <Ionicons name="trash-outline" size={18} color="#fff" />
-                  <Text style={styles.btnText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        />
+            )}
+          />
+          <TaskCompleteOverlay visible={doneVisible} message="Deleted" />
+        </>
       )}
     </SafeAreaView>
   );
@@ -183,7 +191,7 @@ export default function BookingsScreen() {
 /* --------- STYLES --------- */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: colors.surface },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
@@ -194,67 +202,67 @@ const styles = StyleSheet.create({
   },
 
   emptyText: {
-    marginTop: 10,
+    marginTop: theme.spacing.md - 2,
     fontSize: 16,
-    color: "#777",
+    color: colors.textMuted,
   },
 
   card: {
     backgroundColor: "#F3F8F7",
-    padding: 18,
+    padding: theme.spacing.lg + theme.spacing.xs,
     borderRadius: 14,
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
     borderWidth: 1,
-    borderColor: "#CDE6DC",
+    borderColor: colors.borderSoft,
   },
 
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: theme.spacing.md - 2,
   },
 
   parkingName: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#2E7D6A",
-    marginLeft: 6,
+    color: colors.primary,
+    marginLeft: theme.spacing.sm - 2,
   },
 
   info: {
     fontSize: 15,
-    color: "#333",
-    marginTop: 4,
+    color: colors.text,
+    marginTop: theme.spacing.sm - theme.spacing.xs,
   },
 
   actions: {
     flexDirection: "row",
-    marginTop: 15,
+    marginTop: theme.spacing.lg - theme.spacing.xs,
   },
 
   editBtn: {
-    backgroundColor: "#2E7D6A",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    backgroundColor: colors.primary,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
+    paddingHorizontal: theme.spacing.lg,
     borderRadius: 10,
-    marginRight: 10,
+    marginRight: theme.spacing.md - 2,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: theme.spacing.sm - 2,
   },
 
   deleteBtn: {
-    backgroundColor: "#b02a37",
+    backgroundColor: colors.danger,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: theme.spacing.sm - 2,
   },
 
   btnText: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
     fontWeight: "700",
     fontSize: 14,
   },

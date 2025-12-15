@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Text } from 'react-native';
+import { colors } from '../../components/theme';
 import { auth, db } from '../firebase/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -72,12 +73,12 @@ export default function UserManagementScreen() {
           <Ionicons
             name={item.status === 'inactive' ? 'close-circle' : 'checkmark-circle'}
             size={20}
-            color={item.status === 'inactive' ? '#ff6b6b' : '#2E7D6A'}
+            color={item.status === 'inactive' ? '#ff6b6b' : colors.primary}
           />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconBtn} onPress={() => removeUser(item)}>
-          <MaterialIcons name="delete" size={20} color="#b02a37" />
+          <MaterialIcons name="delete" size={20} color={colors.danger} />
         </TouchableOpacity>
       </View>
     ),
@@ -115,7 +116,7 @@ export default function UserManagementScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: colors.surface },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   row: {
@@ -126,5 +127,5 @@ const styles = StyleSheet.create({
   iconBtn: { marginLeft: 12 },
 
   name: { fontSize: 16, fontWeight: '700' },
-  meta: { color: '#666', marginTop: 2 },
+  meta: { color: colors.textMuted, marginTop: 2 },
 });

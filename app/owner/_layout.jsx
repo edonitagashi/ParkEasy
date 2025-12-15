@@ -9,7 +9,7 @@ export default function OwnerLayout() {
         tabBarActiveTintColor: "#2E7D6A",
         tabBarInactiveTintColor: "#555",
         tabBarStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
           borderTopColor: "#CDEDE7",
           height: 60,

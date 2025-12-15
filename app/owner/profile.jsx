@@ -10,6 +10,7 @@ import {
   UIManager,
 } from "react-native";
 import { auth, db } from "../firebase/firebase";
+import theme, { colors } from "../../components/theme";
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { router } from "expo-router";
@@ -84,7 +85,7 @@ export default function Profile() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D6A" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
 
@@ -112,9 +113,9 @@ export default function Profile() {
           <Text
             style={[
               styles.status,
-              userData.ownerStatus === "pending" && { color: "#e67e22" },
-              userData.ownerStatus === "approved" && { color: "#27ae60" },
-              userData.ownerStatus === "rejected" && { color: "#c0392b" },
+              userData.ownerStatus === "pending" && { color: colors.warning },
+              userData.ownerStatus === "approved" && { color: colors.success },
+              userData.ownerStatus === "rejected" && { color: colors.danger },
             ]}
           >
             Status: {userData.ownerStatus}
@@ -155,62 +156,62 @@ export default function Profile() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  container: { flex: 1, backgroundColor: "#E9F8F6", padding: 20 },
+  container: { flex: 1, backgroundColor: colors.background, padding: theme.spacing.lg + theme.spacing.sm },
 
-  title: { fontSize: 26, fontWeight: "bold", color: "#2E7D6A", marginBottom: 20 },
+  title: { fontSize: 26, fontWeight: "bold", color: colors.primary, marginBottom: theme.spacing.xl - theme.spacing.sm },
 
   box: {
-    backgroundColor: "#fff",
-    padding: 14,
+    backgroundColor: colors.surface,
+    padding: theme.spacing.md + theme.spacing.xs,
     borderRadius: 12,
-    borderColor: "#CDEDE7",
+    borderColor: colors.borderSoft,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
 
-  boxTitle: { fontSize: 18, fontWeight: "700", color: "#2E7D6A", marginBottom: 10 },
+  boxTitle: { fontSize: 18, fontWeight: "700", color: colors.primary, marginBottom: theme.spacing.sm + theme.spacing.xs },
 
-  item: { fontSize: 15, color: "#444", marginBottom: 5 },
+  item: { fontSize: 15, color: colors.text, marginBottom: theme.spacing.sm - theme.spacing.xs },
 
   status: {
-    marginTop: 10,
+    marginTop: theme.spacing.md - 2,
     fontSize: 16,
     fontWeight: "700",
   },
 
   resubmitBtn: {
-    backgroundColor: "#e74c3c",
-    padding: 12,
+    backgroundColor: colors.danger,
+    padding: theme.spacing.md,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
 
-  btnText: { color: "#fff", fontWeight: "600" },
+  btnText: { color: colors.textOnPrimary, fontWeight: "600" },
 
   supportHeader: {
-    padding: 12,
-    backgroundColor: "#2E7D6A",
+    padding: theme.spacing.md,
+    backgroundColor: colors.primary,
     borderRadius: 10,
-    marginBottom: 6,
+    marginBottom: theme.spacing.sm - theme.spacing.xs,
   },
 
-  supportTitle: { color: "#fff", fontWeight: "700", textAlign: "center" },
+  supportTitle: { color: colors.textOnPrimary, fontWeight: "700", textAlign: "center" },
 
   supportContent: {
-    padding: 12,
-    backgroundColor: "#fff",
+    padding: theme.spacing.md,
+    backgroundColor: colors.surface,
     borderRadius: 10,
-    borderColor: "#CDEDE7",
+    borderColor: colors.borderSoft,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
 
-  supportItem: { fontSize: 15, color: "#555", marginBottom: 6 },
+  supportItem: { fontSize: 15, color: colors.textMuted, marginBottom: theme.spacing.sm - theme.spacing.xs },
 
   logoutBtn: {
-    backgroundColor: "#2E7D6A",
-    padding: 12,
+    backgroundColor: colors.primary,
+    padding: theme.spacing.md,
     borderRadius: 10,
     alignItems: "center",
   },

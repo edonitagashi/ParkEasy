@@ -5,11 +5,12 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   Alert,
   Platform,
   ScrollView
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import { colors, spacing, radii } from "../../components/theme";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -118,7 +119,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={styles.container}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.surface }} contentContainerStyle={styles.container}>
       <View style={styles.inner}>
         <Text style={styles.title}>Login</Text>
         <Text style={styles.subtitle}>Access your Parking App account</Text>
@@ -140,17 +141,17 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        <AnimatedTouchable style={styles.button} onPress={handleLogin} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
-        </TouchableOpacity>
+        </AnimatedTouchable>
 
         <GoogleAuthButton mode="login" />
 
-        <TouchableOpacity onPress={() => router.push("/RegisterScreen")}>
+        <AnimatedTouchable onPress={() => router.push("/RegisterScreen")}>
           <Text style={styles.switchText}>
             Don’t have an account? <Text style={styles.link}>Sign up</Text>
           </Text>
-        </TouchableOpacity>
+        </AnimatedTouchable>
       </View>
     </ScrollView>
   );
@@ -170,49 +171,49 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#000",
+    color: colors.textStrong,
     marginTop: 10,
     textAlign: "center",
   },
 
   subtitle: {
     textAlign: "center",
-    color: "gray",
+    color: colors.textMuted,
     marginBottom: 20,
   },
 
   input: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
 
   button: {
-    backgroundColor: "#2E7D6A",
-    padding: 14,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    padding: spacing.md,
+    borderRadius: radii.md,
     width: "100%",
     alignItems: "center",
     marginTop: 10,
   },
 
   buttonText: {
-    color: "white",
+    color: colors.textOnPrimary,
     fontWeight: "bold",
     fontSize: 16,
   },
 
   switchText: {
     marginTop: 15,
-    color: "#555",
+    color: colors.textMuted,
     textAlign: "center",
   },
 
   link: {
-    color: "#2E7D6A",
+    color: colors.primary,
     fontWeight: "bold",
   },
 });

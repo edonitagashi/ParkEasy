@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import theme, { colors } from "../../components/theme";
 import { MaterialIcons } from '@expo/vector-icons'; 
 
 export default function TabLayout() {
@@ -8,15 +9,15 @@ export default function TabLayout() {
     <>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#2E7D6A',
-          tabBarInactiveTintColor: 'gray',
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: {
-            backgroundColor: '#fff',
+            backgroundColor: colors.surface,
             borderTopWidth: 1,
-            borderTopColor: '#E9F8F6',
+            borderTopColor: colors.background,
             height: 60,
-            paddingBottom: 8,
-            paddingTop: 8,
+            paddingBottom: theme.spacing.sm,
+            paddingTop: theme.spacing.sm,
           },
           headerShown: false,
         }}

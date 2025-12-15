@@ -11,6 +11,8 @@ import {
   TextInput,
 } from "react-native";
 import { db } from "../firebase/firebase";
+import theme from "../../components/theme";
+const { colors } = theme;
 import { collection, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import AdminBackHeader from "../../components/AdminBackHeader";
 
@@ -133,7 +135,7 @@ export default function ParkingListScreen() {
       <FlatList
         data={parkings}
         keyExtractor={keyExtractor}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: theme.spacing.lg }}
         renderItem={renderItem}
         initialNumToRender={6}
         maxToRenderPerBatch={8}
@@ -196,15 +198,15 @@ export default function ParkingListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: colors.surface },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
-  row: { flexDirection: 'row', marginTop: 8 },
-  iconBtn: { marginLeft: 12 },
+  row: { flexDirection: 'row', marginTop: theme.spacing.sm },
+  iconBtn: { marginLeft: theme.spacing.md },
 
-  card: { backgroundColor: '#fff', padding: 12, borderRadius: 8, marginBottom: 12, elevation: 2 },
+  card: { backgroundColor: colors.surface, padding: theme.spacing.md, borderRadius: 8, marginBottom: theme.spacing.md, elevation: 2 },
   name: { fontSize: 16, fontWeight: '700' },
-  text: { color: '#333', marginTop: 4 },
+  text: { color: '#333', marginTop: theme.spacing.sm - theme.spacing.xs },
 
   modalOverlay: {
     flex: 1,
@@ -214,27 +216,27 @@ const styles = StyleSheet.create({
   },
   modalBox: {
     width: "90%",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
-    padding: 16,
+    padding: theme.spacing.lg,
   },
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: theme.spacing.md },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
   btn: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: theme.spacing.sm + theme.spacing.xs,
     borderRadius: 8,
     alignItems: "center",
-    marginHorizontal: 6,
+    marginHorizontal: theme.spacing.sm,
   },
   save: { backgroundColor: "#2E7D6A" },
   cancel: { backgroundColor: "#b02a37" },
-  btnText: { color: "#fff", fontWeight: "700" },
+  btnText: { color: colors.textOnPrimary, fontWeight: "700" },
 });

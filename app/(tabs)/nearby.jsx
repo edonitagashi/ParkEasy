@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import theme from "../../components/theme";
+const { colors } = theme;
 import { 
   View, Text, Image, TouchableOpacity, Modal, StyleSheet, 
   ActivityIndicator 
@@ -107,7 +109,7 @@ export default function Nearby() {
 
       {/* WEATHER BUTTON 
       <TouchableOpacity onPress={() => setWeatherVisible(true)} style={styles.weatherBtn}>
-        <Text style={{ color: "white", fontWeight: "600" }}>Weather</Text>
+        <Text style={{ color: colors.textOnPrimary, fontWeight: "600" }}>Weather</Text>
       </TouchableOpacity>
       */}
 
@@ -150,7 +152,7 @@ export default function Nearby() {
                   borderRadius: 20,
                   overflow: "hidden",
                   borderWidth: 2,
-                  borderColor: favorites?.includes(p.id) ? "#FFD166" : "white",
+                  borderColor: favorites?.includes(p.id) ? colors.accent : colors.surface,
                 }}
               >
                 <Image source={getImageSrc(p)} style={{ width: "100%", height: "100%" }} />
@@ -205,7 +207,7 @@ export default function Nearby() {
           <View style={styles.weatherContent}>
             <WeatherScreen />
             <TouchableOpacity onPress={() => setWeatherVisible(false)} style={styles.weatherCloseBtn}>
-              <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>Close</Text>
+              <Text style={{ color: colors.textOnPrimary, fontSize: 16, fontWeight: "600" }}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
     bottom: 30,
     right: 20,
     zIndex: 999,
-    backgroundColor: "white",
+    backgroundColor: colors.surface,
     width: 55,
     height: 55,
     borderRadius: 28,
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: colors.surface,
     padding: 20,
     borderRadius: 18,
     width: "90%",
@@ -284,12 +286,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  reserveText: { color: "white", fontWeight: "700" },
+  reserveText: { color: colors.textOnPrimary, fontWeight: "700" },
 
   favoriteBtn: {
     flex: 1,
     padding: 12,
-    backgroundColor: "white",
+    backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#DDD",
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  closeText: { color: "white", fontWeight: "700" },
+  closeText: { color: colors.textOnPrimary, fontWeight: "700" },
 
   weatherOverlay: {
     flex: 1,
@@ -314,7 +316,7 @@ const styles = StyleSheet.create({
   },
 
   weatherContent: {
-    backgroundColor: "white",
+    backgroundColor: colors.surface,
     padding: 20,
     borderRadius: 20,
     width: "90%",

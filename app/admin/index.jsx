@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import theme from "../../components/theme";
+import { colors } from "../../components/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { db } from "../firebase/firebase";
@@ -45,7 +47,7 @@ export default function AdminHome() {
       <Text style={styles.sectionTitle}>System Overview</Text>
 
       {loading ? (
-        <ActivityIndicator color="#2E7D6A" size="large" />
+        <ActivityIndicator color={colors.primary} size="large" />
       ) : (
         <View style={styles.statsWrap}>
           <StatCard label="Parkings" value={stats.parkings} icon="car" />
@@ -57,15 +59,15 @@ export default function AdminHome() {
 
       <Text style={styles.sectionTitle}>Management</Text>
 
-      <MenuButton title="Manage Parkings" icon="car" color="#2E7D6A" onPress={() => router.push("/admin/ParkingListScreen")} />
+      <MenuButton title="Manage Parkings" icon="car" color={theme.colors.primary} onPress={() => router.push("/admin/ParkingListScreen")} />
 
-<MenuButton title="Parking Reservations" icon="calendar" color="#6C63FF" 
+<MenuButton title="Parking Reservations" icon="calendar" color={theme.colors.accent} 
     onPress={() => router.push("/admin/ParkingListScreen")} />
 
-<MenuButton title="Manage Users" icon="people" color="#FF6B6B" 
+<MenuButton title="Manage Users" icon="people" color={theme.colors.danger} 
     onPress={() => router.push("/admin/UserManagementScreen")} />
 
-<MenuButton title="View Requests" icon="mail" color="#4ECDC4" 
+<MenuButton title="View Requests" icon="mail" color={theme.colors.secondary} 
     onPress={() => router.push("/admin/ParkingRequestsScreen")} />
 
     </View>
@@ -75,7 +77,7 @@ export default function AdminHome() {
 function StatCard({ label, value, icon }) {
   return (
     <View style={styles.statCard}>
-      <Ionicons name={icon} size={26} color="#2E7D6A" />
+      <Ionicons name={icon} size={26} color={colors.primary} />
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -85,34 +87,34 @@ function StatCard({ label, value, icon }) {
 function MenuButton({ title, icon, color, onPress }) {
   return (
     <TouchableOpacity style={[styles.menuBtn, { backgroundColor: color }]} onPress={onPress}>
-      <Ionicons name={icon} size={24} color="#fff" />
+      <Ionicons name={icon} size={24} color={theme.colors.pickerDoneText} />
       <Text style={styles.menuText}>{title}</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12, color: "#2E7D6A" },
-  statsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  container: { flex: 1, padding: theme.spacing.lg, backgroundColor: colors.surface },
+  sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: theme.spacing.md, color: colors.primary },
+  statsWrap: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm + theme.spacing.xs },
   statCard: {
     width: "47%",
-    backgroundColor: "#f9f9f9",
-    paddingVertical: 18,
+    backgroundColor: theme.colors.background,
+    paddingVertical: theme.spacing.lg + theme.spacing.xs,
     borderRadius: 12,
     alignItems: "center",
     elevation: 2,
   },
-  statValue: { fontSize: 20, fontWeight: "bold", color: "#2E7D6A", marginTop: 6 },
-  statLabel: { color: "#555", fontSize: 13 },
+  statValue: { fontSize: 20, fontWeight: "bold", color: colors.primary, marginTop: theme.spacing.sm - 2 },
+  statLabel: { color: colors.textMuted, fontSize: 13 },
   menuBtn: {
-    paddingVertical: 16,
+    paddingVertical: theme.spacing.lg,
     borderRadius: 12,
-    marginTop: 12,
+    marginTop: theme.spacing.md,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 10,
+    gap: theme.spacing.sm + theme.spacing.xs,
   },
-  menuText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  menuText: { color: theme.colors.pickerDoneText, fontWeight: "600", fontSize: 16 },
 });

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { TouchableOpacity, Text, StyleSheet, Platform, Alert } from "react-native";
+import { Text, StyleSheet, Platform, Alert, View } from "react-native";
+import AnimatedTouchable from "./animation/AnimatedTouchable";
+import { colors, spacing, radii, typography } from "./theme";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { auth, db } from "../app/firebase/firebase";
@@ -91,30 +93,37 @@ export default function GoogleAuthButton({ mode = "login" }) {
   };
 
   return (
-    <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleAuth} disabled={loading}>
-      <AntDesign name="google" size={22} color="#DB4437" style={{ marginRight: 8 }} />
-      <Text style={styles.googleText}>{loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}</Text>
-    </TouchableOpacity>
+    <AnimatedTouchable style={styles.googleBtn} onPress={handleGoogleAuth} disabled={loading}>
+      <View style={styles.row}>
+        <AntDesign name="google" size={22} color="#DB4437" style={styles.icon} />
+        <Text style={styles.googleText}>{loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}</Text>
+      </View>
+    </AnimatedTouchable>
   );
 }
 
 const styles = StyleSheet.create({
   googleBtn: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.md,
+    width: "100%",
+    maxWidth: 600,
+  },
+  row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginTop: 12,
-     width: "100%",
-  maxWidth: 600,
+    gap: spacing.sm,
   },
+  icon: { marginRight: spacing.sm },
   googleText: {
     color: "#000",
-    fontSize: 16,
-    fontWeight: "500",
+    color: colors.text,
+    fontSize: typography.size.md,
+    fontWeight: "600",
   },
 });

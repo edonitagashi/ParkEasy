@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import theme from "./theme";
 
 export default function SearchBar({ value, onChangeText }) {
   return (
@@ -9,7 +10,7 @@ export default function SearchBar({ value, onChangeText }) {
       <TextInput
         style={styles.input}
         placeholder="Search for parking..."
-        placeholderTextColor="#888"
+        placeholderTextColor={theme.colors.textMuted}
         value={value}
         onChangeText={onChangeText}
       />
@@ -21,12 +22,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff", 
+    backgroundColor: theme.colors.surface, 
     borderWidth: 1.2,
-    borderColor: "#5C8374", 
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderColor: theme.colors.secondary, 
+    marginHorizontal: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     borderRadius: 12,
     elevation: 2,
     shadowColor: "#000",
@@ -36,8 +37,8 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: theme.spacing.sm,
     fontSize: 16,
-    color: "#333", 
+    color: theme.colors.text, 
   },
 });

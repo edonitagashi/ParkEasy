@@ -1,4 +1,6 @@
 import React from "react";
+import theme from "../components/theme";
+const { colors } = theme;
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -28,7 +30,7 @@ export default function NotFound() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFF0",
+    backgroundColor: colors.surface,
     justifyContent: "center",
   },
   content: {
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
+    color: colors.textOnPrimary,
     fontWeight: "bold",
     fontSize: 16,
   },
