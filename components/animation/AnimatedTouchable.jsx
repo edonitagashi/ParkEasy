@@ -1,40 +1,23 @@
-import React, { useRef } from 'react';
-import { Animated, TouchableWithoutFeedback, View } from 'react-native';
+import React from 'react';
+import { Pressable } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-// Reusable press animation: fades content on press
-export default function AnimatedTouchable({
-  children,
-  onPress,
-  disabled = false,
-  activeOpacity = 0.7,
-  style,
-}) {
-  const opacity = useRef(new Animated.Value(1)).current;
+export default function AnimatedTouchable({ children, onPress, disabled = false, activeOpacity = 0.7, style }) {
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   const handlePressIn = () => {
-    Animated.timing(opacity, {
-      toValue: activeOpacity,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
+    opacity.value = withTiming(activeOpacity, { duration: 220 });
   };
 
   const handlePressOut = () => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
+    opacity.value = withTiming(1, { duration: 220 });
   };
 
   return (
-    <TouchableWithoutFeedback
-      onPress={onPress}
-      disabled={disabled}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-    >
-      <Animated.View style={[style, { opacity }]}>{children}</Animated.View>
-    </TouchableWithoutFeedback>
+    <Pressable onPress={onPress} disabled={disabled} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+      <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
+    </Pressable>
   );
 }

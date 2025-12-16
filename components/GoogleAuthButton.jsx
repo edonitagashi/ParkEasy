@@ -89,7 +89,7 @@ export default function GoogleAuthButton({ mode = "login" }) {
 
     if (mode === "signup") {
       if (snap.exists()) {
-        showAlert("ℹ️ Account already exists", "Please log in instead.");
+        showAlert(" Account already exists", "Please log in instead.");
         router.replace("/LoginScreen");
         return;
       }
@@ -105,10 +105,10 @@ export default function GoogleAuthButton({ mode = "login" }) {
       });
 
       snap = await getDoc(ref);
-      showAlert("✅ Account created successfully!", "");
+      showAlert(" Account created successfully!", "");
     } else {
       if (!snap.exists()) {
-        showAlert("❌ Not registered", "Please sign up first.");
+        showAlert(" Not registered", "Please sign up first.");
         await auth.signOut();
         return;
       }
@@ -117,7 +117,7 @@ export default function GoogleAuthButton({ mode = "login" }) {
     const data = snap.exists() ? snap.data() : { role: "user", status: "active" };
 
     if (data.status === "inactive") {
-      showAlert("❌ Account deactivated", "Contact admin for support.");
+      showAlert(" Account deactivated", "Contact admin for support.");
       await auth.signOut();
       return;
     }
