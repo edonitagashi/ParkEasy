@@ -15,6 +15,7 @@ import { colors, radii, spacing } from "../../components/theme";
 
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
+import * as Notifications from "expo-notifications";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import FadeModal from "../../components/animation/FadeModal";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,7 +50,7 @@ export default function BookParkingScreen() {
     setLoading(true);
 
     try {
-      await addDoc(collection(db, "bookings"), {
+      const bookingRef = await addDoc(collection(db, "bookings"), {
         userId: auth.currentUser.uid,
         parkingId: id,            // fiks parking ID
         parkingName: name,        // emri i parkingut
@@ -58,6 +59,93 @@ export default function BookParkingScreen() {
         duration,
         createdAt: new Date(),
       });
+
+      // Ask for notification permissions and configure Android channel
+      try {
+        const settings = await Notifications.getPermissionsAsync();
+        if (!settings.granted) {
+          await Notifications.requestPermissionsAsync();
+        }
+        // Android channel
+        if (Platform.OS === 'android') {
+          await Notifications.setNotificationChannelAsync('default', {
+            name: 'Default',
+            importance: Notifications.AndroidImportance.DEFAULT,
+          });
+        }
+      } catch (e) {
+        console.log('Notification permission setup error', e);
+      }
+
+      // Schedule a confirmation notification immediately
+      try {
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Booking Confirmed',
+            body: `Your parking at ${name} is reserved for ${formatDate(date)} ${formatTime(time)}.`,
+            data: { bookingId: bookingRef.id },
+          },
+          trigger: null,
+        });
+        // Persist a record of the scheduled notification
+        try {
+          await addDoc(collection(db, 'users', auth.currentUser.uid, 'notifications'), {
+            notificationId,
+            title: 'Booking Confirmed',
+            body: `Reserved at ${name}`,
+            bookingId: bookingRef.id,
+            scheduledAt: new Date(),
+          });
+        } catch (e) {
+          console.log('Error saving notification record', e);
+        }
+      } catch (e) {
+        console.log('Error scheduling notification', e);
+      }
+
+      // Schedule a reminder ~10 minutes before the booked time
+      try {
+        // Compose the target Date from selected date + time
+        const target = new Date(date);
+        const t = new Date(time);
+        target.setHours(t.getHours(), t.getMinutes(), 0, 0);
+
+        // Reminder 10 minutes before
+        const reminderTime = new Date(target.getTime() - 10 * 60 * 1000);
+        const now = new Date();
+        let trigger;
+        if (reminderTime > now) {
+          const seconds = Math.max(1, Math.floor((reminderTime.getTime() - now.getTime()) / 1000));
+          trigger = { seconds };
+        } else {
+          // If the booking is soon, send immediate reminder
+          trigger = null;
+        }
+
+        const reminderId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Booking Reminder',
+            body: `Reminder: ${name} at ${formatDate(date)} ${formatTime(time)}.`,
+            data: { bookingId: bookingRef.id },
+          },
+          trigger,
+        });
+
+        // Persist reminder record
+        try {
+          await addDoc(collection(db, 'users', auth.currentUser.uid, 'notifications'), {
+            notificationId: reminderId,
+            title: 'Booking Reminder',
+            body: `Upcoming parking at ${name}`,
+            bookingId: bookingRef.id,
+            scheduledAt: reminderTime,
+          });
+        } catch (e) {
+          console.log('Error saving reminder record', e);
+        }
+      } catch (e) {
+        console.log('Error scheduling reminder', e);
+      }
 
       setDoneVisible(true);
       setTimeout(() => {
