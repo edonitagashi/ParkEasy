@@ -1,12 +1,7 @@
-<<<<<<< Updated upstream
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, StyleSheet, Platform, Alert, View } from "react-native";
 import AnimatedTouchable from "./animation/AnimatedTouchable";
 import { colors, spacing, radii, typography } from "./theme";
-=======
-import React, { useEffect, useState } from "react";
-import { TouchableOpacity, Text, StyleSheet, Platform, Alert } from "react-native";
->>>>>>> Stashed changes
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { auth, db } from "../firebase/firebase";
@@ -137,21 +132,12 @@ export default function GoogleAuthButton({ mode = "login" }) {
   };
 
   return (
-<<<<<<< Updated upstream
     <AnimatedTouchable style={styles.googleBtn} onPress={handleGoogleAuth} disabled={loading}>
       <View style={styles.row}>
         <AntDesign name="google" size={22} color="#DB4437" style={styles.icon} />
         <Text style={styles.googleText}>{loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}</Text>
       </View>
     </AnimatedTouchable>
-=======
-    <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleAuth} disabled={loading}>
-      <AntDesign name="google" size={22} color="#DB4437" style={{ marginRight: 8 }} />
-      <Text style={styles.googleText}>
-        {loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}
-      </Text>
-    </TouchableOpacity>
->>>>>>> Stashed changes
   );
 }
 
@@ -170,9 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-<<<<<<< Updated upstream
     gap: spacing.sm,
-=======
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ddd",
@@ -181,7 +165,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     width: "100%",
     maxWidth: 600,
->>>>>>> Stashed changes
   },
   icon: { marginRight: spacing.sm },
   googleText: {

@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Text } from 'react-native';
-<<<<<<< Updated upstream
 import { colors } from '../../components/theme';
-import { auth, db } from '../firebase/firebase';
-=======
 import { auth, db } from '../../firebase/firebase';
->>>>>>> Stashed changes
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AdminBackHeader from "../../components/AdminBackHeader";

@@ -8,14 +8,10 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-<<<<<<< Updated upstream
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import theme, { colors } from "../../components/theme";
 import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
-import { db } from "../firebase/firebase";
-=======
 import { db } from "../../firebase/firebase";
->>>>>>> Stashed changes
 import {
   collection,
   getDocs,
