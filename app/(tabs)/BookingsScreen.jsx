@@ -12,7 +12,7 @@ import {
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import { colors } from "../../components/theme";
 import { collection, query, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";

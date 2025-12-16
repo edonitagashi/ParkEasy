@@ -9,8 +9,12 @@ import {
   Platform,
   UIManager,
 } from "react-native";
+<<<<<<< Updated upstream
 import { auth, db } from "../firebase/firebase";
 import theme, { colors } from "../../components/theme";
+=======
+import { auth, db } from "../../firebase/firebase";
+>>>>>>> Stashed changes
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { router } from "expo-router";

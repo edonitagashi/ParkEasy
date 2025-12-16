@@ -14,7 +14,7 @@ import {
 import AnimatedTouchable from "../components/animation/AnimatedTouchable";
 import TaskCompleteOverlay from "../components/animation/TaskCompleteOverlay";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "./firebase/firebase";
+import { db } from "../firebase/firebase";
 import { useLocalSearchParams, router } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";

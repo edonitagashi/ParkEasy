@@ -82,10 +82,7 @@ export default function TabLayout() {
           }}
         />
 
-        <Tabs.Screen
-          name="[...unmatched]"
-          options={{ href: null }}
-        />
+        
       </Tabs>
     </>
   );

@@ -8,7 +8,7 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-import { db, auth } from "../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 export default function useFavorites() {

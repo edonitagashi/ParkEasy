@@ -12,7 +12,7 @@ import {
   ScrollView
 } from "react-native";
 import { useRouter } from "expo-router";
-import { auth, db } from "../firebase/firebase";
+import { auth, db } from "../../firebase/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import GoogleAuthButton from "../../components/GoogleAuthButton";

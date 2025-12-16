@@ -11,7 +11,7 @@ import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import theme, { colors } from "../../components/theme";
 import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import { useLocalSearchParams } from "expo-router";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import AdminBackHeader from "../../components/AdminBackHeader";
 

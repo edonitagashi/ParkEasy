@@ -4,7 +4,7 @@ import theme from "../../components/theme";
 import { colors } from "../../components/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function AdminHome() {

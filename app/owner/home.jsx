@@ -9,8 +9,12 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+<<<<<<< Updated upstream
 import { auth, db } from "../firebase/firebase";
 import theme, { colors } from "../../components/theme";
+=======
+import { auth, db } from "../../firebase/firebase";
+>>>>>>> Stashed changes
 import {
   doc,
   getDoc,

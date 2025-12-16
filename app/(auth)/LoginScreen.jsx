@@ -14,7 +14,7 @@ import { colors, spacing, radii } from "../../components/theme";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase/firebase";
+import { auth, db } from "../../firebase/firebase";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function LoginScreen() {

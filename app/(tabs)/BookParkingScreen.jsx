@@ -14,7 +14,7 @@ import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay"
 import { colors, radii, spacing } from "../../components/theme";
 
 import { addDoc, collection } from "firebase/firestore";
-import { db, auth } from "../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import FadeModal from "../../components/animation/FadeModal";
 import { Ionicons } from "@expo/vector-icons";

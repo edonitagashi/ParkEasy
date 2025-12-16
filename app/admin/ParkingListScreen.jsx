@@ -10,9 +10,13 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+<<<<<<< Updated upstream
 import { db } from "../firebase/firebase";
 import theme from "../../components/theme";
 const { colors } = theme;
+=======
+import { db } from "../../firebase/firebase";
+>>>>>>> Stashed changes
 import { collection, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import AdminBackHeader from "../../components/AdminBackHeader";
 

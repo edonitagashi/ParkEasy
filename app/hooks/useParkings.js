@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { collection, onSnapshot, query } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 /**
  * useParkings - realtime listener for 'parkings' collection using onSnapshot.
