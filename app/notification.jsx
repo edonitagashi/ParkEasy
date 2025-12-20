@@ -3,6 +3,8 @@ import { View, StyleSheet, TouchableOpacity, Alert, FlatList, Text } from "react
 import * as Notifications from "expo-notifications";
 import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
 
 const NotifCard = memo(({ item, onCancel }) => (
   <View style={styles.card}>
@@ -23,6 +25,7 @@ const NotifCard = memo(({ item, onCancel }) => (
 ));
 
 export default function NotificationsScreen() {
+  const router = useRouter();
   const [notifs, setNotifs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,7 +83,18 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Scheduled Notifications</Text>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity 
+          onPress={() => router.push("/(tabs)/profile")} 
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#2E7D6A" />
+        </TouchableOpacity>
+        <Text style={styles.header}>Scheduled Notifications</Text>
+        <View style={{ width: 24 }} />
+      </View>
+      
       <FlatList
         data={notifs}
         keyExtractor={(item) => item.id}
@@ -102,11 +116,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#E9F8F6" 
   },
 
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#F0F9F7',
+  },
+
   header: { 
     fontSize: 18, 
     fontWeight: "700", 
     color: "#2E7D6A", 
-    marginBottom: 12, 
+    flex: 1,
     textAlign: "center"
   },
 

@@ -46,6 +46,9 @@ export default function Profile() {
   const [showHelpPanel, setShowHelpPanel] = useState(false);
   const [showPrivacyPanel, setShowPrivacyPanel] = useState(false);
   const [showTermsPanel, setShowTermsPanel] = useState(false);
+  
+  // New state for photo options modal
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
 
   const placeholder = require("../../assets/images/profile.jpg");
 
@@ -67,7 +70,7 @@ export default function Profile() {
       if (!snap.exists()) return;
 
       const data = snap.data();
-      const base64Img = data.avatarUri || data.image;
+      const base64Img = data.avatarUri || data.image || data.avatarUrl;
       if (!base64Img) return;
 
       setAvatarUri(base64Img);
@@ -216,34 +219,16 @@ export default function Profile() {
       }
 
       const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         base64: true,
-        quality: 0.9,
+        quality: 0.3,
       });
 
       if (!res.canceled && res.assets?.length) {
         const base64Img = `data:image/jpg;base64,${res.assets[0].base64}`;
-
-        setAvatarUri(base64Img);
-
-        const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
-        if (!rawCur) return;
-
-        const me = JSON.parse(rawCur);
-        me.avatarUri = base64Img;
-        await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
-
-        const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-        const users = rawUsers ? JSON.parse(rawUsers) : [];
-        const idx = users.findIndex((u) => u.id === me.id);
-        if (idx !== -1) {
-          users[idx] = { ...users[idx], avatarUri: base64Img };
-          await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-        }
-
-        await syncAvatarToFirestore(base64Img);
+        await handleAvatarUpdate(base64Img);
       }
     } catch (e) {
       console.error("Image pick error:", e);
@@ -279,30 +264,33 @@ export default function Profile() {
 
       if (!results.canceled && results.assets?.length) {
         const base64Img = `data:image/jpg;base64,${results.assets[0].base64}`;
-
-        setAvatarUri(base64Img);
-
-        const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
-        if (rawCur) {
-          const me = JSON.parse(rawCur);
-          me.avatarUri = base64Img;
-          await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
-
-          const rawUsers = await AsyncStorage.getItem(USERS_KEY);
-          const users = rawUsers ? JSON.parse(rawUsers) : [];
-          const idx = users.findIndex((u) => u.id === me.id);
-          if (idx !== -1) {
-            users[idx] = { ...users[idx], avatarUri: base64Img };
-            await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-          }
-        }
-
-        await syncAvatarToFirestore(base64Img);
+        await handleAvatarUpdate(base64Img);
       }
     } catch (error) {
       console.error("Camera error:", error);
       Alert.alert("Error", "The photo could not be taken.");
     }
+  };
+
+  const handleAvatarUpdate = async (base64Img) => {
+    setAvatarUri(base64Img);
+
+    const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
+    if (!rawCur) return;
+
+    const me = JSON.parse(rawCur);
+    me.avatarUri = base64Img;
+    await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
+
+    const rawUsers = await AsyncStorage.getItem(USERS_KEY);
+    const users = rawUsers ? JSON.parse(rawUsers) : [];
+    const idx = users.findIndex((u) => u.id === me.id);
+    if (idx !== -1) {
+      users[idx] = { ...users[idx], avatarUri: base64Img };
+      await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    await syncAvatarToFirestore(base64Img);
   };
 
   const handleRemovePhoto = async () => {
@@ -312,6 +300,8 @@ export default function Profile() {
       const rawCur = await AsyncStorage.getItem(CURRENT_USER_KEY);
       if (!rawCur) return;
       const me = JSON.parse(rawCur);
+      // Delete Storage object if present
+      // No Storage usage in reverted version
       delete me.avatarUri;
       await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(me));
 
@@ -374,11 +364,11 @@ export default function Profile() {
         await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
       }
 
-      setSuccessMsg("✅ Changes saved succesfully!");
+      setSuccessMsg("✅ Changes saved successfully!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (e) {
       console.error("Profile save error:", e);
-      Alert.alert("Wrong", "No changes were saved.");
+      Alert.alert("Error", "No changes were saved.");
     } finally {
       setSaving(false);
     }
@@ -448,131 +438,115 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-      {/* HEADER: Profile + zile */}
-      <View style={s.headerRow}>
-        <Text style={s.headerTitle}>Profile</Text>
-
+    <View style={{ flex: 1 }}>
+      <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
+      {/* Profile Header - Redesigned to match image */}
+      <View style={s.profileHeader}>
         <TouchableOpacity
-          style={s.bellBtn}
+          style={s.notificationBtn}
           onPress={() => router.push("/notification")}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="notifications-outline" size={28} color="#2E7D6A" />
+          <Ionicons name="notifications-outline" size={26} color="#2E7D6A" />
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={s.avatarContainer}
+          onPress={() => setShowPhotoOptions(true)}
+        >
+          <Image
+            source={avatarUri ? { uri: avatarUri } : placeholder}
+            style={s.avatar}
+          />
+          <View style={s.editAvatarButton}>
+            <Ionicons name="camera" size={20} color="#FFFFFF" />
+          </View>
+        </TouchableOpacity>
+        
+        <Text style={s.fullname}>{fullName || "User"}</Text>
+        <Text style={s.userLabel}>User</Text>
       </View>
 
-      {/* Avatar + Add/Change Photo */}
-      <View style={s.avatarWrap}>
-        <Image
-          source={avatarUri ? { uri: avatarUri } : placeholder}
-          style={s.avatar}
-        />
+      {/* Edit Profile Section */}
+      <View style={s.sectionCard}>
+        <Text style={s.sectionTitle}>Edit profile</Text>
+        
+        {/* Name Field */}
+        <View style={s.fieldRow}>
+          <Text style={s.fieldLabel}>Name</Text>
+          <TextInput
+            value={fullName}
+            onChangeText={setFullName}
+            placeholder="Enter your name"
+            style={s.fieldInput}
+            placeholderTextColor="#999"
+          />
+        </View>
+        
+        <View style={s.divider} />
+        
+        {/* Phone Number Field */}
+        <View style={s.fieldRow}>
+          <Text style={s.fieldLabel}>Phone Number</Text>
+          <TextInput
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            placeholder="Enter your phone number"
+            style={s.fieldInput}
+            placeholderTextColor="#999"
+            keyboardType="phone-pad"
+          />
+        </View>
+        
+        <View style={s.divider} />
+        
+        {/* Email Field */}
+        <View style={s.fieldRow}>
+          <Text style={s.fieldLabel}>Email</Text>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            style={s.fieldInput}
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+      </View>
 
-        <View style={s.photoButtonsRow}>
-          <TouchableOpacity style={s.addPhotoBtn} onPress={pickFromLibrary}>
-            <Text style={s.addPhotoTxt}>
-              {avatarUri ? "Change photo" : "Add photo"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={s.addPhotoBtn} onPress={takePhoto}>
-            <Text style={s.addPhotoTxt}>Take photo</Text>
+      {/* Password Section */}
+      <View style={s.sectionCard}>
+        <View style={[s.fieldRow, { position: "relative" }]}>
+          <Text style={s.fieldLabel}>Password</Text>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry={!showPwd}
+            style={[s.fieldInput, { paddingRight: 64 }]}
+            placeholderTextColor="#999"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setShowPwd(v => !v)} style={s.showBtn}>
+            <Text style={s.showTxt}>{showPwd ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
         </View>
-
-        {avatarUri ? (
-          <TouchableOpacity
-            style={[s.addPhotoBtn, s.removePhotoBtn]}
-            onPress={handleRemovePhoto}
-          >
-            <Text style={[s.addPhotoTxt, { color: "#b02a37" }]}>
-              Remove photo
-            </Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
 
-      <Text style={s.fullname}>{fullName || "User"}</Text>
-
-      <Text style={s.section}>Edit profile</Text>
-
-      {/* Emri */}
-      <View style={s.row}>
-        <Text style={s.label}>Name</Text>
-        <TextInput
-          value={fullName}
-          onChangeText={setFullName}
-          placeholder="Enter your name"
-          style={s.input}
-          autoCorrect={false}
-          autoCapitalize="words"
-        />
-      </View>
-
-      {/* Numri */}
-      <View style={s.row}>
-        <Text style={s.label}>Phone Number</Text>
-        <TextInput
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-          placeholder="Enter your phone number"
-          keyboardType="phone-pad"
-          inputMode="tel"
-          style={s.input}
-          autoCorrect={false}
-        />
-      </View>
-
-      {/* Email */}
-      <View style={s.row}>
-        <Text style={s.label}>Email</Text>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter your email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          inputMode="email"
-          style={s.input}
-          autoCorrect={false}
-        />
-      </View>
-
-      {/* Password + Show/Hide */}
-      <View style={[s.row, { position: "relative" }]}>
-        <Text style={s.label}>Password</Text>
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Enter your password"
-          secureTextEntry={!showPwd}
-          style={[s.input, { paddingRight: 64 }]}
-          autoCapitalize="none"
-        />
-        <TouchableOpacity
-          onPress={() => setShowPwd((v) => !v)}
-          style={s.showBtn}
-        >
-          <Text style={s.showTxt}>{showPwd ? "Hide" : "Show"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={[s.saveBtn, saving && { opacity: 0.7 }]}
-        onPress={handleSave}
+      {/* Save Button */}
+      <TouchableOpacity 
+        style={[s.saveBtn, saving && { opacity: 0.7 }]} 
+        onPress={handleSave} 
         disabled={saving}
       >
-        {saving ? (
-          <ActivityIndicator color={colors.textOnPrimary} />
-        ) : (
-          <Text style={s.saveTxt}>Save changes</Text>
-        )}
+        <Text style={s.saveTxt}>{saving ? "Saving..." : "Save changes"}</Text>
       </TouchableOpacity>
 
+      {/* Success Message */}
       {successMsg ? <Text style={s.successMsg}>{successMsg}</Text> : null}
 
-      {/* More options */}
+      {/* More Options Section */}
       <Text style={s.section}>More Options</Text>
 
       {/* About Us */}
@@ -581,20 +555,13 @@ export default function Profile() {
           <Ionicons name="information-circle" size={24} color="#4C6E64" />
           <Text style={s.optionText}>About Us</Text>
         </View>
-        <Ionicons
-          name={showAboutPanel ? "chevron-down" : "chevron-forward"}
-          size={20}
-          color="#4C6E64"
-        />
+        <Ionicons name={showAboutPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
 
       {showAboutPanel && (
         <View style={s.expandedPanel}>
           <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
-            <Text style={s.expandedText}>
-              ParkEasy v1.0.0 — A modern app for finding parking. Developed
-              with ❤️ in Kosovo. Contact: info@parkeasy.com
-            </Text>
+            <Text style={s.expandedText}>ParkEasy v1.0.0 — A modern app for finding parking. Developed with ❤️ in Kosovo. Contact: info@parkeasy.com</Text>
           </ScrollView>
         </View>
       )}
@@ -605,11 +572,7 @@ export default function Profile() {
           <Ionicons name="help-circle" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Help & Support</Text>
         </View>
-        <Ionicons
-          name={showHelpPanel ? "chevron-down" : "chevron-forward"}
-          size={20}
-          color="#4C6E64"
-        />
+        <Ionicons name={showHelpPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
 
       {showHelpPanel && (
@@ -618,21 +581,11 @@ export default function Profile() {
             <Text style={s.expandedLabel}>Contact</Text>
             <Text style={s.expandedText}>Phone: +383 49 000 000</Text>
             <Text style={s.expandedText}>Email: support@parkeasy.com</Text>
-            <View
-              style={{ flexDirection: "row", gap: 10, marginTop: 8 }}
-            >
-              <TouchableOpacity
-                style={s.smallBtn}
-                onPress={() => Linking.openURL("tel:+38349000000")}
-              >
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+              <TouchableOpacity style={s.smallBtn} onPress={() => Linking.openURL('tel:+38349000000')}>
                 <Text style={s.smallBtnText}>Call</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={s.smallBtn}
-                onPress={() =>
-                  Linking.openURL("mailto:support@parkeasy.com")
-                }
-              >
+              <TouchableOpacity style={s.smallBtn} onPress={() => Linking.openURL('mailto:support@parkeasy.com')}>
                 <Text style={s.smallBtnText}>Email</Text>
               </TouchableOpacity>
             </View>
@@ -643,27 +596,16 @@ export default function Profile() {
       {/* Privacy Policy */}
       <TouchableOpacity style={s.optionItem} onPress={handlePrivacyPolicy}>
         <View style={s.optionLeft}>
-          <Ionicons
-            name="shield-checkmark"
-            size={24}
-            color="#4C6E64"
-          />
+          <Ionicons name="shield-checkmark" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Privacy Policy</Text>
         </View>
-        <Ionicons
-          name={showPrivacyPanel ? "chevron-down" : "chevron-forward"}
-          size={20}
-          color="#4C6E64"
-        />
+        <Ionicons name={showPrivacyPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
 
       {showPrivacyPanel && (
         <View style={s.expandedPanel}>
           <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
-            <Text style={s.expandedText}>
-              We respect your privacy. Your data is secure and used only for
-              service purposes. We do not share personal data without consent.
-            </Text>
+            <Text style={s.expandedText}>We respect your privacy. Your data is secure and used only for service purposes. We do not share personal data without consent.</Text>
           </ScrollView>
         </View>
       )}
@@ -671,27 +613,16 @@ export default function Profile() {
       {/* Terms of Service */}
       <TouchableOpacity style={s.optionItem} onPress={handleTermsOfService}>
         <View style={s.optionLeft}>
-          <Ionicons
-            name="document-text"
-            size={24}
-            color="#4C6E64"
-          />
+          <Ionicons name="document-text" size={24} color="#4C6E64" />
           <Text style={s.optionText}>Terms of Service</Text>
         </View>
-        <Ionicons
-          name={showTermsPanel ? "chevron-down" : "chevron-forward"}
-          size={20}
-          color="#4C6E64"
-        />
+        <Ionicons name={showTermsPanel ? "chevron-down" : "chevron-forward"} size={20} color="#4C6E64" />
       </TouchableOpacity>
 
       {showTermsPanel && (
         <View style={s.expandedPanel}>
           <ScrollView style={s.panelScroll} nestedScrollEnabled={true}>
-            <Text style={s.expandedText}>
-              By using ParkEasy, you agree to our terms of service. Use the app
-              responsibly and follow local parking rules.
-            </Text>
+            <Text style={s.expandedText}>By using ParkEasy, you agree to our terms of service. Use the app responsibly and follow local parking rules.</Text>
           </ScrollView>
         </View>
       )}
@@ -708,109 +639,186 @@ export default function Profile() {
       {/* Version Info */}
       <View style={s.versionContainer}>
         <Text style={s.versionText}>ParkEasy v1.0.0</Text>
-        <Text style={s.copyright}>
-          © 2024 ParkEasy. All rights reserved.
-        </Text>
+        <Text style={s.copyright}>© 2024 ParkEasy. All rights reserved.</Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+
+      {/* Photo Options Bottom Sheet - Outside ScrollView so it stays at bottom */}
+      {showPhotoOptions && (
+        <View style={s.bottomSheetOverlay}>
+          <TouchableOpacity 
+            style={s.bottomSheetBackground}
+            activeOpacity={1}
+            onPress={() => setShowPhotoOptions(false)}
+          />
+          <View style={s.bottomSheetContent}>
+            <TouchableOpacity 
+              style={s.modalOption} 
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+                InteractionManager.runAfterInteractions(() => {
+                  pickFromLibrary();
+                });
+              }}
+            >
+              <Ionicons name="image" size={24} color="#4C6E64" />
+              <Text style={s.modalOptionText}>Choose from library</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={s.modalOption} 
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+                InteractionManager.runAfterInteractions(() => {
+                  takePhoto();
+                });
+              }}
+            >
+              <Ionicons name="camera" size={24} color="#4C6E64" />
+              <Text style={s.modalOptionText}>Take Photo</Text>
+            </TouchableOpacity>
+            
+            {avatarUri && (
+              <TouchableOpacity 
+                style={[s.modalOption, s.deleteOption]} 
+                activeOpacity={0.7}
+                onPress={() => {
+                  setShowPhotoOptions(false);
+                  InteractionManager.runAfterInteractions(() => {
+                    handleRemovePhoto();
+                  });
+                }}
+              >
+                <Ionicons name="trash" size={24} color="#b02a37" />
+                <Text style={[s.modalOptionText, s.deleteOptionText]}>Delete</Text>
+              </TouchableOpacity>
+            )}
+            
+            <TouchableOpacity 
+              style={[s.modalOption, s.cancelOption]}
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+              }}
+            >
+              <Text style={s.cancelOptionText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#E9F8F6", padding: 20 },
-
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    marginTop: 4,
+  container: { 
+    flex: 1, 
+    backgroundColor: "#E9F8F6" 
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#2E7D6A",
-  },
-  bellBtn: {
-    padding: 6,
-    borderRadius: 20,
-    backgroundColor: "#E9F8F6",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 2,
-  },
-
-  avatarWrap: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 6,
-  },
-
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: "#d9ebe7",
-  },
-
-  photoButtonsRow: {
-    flexDirection: "row",
-    marginTop: 8,
-    justifyContent: "center",
-    columnGap: 10,
-  },
-
-  addPhotoBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: "#2E7D6A",
-    marginHorizontal: 4,
-  },
-
-  removePhotoBtn: {
-    marginTop: 8,
-    borderColor: "#b02a37",
-  },
-
-  addPhotoTxt: { color: "#2E7D6A", fontWeight: "700" },
-
-  fullname: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2E7D6A",
-    marginBottom: 10,
-  },
-
-  section: {
-    color: "#4C6E64",
-    fontWeight: "700",
+  
+  // Profile Header Styles
+  profileHeader: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    backgroundColor: '#FFFFFF',
     marginBottom: 8,
-    marginTop: 16,
+    position: 'relative',
   },
 
-  row: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: "#CFE1DB",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
+  notificationBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#F0F9F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
-
-  label: {
-    color: "#4C6E64",
-    marginBottom: 6,
-    fontWeight: "600",
+  
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
   },
-
-  input: {
+  
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#d9ebe7',
+  },
+  
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#2E7D6A',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  
+  fullname: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  
+  userLabel: {
     fontSize: 16,
-    color: "#1b1b1b",
+    color: '#666666',
   },
-
+  
+  // Edit Profile Card
+  sectionCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    borderWidth: 1,
+    borderColor: '#CFE1DB',
+  },
+  
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4C6E64',
+    marginBottom: 16,
+  },
+  
+  fieldRow: {
+    paddingVertical: 12,
+  },
+  
+  fieldLabel: {
+    fontSize: 14,
+    color: '#4C6E64',
+    marginBottom: 6,
+    fontWeight: '600',
+  },
+  
+  fieldInput: {
+    fontSize: 16,
+    color: '#1b1b1b',
+    paddingVertical: 8,
+  },
+  
+  divider: {
+    height: 1,
+    backgroundColor: '#CFE1DB',
+  },
+  
+  // Password field specific
   showBtn: {
     position: "absolute",
     right: 12,
@@ -819,132 +827,211 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 8,
   },
-
+  
   showTxt: {
     color: "#2E7D6A",
     fontWeight: "700",
   },
-
+  
+  // Save Button
   saveBtn: {
     backgroundColor: "#2E7D6A",
     borderRadius: 12,
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 16,
+    marginHorizontal: 16,
     marginTop: 4,
+    marginBottom: 12,
   },
-
+  
   saveTxt: {
     color: colors.textOnPrimary,
     fontWeight: "700",
+    fontSize: 16,
   },
-
+  
   successMsg: {
     color: "#2E7D6A",
     backgroundColor: "#DFF6E3",
     textAlign: "center",
-    paddingVertical: 8,
+    paddingVertical: 12,
+    marginHorizontal: 16,
     marginTop: 10,
+    marginBottom: 16,
     borderRadius: 8,
     fontWeight: "700",
   },
-
+  
+  // More Options Section
+  section: {
+    color: "#4C6E64",
+    fontWeight: "700",
+    marginBottom: 8,
+    marginTop: 16,
+    marginLeft: 16,
+    fontSize: 18,
+  },
+  
   optionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.surface,
     padding: 16,
-    borderRadius: 12,
+    marginHorizontal: 16,
     marginBottom: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#CFE1DB",
+    borderColor: '#CFE1DB',
   },
-
+  
   optionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-
+  
   optionText: {
     fontSize: 16,
-    color: "#1b1b1b",
+    color: '#1b1b1b',
     marginLeft: 12,
-    fontWeight: "500",
+    fontWeight: '500',
   },
-
+  
   logoutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.surface,
     padding: 16,
+    marginHorizontal: 16,
     borderRadius: 12,
     marginTop: 16,
     marginBottom: 8,
     borderWidth: 2,
-    borderColor: "#b02a37",
+    borderColor: '#b02a37',
   },
-
+  
   versionContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 30,
     marginBottom: 20,
     padding: 16,
   },
-
+  
   versionText: {
-    color: "#4C6E64",
+    color: '#4C6E64',
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
-
+  
   copyright: {
-    color: "#4C6E64",
+    color: '#4C6E64',
     fontSize: 12,
     marginTop: 5,
-    textAlign: "center",
+    textAlign: 'center',
   },
-
+  
   expandedPanel: {
     backgroundColor: colors.surface,
     padding: 12,
+    marginHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#CFE1DB",
+    borderColor: '#CFE1DB',
     marginBottom: 8,
   },
-
+  
   panelScroll: {
     maxHeight: 220,
   },
-
+  
   expandedLabel: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#4C6E64",
+    fontWeight: '700',
+    color: '#4C6E64',
   },
-
+  
   expandedText: {
     fontSize: 14,
-    color: "#1b1b1b",
+    color: '#1b1b1b',
     marginTop: 6,
   },
-
+  
   smallBtn: {
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: "#F3F8F7",
+    backgroundColor: '#F3F8F7',
     borderWidth: 1,
-    borderColor: "#CFE1DB",
+    borderColor: '#CFE1DB',
   },
-
-  smallBtnActive: {
-    backgroundColor: "#2E7D6A",
-  },
-
+  
   smallBtnText: {
-    color: "#1b1b1b",
-    fontWeight: "600",
+    color: '#1b1b1b',
+    fontWeight: '600',
+  },
+  
+  // Photo Options Bottom Sheet Styles
+  bottomSheetOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    zIndex: 1000,
+  },
+  
+  bottomSheetBackground: {
+    flex: 1,
+    width: '100%',
+  },
+  
+  bottomSheetContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 4,
+    paddingTop: 6,
+  },
+  
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  
+  deleteOption: {
+    borderBottomColor: '#F5F5F5',
+  },
+  
+  modalOptionText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+  
+  deleteOptionText: {
+    color: '#b02a37',
+    fontWeight: '600',
+  },
+  
+  cancelOption: {
+    borderBottomWidth: 0,
+    marginTop: 4,
+    paddingVertical: 8,
+    justifyContent: 'center',
+  },
+  
+  cancelOptionText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });
