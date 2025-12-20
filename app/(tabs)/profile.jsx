@@ -52,6 +52,30 @@ export default function Profile() {
 
   const placeholder = require("../../assets/images/profile.jpg");
 
+  // Kosovo phone formatter: +383 00 000 000
+  const formatKosovoPhone = (text) => {
+    try {
+      const digits = String(text || "").replace(/\D+/g, "");
+      let rest = digits;
+      if (rest.startsWith("383")) rest = rest.slice(3);
+      rest = rest.slice(0, 8);
+      const p1 = rest.slice(0, 2);
+      const p2 = rest.slice(2, 5);
+      const p3 = rest.slice(5, 8);
+      let out = "+383 ";
+      if (p1) out += p1;
+      if (p2) out += ` ${p2}`;
+      if (p3) out += ` ${p3}`;
+      return out;
+    } catch {
+      return "+383 ";
+    }
+  };
+
+  const handlePhoneChange = (text) => {
+    setPhoneNumber(formatKosovoPhone(text));
+  };
+
   async function loadAvatarFromFirestore() {
     try {
       let userId = auth.currentUser?.uid;
@@ -110,7 +134,7 @@ export default function Profile() {
           if (raw) {
             const me = JSON.parse(raw);
             setFullName(me.name || "User");
-            setPhoneNumber(me.phone || "");
+            setPhoneNumber(formatKosovoPhone(me.phone || ""));
             setEmail(me.email || "");
             setPassword(me.password || "");
             setAvatarUri(me.avatarUri || null);
@@ -129,7 +153,7 @@ export default function Profile() {
                 JSON.stringify(foundUser)
               );
               setFullName(foundUser.name || "User");
-              setPhoneNumber(foundUser.phone || "");
+              setPhoneNumber(formatKosovoPhone(foundUser.phone || ""));
               setEmail(foundUser.email || "");
               setPassword(foundUser.password || "");
               setAvatarUri(foundUser.avatarUri || null);
@@ -150,6 +174,7 @@ export default function Profile() {
               );
               setFullName(newUser.name);
               setEmail(newUser.email);
+              setPhoneNumber(formatKosovoPhone(""));
             }
           }
 
@@ -168,7 +193,7 @@ export default function Profile() {
           }
           const me = JSON.parse(raw);
           setFullName(me.name || "User");
-          setPhoneNumber(me.phone || "");
+          setPhoneNumber(formatKosovoPhone(me.phone || ""));
           setEmail(me.email || "");
           setPassword(me.password || "");
           setAvatarUri(me.avatarUri || null);
@@ -490,11 +515,12 @@ export default function Profile() {
           <Text style={s.fieldLabel}>Phone Number</Text>
           <TextInput
             value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            placeholder="Enter your phone number"
+            onChangeText={handlePhoneChange}
+            placeholder="+383 00 000 000"
             style={s.fieldInput}
             placeholderTextColor="#999"
             keyboardType="phone-pad"
+            maxLength={15}
           />
         </View>
         
@@ -506,7 +532,7 @@ export default function Profile() {
           <TextInput
             value={email}
             onChangeText={setEmail}
-            placeholder="Enter your email"
+            placeholder="example@gmail.com"
             style={s.fieldInput}
             placeholderTextColor="#999"
             keyboardType="email-address"
