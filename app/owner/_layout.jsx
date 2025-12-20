@@ -1,5 +1,8 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import theme from "../../components/theme";
+
+const { colors } = theme;
 
 export default function OwnerLayout() {
   return (

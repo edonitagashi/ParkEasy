@@ -8,7 +8,13 @@ import {
   FlatList,
   Modal,
   TextInput,
+  Image,
+  Alert,
+  Platform,
+  InteractionManager,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
 import theme, { colors } from "../../components/theme";
 import { auth, db } from "../../firebase/firebase";
 import {
@@ -32,6 +38,7 @@ export default function Home() {
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editSpots, setEditSpots] = useState("");
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
 
   // LOAD USER EMAIL FOR EACH BOOKING
   const loadUserEmails = async (bookingList) => {
@@ -103,17 +110,141 @@ export default function Home() {
 
   const saveEdit = async () => {
     try {
+      // Validate inputs
+      const trimmedName = editName.trim();
+      const priceNum = parseFloat(editPrice);
+      const spotsNum = parseInt(editSpots);
+
+      if (!trimmedName) {
+        Alert.alert("Validation Error", "Please enter a parking name");
+        return;
+      }
+
+      if (isNaN(priceNum) || priceNum < 0) {
+        Alert.alert("Validation Error", "Please enter a valid price");
+        return;
+      }
+
+      if (isNaN(spotsNum) || spotsNum < 0) {
+        Alert.alert("Validation Error", "Please enter a valid number of spots");
+        return;
+      }
+
       await updateDoc(doc(db, "parkings", parking.id), {
-        name: editName.trim(),
-        price: Number(editPrice),
-        totalSpots: Number(editSpots),
+        name: trimmedName,
+        price: priceNum,
+        totalSpots: spotsNum,
       });
 
-      alert("Parking updated!");
+      Alert.alert("Success", "Parking updated successfully!");
       setEditVisible(false);
       loadData();
     } catch (err) {
-      alert("Error updating parking");
+      console.error("Save error:", err);
+      Alert.alert("Error", "Could not update parking. Please try again.");
+    }
+  };
+
+  const pickFromLibrary = async () => {
+    try {
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission required", "We need access to your photos.");
+          return;
+        }
+      }
+
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [16, 9],
+        base64: true,
+        quality: 0.3,
+      });
+
+      if (!res.canceled && res.assets?.length) {
+        const base64Img = `data:image/jpg;base64,${res.assets[0].base64}`;
+        await syncPhotoToFirestore(base64Img);
+      }
+    } catch (e) {
+      console.error("Image pick error:", e);
+      Alert.alert("Error", "The photo could not be selected.");
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      if (Platform.OS === "web") {
+        Alert.alert(
+          "Not supported on web",
+          "Camera works only on a physical device or emulator with Expo Go."
+        );
+        return;
+      }
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Permission to access camera is required!"
+        );
+        return;
+      }
+
+      const results = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [16, 9],
+        base64: true,
+        quality: 0.5,
+      });
+
+      if (!results.canceled && results.assets?.length) {
+        const base64Img = `data:image/jpg;base64,${results.assets[0].base64}`;
+        await syncPhotoToFirestore(base64Img);
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      Alert.alert("Error", "The photo could not be taken.");
+    }
+  };
+
+  const syncPhotoToFirestore = async (base64Img) => {
+    try {
+      if (!parking) return;
+
+      await updateDoc(doc(db, "parkings", parking.id), {
+        photoUri: base64Img,
+      });
+
+      // Update local state immediately
+      setParking({ ...parking, photoUri: base64Img });
+      setShowPhotoOptions(false);
+
+      Alert.alert("Success", "Parking photo updated!");
+    } catch (error) {
+      console.log("Firestore photo error:", error);
+      Alert.alert("Error", "Could not update parking photo.");
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    try {
+      if (!parking) return;
+
+      await updateDoc(doc(db, "parkings", parking.id), {
+        photoUri: "",
+      });
+
+      // Update local state immediately
+      setParking({ ...parking, photoUri: "" });
+      setShowPhotoOptions(false);
+
+      Alert.alert("Success", "Parking photo removed!");
+    } catch (error) {
+      console.error("Remove photo error:", error);
+      Alert.alert("Error", "Could not remove parking photo.");
     }
   };
 
@@ -148,6 +279,26 @@ export default function Home() {
 
       {parking && (
         <View style={styles.parkingCard}>
+          {/* Parking Photo Section */}
+          <TouchableOpacity 
+            style={styles.photoContainer}
+            onPress={() => setShowPhotoOptions(true)}
+          >
+            {parking.photoUri ? (
+              <Image
+                source={{ uri: parking.photoUri }}
+                style={styles.parkingPhoto}
+              />
+            ) : (
+              <View style={styles.photoPlaceholder}>
+                <Ionicons name="image-outline" size={48} color="#999" />
+              </View>
+            )}
+            <View style={styles.photoOverlay}>
+              <Ionicons name="camera" size={20} color="#FFFFFF" />
+            </View>
+          </TouchableOpacity>
+
           <Text style={styles.pTitle}>{parking.name}</Text>
           <Text style={styles.pText}>Address: {parking.address}</Text>
           <Text style={styles.pText}>Price: €{parking.price}</Text>
@@ -197,29 +348,35 @@ export default function Home() {
       <Modal visible={editVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Edit Parking</Text>
+            <Text style={styles.modalTitle}>Edit Parking Details</Text>
 
+            <Text style={styles.inputLabel}>Parking Name</Text>
             <TextInput
               style={styles.input}
               value={editName}
               onChangeText={setEditName}
-              placeholder="Parking Name"
+              placeholder="Enter parking name"
+              placeholderTextColor="#999"
             />
 
+            <Text style={styles.inputLabel}>Price (€)</Text>
             <TextInput
               style={styles.input}
               value={editPrice}
               onChangeText={setEditPrice}
               keyboardType="numeric"
-              placeholder="Price (€)"
+              placeholder="Enter price"
+              placeholderTextColor="#999"
             />
 
+            <Text style={styles.inputLabel}>Total Spots</Text>
             <TextInput
               style={styles.input}
               value={editSpots}
               onChangeText={setEditSpots}
               keyboardType="numeric"
-              placeholder="Total Spots"
+              placeholder="Enter total spots"
+              placeholderTextColor="#999"
             />
 
             <View style={styles.row}>
@@ -237,6 +394,72 @@ export default function Home() {
           </View>
         </View>
       </Modal>
+
+      {/* Photo Options Bottom Sheet */}
+      {showPhotoOptions && (
+        <View style={styles.bottomSheetOverlay}>
+          <TouchableOpacity 
+            style={styles.bottomSheetBackground}
+            activeOpacity={1}
+            onPress={() => setShowPhotoOptions(false)}
+          />
+          <View style={styles.bottomSheetContent}>
+            <TouchableOpacity 
+              style={styles.modalOption} 
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+                InteractionManager.runAfterInteractions(() => {
+                  pickFromLibrary();
+                });
+              }}
+            >
+              <Ionicons name="image" size={24} color={colors.primary} />
+              <Text style={styles.modalOptionText}>Choose from library</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.modalOption} 
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+                InteractionManager.runAfterInteractions(() => {
+                  takePhoto();
+                });
+              }}
+            >
+              <Ionicons name="camera" size={24} color={colors.primary} />
+              <Text style={styles.modalOptionText}>Take Photo</Text>
+            </TouchableOpacity>
+            
+            {parking.photoUri && (
+              <TouchableOpacity 
+                style={[styles.modalOption, styles.deleteOption]} 
+                activeOpacity={0.7}
+                onPress={() => {
+                  setShowPhotoOptions(false);
+                  InteractionManager.runAfterInteractions(() => {
+                    handleRemovePhoto();
+                  });
+                }}
+              >
+                <Ionicons name="trash" size={24} color={colors.danger} />
+                <Text style={[styles.modalOptionText, styles.deleteOptionText]}>Delete</Text>
+              </TouchableOpacity>
+            )}
+            
+            <TouchableOpacity 
+              style={[styles.modalOption, styles.cancelOption]}
+              activeOpacity={0.7}
+              onPress={() => {
+                setShowPhotoOptions(false);
+              }}
+            >
+              <Text style={styles.cancelOptionText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
     </View>
   );
@@ -266,6 +489,47 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
+
+  photoContainer: {
+    position: 'relative',
+    marginBottom: theme.spacing.md,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+
+  parkingPhoto: {
+    width: '100%',
+    height: 180,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+  },
+
+  photoPlaceholder: {
+    width: '100%',
+    height: 180,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+  },
+
+  photoOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: colors.primary,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+
   pTitle: { fontSize: 20, fontWeight: "bold", color: colors.primary },
   pText: { color: colors.textMuted, marginTop: theme.spacing.sm - theme.spacing.xs },
 
@@ -305,12 +569,22 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
 
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.primary,
+    marginBottom: theme.spacing.xs,
+    marginTop: theme.spacing.sm,
+  },
+
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
     padding: theme.spacing.sm + theme.spacing.xs,
     marginBottom: theme.spacing.md - 2,
+    fontSize: 16,
+    color: "#1b1b1b",
   },
 
   row: { flexDirection: "row", gap: theme.spacing.sm + theme.spacing.xs },
@@ -318,4 +592,68 @@ const styles = StyleSheet.create({
   save: { backgroundColor: colors.primary },
   cancel: { backgroundColor: colors.danger },
   btnText: { color: colors.textOnPrimary, fontWeight: "700" },
+
+  // Photo Options Bottom Sheet Styles
+  bottomSheetOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    zIndex: 1000,
+  },
+
+  bottomSheetBackground: {
+    flex: 1,
+    width: '100%',
+  },
+
+  bottomSheetContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 4,
+    paddingTop: 6,
+  },
+
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+
+  deleteOption: {
+    borderBottomColor: '#F5F5F5',
+  },
+
+  modalOptionText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+
+  deleteOptionText: {
+    color: colors.danger,
+    fontWeight: '600',
+  },
+
+  cancelOption: {
+    borderBottomWidth: 0,
+    marginTop: 4,
+    paddingVertical: 8,
+    justifyContent: 'center',
+  },
+
+  cancelOptionText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 });
