@@ -104,7 +104,6 @@ export default function Home() {
   // Geocode address string to coordinates
   const geocodeAddress = async (address) => {
     try {
-      const GOOGLE_MAPS_API_KEY = "AIzaSyBfKKqxdwPhgtE4T8YNxmWqSGhXXN3h2YU";
       const query = encodeURIComponent(address.trim());
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
