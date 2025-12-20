@@ -37,6 +37,30 @@ export default function RegisterScreen() {
 
   const [loading, setLoading] = useState(false);
 
+  // Kosovo phone formatter: +383 00 000 000
+  const formatKosovoPhone = (text) => {
+    try {
+      const digits = String(text || "").replace(/\D+/g, "");
+      let rest = digits;
+      if (rest.startsWith("383")) rest = rest.slice(3);
+      rest = rest.slice(0, 8);
+      const p1 = rest.slice(0, 2);
+      const p2 = rest.slice(2, 5);
+      const p3 = rest.slice(5, 8);
+      let out = "+383 ";
+      if (p1) out += p1;
+      if (p2) out += ` ${p2}`;
+      if (p3) out += ` ${p3}`;
+      return out;
+    } catch {
+      return "+383 ";
+    }
+  };
+
+  const handlePhoneChange = (text) => {
+    setPhone(formatKosovoPhone(text));
+  };
+
   const showAlert = (title, message) => {
     if (Platform.OS === "web") alert(`${title}\n\n${message}`);
     else Alert.alert(title, message);
@@ -45,10 +69,33 @@ export default function RegisterScreen() {
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) => password.length >= 6;
 
+  // Geocode address string to coordinates
+  const geocodeAddress = async (address) => {
+    try {
+      const GOOGLE_MAPS_API_KEY = "AIzaSyBfKKqxdwPhgtE4T8YNxmWqSGhXXN3h2YU";
+      const query = encodeURIComponent(address.trim());
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GOOGLE_MAPS_API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng,
+        };
+      }
+      return null;
+    } catch (e) {
+      console.error("Geocoding error:", e);
+      return null;
+    }
+  };
+
   const handleRegister = async () => {
     // BASIC INPUT VALIDATION
     if (!name.trim()) return showAlert("Error", "Please enter your name.");
-    if (!phone.trim()) return showAlert("Error", "Please enter your phone number.");
+    if (!phone || phone.trim() === "+383 ") return showAlert("Error", "Please enter your phone number.");
     if (!email.trim()) return showAlert("Error", "Please enter your email.");
     if (!validateEmail(email.trim())) return showAlert("Error", "Invalid email format.");
     if (!validatePassword(password))
@@ -95,6 +142,9 @@ export default function RegisterScreen() {
 
       // --- OWNER REGISTER LOGIC ---
       if (role === "owner") {
+        // Geocode the address to get coordinates
+        const coords = await geocodeAddress(parkingAddress);
+
         // CREATE OWNER REQUEST
         const reqRef = await addDoc(collection(db, "ownerRequests"), {
           userId: fbUser.uid,
@@ -105,6 +155,9 @@ export default function RegisterScreen() {
           address: parkingAddress,
           price: Number(parkingPrice),
           totalSpots: Number(parkingSpots),
+          latitude: coords?.latitude || null,
+          longitude: coords?.longitude || null,
+          coordinate: coords || null,
           status: "pending",
           createdAt: serverTimestamp(),
         });
@@ -151,14 +204,15 @@ export default function RegisterScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Phone number"
+          placeholder="+383 00 000 000"
           keyboardType="phone-pad"
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={handlePhoneChange}
+          maxLength={15}
         />
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="example@gmail.com"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}

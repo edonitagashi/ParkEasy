@@ -46,7 +46,7 @@ function ParkingCard({ item, hideReserve, blur = false }) {
           style={styles.card}
         >
           <View>
-            <OptimizedImage source={item.image} thumbnail={item.imageThumb || null} style={styles.image} />
+            <OptimizedImage source={item.photoUri || item.image} thumbnail={item.imageThumb || null} style={styles.image} />
             {/* Stronger top/bottom fade overlays for better legibility */}
             <LinearGradient
               colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.0)"]}
@@ -218,10 +218,13 @@ function areEqual(prevProps, nextProps) {
   if (p.price !== n.price) return false;
   if ((p.spots || p.freeSpots) !== (n.spots || n.freeSpots)) return false;
 
-  // If image source changed, re-render
-  const pImg = typeof p.image === "string" ? p.image : p.image?.uri;
-  const nImg = typeof n.image === "string" ? n.image : n.image?.uri;
+  // If image source changed, re-render (check both photoUri and image)
+  const pImg = typeof (p.photoUri || p.image) === "string" ? (p.photoUri || p.image) : (p.photoUri || p.image)?.uri;
+  const nImg = typeof (n.photoUri || n.image) === "string" ? (n.photoUri || n.image) : (n.photoUri || n.image)?.uri;
   if (pImg !== nImg) return false;
+
+  // If photo uri changed specifically, re-render
+  if (p.photoUri !== n.photoUri) return false;
 
   // hideReserve prop rarely changes — keep equality
   if (prevProps.hideReserve !== nextProps.hideReserve) return false;

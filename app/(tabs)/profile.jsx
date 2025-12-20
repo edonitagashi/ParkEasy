@@ -52,8 +52,31 @@ export default function Profile() {
 
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
 
-  // ==================== FUNKSIONET PËR AVATAR (mbeten të njëjta) ====================
-  async function loadAvatarFromFirestore() {
+// Kosovo phone formatter: +383 00 000 000
+const formatKosovoPhone = (text) => {
+  try {
+    const digits = String(text || "").replace(/\D+/g, "");
+    let rest = digits;
+    if (rest.startsWith("383")) rest = rest.slice(3);
+    rest = rest.slice(0, 8);
+    const p1 = rest.slice(0, 2);
+    const p2 = rest.slice(2, 5);
+    const p3 = rest.slice(5, 8);
+    let out = "+383 ";
+    if (p1) out += p1;
+    if (p2) out += ` ${p2}`;
+    if (p3) out += ` ${p3}`;
+    return out;
+  } catch {
+    return "+383 ";
+  }
+};
+
+const handlePhoneChange = (text) => {
+  setPhoneNumber(formatKosovoPhone(text));
+};
+
+async function loadAvatarFromFirestore() {
     try {
       let userId = auth.currentUser?.uid;
       if (!userId) {
@@ -82,7 +105,7 @@ export default function Profile() {
     }
   }
 
-  const syncAvatarToFirestore = async (base64Img) => {
+const syncAvatarToFirestore = async (base64Img) => {
     try {
       if (!auth.currentUser) return;
       const userId = auth.currentUser.uid;
@@ -316,11 +339,11 @@ export default function Profile() {
         onNotificationPress={() => router.push("/notification")}
       />
 
-      <ScrollView
-        style={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 20 }}
-      >
+<ScrollView
+  style={{ flex: 1 }}
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={{ paddingTop: 20 }}
+>
         {/* AVATARI DHE EMRII */}
         <View style={s.profileTop}>
           <TouchableOpacity
