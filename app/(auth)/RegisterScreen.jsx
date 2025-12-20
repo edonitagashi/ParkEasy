@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, db } from "../../firebase/firebase";
@@ -51,12 +51,19 @@ export default function RegisterScreen() {
     if (!phone.trim()) return showAlert("Error", "Please enter your phone number.");
     if (!email.trim()) return showAlert("Error", "Please enter your email.");
     if (!validateEmail(email.trim())) return showAlert("Error", "Invalid email format.");
-    if (!validatePassword(password)) return showAlert("Error", "Password must be at least 6 characters.");
-    if (password !== confirmPassword) return showAlert("Error", "Passwords do not match.");
+    if (!validatePassword(password))
+      return showAlert("Error", "Password must be at least 6 characters.");
+    if (password !== confirmPassword)
+      return showAlert("Error", "Passwords do not match.");
 
     // OWNER FIELDS VALIDATION
     if (role === "owner") {
-      if (!parkingName.trim() || !parkingAddress.trim() || !parkingPrice || !parkingSpots) {
+      if (
+        !parkingName.trim() ||
+        !parkingAddress.trim() ||
+        !parkingPrice ||
+        !parkingSpots
+      ) {
         return showAlert("Error", "Please fill all parking fields.");
       }
     }
@@ -114,12 +121,11 @@ export default function RegisterScreen() {
 
         // SEND OWNER TO HOME SCREEN
         router.replace("/owner/home");
-      } 
+      }
       // --- NORMAL USER ---
       else {
         router.replace("/(tabs)/nearby");
       }
-
     } catch (error) {
       console.error("Register error:", error);
       showAlert("Error", error.message);
@@ -129,77 +135,182 @@ export default function RegisterScreen() {
   };
 
   return (
-  <ScrollView contentContainerStyle={styles.scroll}>
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign up</Text>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "#E9F8F6" }}
+      contentContainerStyle={styles.outerContainer}
+    >
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Sign up</Text>
+        <Text style={styles.subtitle}>Create your Parking App account</Text>
 
-      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Phone number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
-      <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
-      <TextInput style={styles.input} placeholder="Confirm password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone number"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
 
-      <Text style={styles.label}>Register as:</Text>
+        <Text style={styles.label}>Register as:</Text>
 
-      <View style={styles.roleRow}>
-        <TouchableOpacity
-          style={[styles.roleButton, role === "user" && styles.roleButtonActive]}
-          onPress={() => setRole("user")}
-        >
-          <Text style={[styles.roleText, role === "user" && styles.roleTextActive]}>User</Text>
-        </TouchableOpacity>
+        <View style={styles.roleRow}>
+          <TouchableOpacity
+            style={[
+              styles.roleButton,
+              role === "user" && styles.roleButtonActive,
+            ]}
+            onPress={() => setRole("user")}
+          >
+            <Text
+              style={[
+                styles.roleText,
+                role === "user" && styles.roleTextActive,
+              ]}
+            >
+              User
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.roleButton, role === "owner" && styles.roleButtonActive]}
-          onPress={() => setRole("owner")}
-        >
-          <Text style={[styles.roleText, role === "owner" && styles.roleTextActive]}>Owner</Text>
+          <TouchableOpacity
+            style={[
+              styles.roleButton,
+              role === "owner" && styles.roleButtonActive,
+            ]}
+            onPress={() => setRole("owner")}
+          >
+            <Text
+              style={[
+                styles.roleText,
+                role === "owner" && styles.roleTextActive,
+              ]}
+            >
+              Owner
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {role === "owner" && (
+          <View style={styles.ownerBox}>
+            <TextInput
+              style={styles.input}
+              placeholder="Parking name"
+              value={parkingName}
+              onChangeText={setParkingName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Parking address"
+              value={parkingAddress}
+              onChangeText={setParkingAddress}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Price (€)"
+              keyboardType="numeric"
+              value={parkingPrice}
+              onChangeText={setParkingPrice}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Total spots"
+              keyboardType="numeric"
+              value={parkingSpots}
+              onChangeText={setParkingSpots}
+            />
+          </View>
+        )}
+
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Loading..." : "Create Account"}
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.googleButtonWrapper}>
+            <GoogleAuthButton mode="signup" style={{ width: "100%" }} />
+          </View>
+        </View>
+
+        <TouchableOpacity onPress={() => router.push("LoginScreen")}>
+          <Text style={styles.switchText}>
+            Already have an account? <Text style={styles.link}>Log in</Text>
+          </Text>
         </TouchableOpacity>
       </View>
-
-      {role === "owner" && (
-        <View style={styles.ownerBox}>
-          <TextInput style={styles.input} placeholder="Parking name" value={parkingName} onChangeText={setParkingName} />
-          <TextInput style={styles.input} placeholder="Parking address" value={parkingAddress} onChangeText={setParkingAddress} />
-          <TextInput style={styles.input} placeholder="Price (€)" keyboardType="numeric" value={parkingPrice} onChangeText={setParkingPrice} />
-          <TextInput style={styles.input} placeholder="Total spots" keyboardType="numeric" value={parkingSpots} onChangeText={setParkingSpots} />
-        </View>
-      )}
-
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? "Loading..." : "Create Account"}</Text>
-      </TouchableOpacity>
-
-      <GoogleAuthButton mode="signup" />
-
-      <TouchableOpacity onPress={() => router.push("LoginScreen")}>
-        <Text style={styles.switchText}>
-          Already have an account? <Text style={styles.link}>Log in</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </ScrollView>
-);
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    padding: 20,
+  outerContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "flex-start",
+    minHeight: "100%",
+    paddingVertical: 40,
   },
-
-  container: {
-    width: "100%",
-    maxWidth: 600,
-    
+  card: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "90%",
+    backgroundColor: "#FFFFFFDD",
+    borderRadius: 20,
+    paddingVertical: 44,
+    paddingHorizontal: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    maxWidth: 400,
   },
-
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
+  cardTitle: {
+    fontSize: 38,
+    fontWeight: "900",
+    color: colors.primary,
     textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    marginBottom: 16,
+  },
+  subtitle: {
+    textAlign: "center",
+    color: colors.textMuted,
+    marginBottom: 20,
   },
 
   input: {
@@ -209,6 +320,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
+    backgroundColor: "#FFF",
   },
 
   label: {
@@ -253,13 +365,23 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
+  buttonGroup: {
+    width: "100%",
+    gap: 12,
+    marginTop: 10,
+  },
+
+  googleButtonWrapper: {
+    width: "100%",
+    marginTop: 12,
+  },
+
   button: {
     backgroundColor: "#2E7D6A",
     padding: 15,
     borderRadius: 10,
     width: "100%",
     alignItems: "center",
-    marginTop: 10,
   },
 
   buttonText: {
@@ -270,12 +392,12 @@ const styles = StyleSheet.create({
 
   switchText: {
     marginTop: 15,
-    color: "#555",
+    color: colors.textMuted,
     textAlign: "center",
   },
 
   link: {
-    color: "#2E7D6A",
+    color: colors.primary,
     fontWeight: "bold",
   },
 });
