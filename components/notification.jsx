@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Alert, FlatList, Text } from "react-native";
 import * as Notifications from "expo-notifications";
 import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase/firebase";
+import { auth, db } from "../firebase/firebase";
 
 const NotifCard = memo(({ item, onCancel }) => (
   <View style={styles.card}>
@@ -98,19 +98,20 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    padding: 16, 
+    padding: 20, 
     backgroundColor: "#E9F8F6" 
   },
 
   header: { 
-    fontSize: 22, 
+    fontSize: 18, 
     fontWeight: "700", 
     color: "#2E7D6A", 
-    marginBottom: 12 
+    marginBottom: 12, 
+    textAlign: "center"
   },
 
   card: { 
-    padding: 14, 
+    padding: 12, 
     backgroundColor: "#F3F8F7", 
     borderRadius: 12, 
     marginBottom: 12,
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
 
   time: { 
     marginTop: 6, 
-    color: "#666", 
+    color: "#4C6E64", 
     fontSize: 12 
   },
 
