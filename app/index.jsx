@@ -1,11 +1,9 @@
-
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import theme, { colors, shadows } from "../components/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
-
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
   const router = useRouter();
@@ -19,40 +17,47 @@ export default function Index() {
     ]).start();
   }, []);
 
-  
   return (
     <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}>
-          <Text style={styles.appName}>ParkEasy</Text>
-          <Image source={require("../assets/images/index5.jpg")} style={styles.headerImage} resizeMode="contain" />
-          <Text style={styles.subtitle}>Find and reserve your parking spot effortlessly.</Text>
-          <View style={styles.banner}>
-            <Text style={styles.bannerTitle}>Smart Parking Starts Here</Text>
-            <Text style={styles.bannerText}>Save time and secure your perfect spot in just a few taps.</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <Link href="LoginScreen" asChild>
-              <TouchableOpacity style={styles.primaryButton}>
-                <Text style={styles.primaryText}>Login</Text>
-              </TouchableOpacity>
-            </Link>
-            <Link href="RegisterScreen" asChild>
-              <TouchableOpacity style={styles.secondaryButton}>
-                <Text style={styles.secondaryText}>Register</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </Animated.View>
-      </ScrollView>
+      <SafeAreaView style={{ flex: 1 }} edges={['top','bottom']}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}> 
+            <Text style={styles.appName}>ParkEasy</Text>
+            <Image source={require("../assets/images/index5.jpg")} style={styles.headerImage} resizeMode="contain" />
+            <Text style={styles.subtitle}>Find and reserve your parking spot effortlessly.</Text>
+            <View style={styles.banner}>
+              <Text style={styles.bannerTitle}>Smart Parking Starts Here</Text>
+              <Text style={styles.bannerText}>Save time and secure your perfect spot in just a few taps.</Text>
+            </View>
+            <View style={styles.buttonContainer}>
+              <Link href="LoginScreen" asChild>
+                <TouchableOpacity style={styles.primaryButton}>
+                  <Text style={styles.primaryText}>Login</Text>
+                </TouchableOpacity>
+              </Link>
+              <Link href="RegisterScreen" asChild>
+                <TouchableOpacity style={styles.secondaryButton}>
+                  <Text style={styles.secondaryText}>Register</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
-  scrollContainer: { alignItems: "center", paddingVertical: theme.spacing.lg + theme.spacing.sm },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: "center",
+    minHeight: '100%',
+    paddingVertical: theme.spacing.lg + theme.spacing.sm
+  },
   container: {
     alignItems: "center", justifyContent: "center", width: "90%",
     backgroundColor: "#FFFFFFDD", borderRadius: 20, paddingVertical: theme.spacing.xxl + theme.spacing.md, paddingHorizontal: theme.spacing.lg + theme.spacing.sm,

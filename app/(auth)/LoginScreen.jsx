@@ -119,9 +119,9 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.surface }} contentContainerStyle={styles.container}>
-      <View style={styles.inner}>
-        <Text style={styles.title}>Login</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: '#E9F8F6' }} contentContainerStyle={styles.outerContainer}>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Login</Text>
         <Text style={styles.subtitle}>Access your Parking App account</Text>
 
         <TextInput
@@ -141,13 +141,16 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        <AnimatedTouchable style={styles.button} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
-        </AnimatedTouchable>
+        <View style={styles.buttonGroup}>
+          <AnimatedTouchable style={styles.button} onPress={handleLogin} disabled={loading}>
+            <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
+          </AnimatedTouchable>
+          <View style={styles.googleButtonWrapper}>
+            <GoogleAuthButton mode="login" style={{ width: '100%' }} />
+          </View>
+        </View>
 
-        <GoogleAuthButton mode="login" />
-
-        <AnimatedTouchable onPress={() => router.push("/RegisterScreen")}>
+        <AnimatedTouchable onPress={() => router.push("/RegisterScreen")}> 
           <Text style={styles.switchText}>
             Don’t have an account? <Text style={styles.link}>Sign up</Text>
           </Text>
@@ -158,39 +161,60 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    alignItems: "center",
+  outerContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100%',
+    paddingVertical: 40,
   },
-
-  inner: {
-    width: "100%",
-    maxWidth: 600,
+  card: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+    backgroundColor: '#FFFFFFDD',
+    borderRadius: 20,
+    paddingVertical: 44,
+    paddingHorizontal: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    maxWidth: 400,
   },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: colors.textStrong,
-    marginTop: 10,
-    textAlign: "center",
+  cardTitle: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: colors.primary,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.15)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    marginBottom: 16,
   },
-
   subtitle: {
-    textAlign: "center",
+    textAlign: 'center',
     color: colors.textMuted,
     marginBottom: 20,
   },
-
   input: {
-    width: "100%",
+    width: '100%',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,
     padding: spacing.md,
     marginBottom: spacing.md,
+    backgroundColor: '#FFF',
   },
-
+  buttonGroup: {
+    width: '100%',
+    gap: 12,
+  },
+  googleButtonWrapper: {
+    width: '100%',
+    marginTop: 12,
+  },
   button: {
     backgroundColor: colors.primary,
     padding: spacing.md,
@@ -199,21 +223,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-
   buttonText: {
     color: colors.textOnPrimary,
     fontWeight: "bold",
     fontSize: 16,
   },
-
   switchText: {
     marginTop: 15,
     color: colors.textMuted,
-    textAlign: "center",
+    textAlign: 'center',
   },
-
   link: {
     color: colors.primary,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

@@ -133,44 +133,32 @@ export default function GoogleAuthButton({ mode = "login" }) {
 
   return (
     <AnimatedTouchable style={styles.googleBtn} onPress={handleGoogleAuth} disabled={loading}>
-      <View style={styles.row}>
-        <AntDesign name="google" size={22} color="#DB4437" style={styles.icon} />
-        <Text style={styles.googleText}>{loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}</Text>
-      </View>
+      <AntDesign name="google" size={22} color="#DB4437" style={styles.icon} />
+      <Text style={styles.googleText}>{loading ? "Please wait..." : mode === "signup" ? "Sign up with Google" : "Continue with Google"}</Text>
     </AnimatedTouchable>
   );
 }
 
 const styles = StyleSheet.create({
   googleBtn: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 14,
     paddingVertical: spacing.md,
     marginTop: spacing.md,
-    width: "100%",
-    maxWidth: 600,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginTop: 12,
-    width: "100%",
-    maxWidth: 600,
+    width: '100%',
+    shadowColor: 'transparent',
+    elevation: 0,
   },
   icon: { marginRight: spacing.sm },
   googleText: {
-    color: "#000",
-    color: colors.text,
-    fontSize: typography.size.md,
-    fontWeight: "600",
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
