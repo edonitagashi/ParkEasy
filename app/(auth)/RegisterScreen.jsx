@@ -69,29 +69,6 @@ export default function RegisterScreen() {
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) => password.length >= 6;
 
-  // Geocode address string to coordinates
-  const geocodeAddress = async (address) => {
-    try {
-      const GOOGLE_MAPS_API_KEY = "AIzaSyBfKKqxdwPhgtE4T8YNxmWqSGhXXN3h2YU";
-      const query = encodeURIComponent(address.trim());
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GOOGLE_MAPS_API_KEY}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data.results && data.results.length > 0) {
-        const location = data.results[0].geometry.location;
-        return {
-          latitude: location.lat,
-          longitude: location.lng,
-        };
-      }
-      return null;
-    } catch (e) {
-      console.error("Geocoding error:", e);
-      return null;
-    }
-  };
-
   const handleRegister = async () => {
     // BASIC INPUT VALIDATION
     if (!name.trim()) return showAlert("Error", "Please enter your name.");
@@ -142,9 +119,6 @@ export default function RegisterScreen() {
 
       // --- OWNER REGISTER LOGIC ---
       if (role === "owner") {
-        // Geocode the address to get coordinates
-        const coords = await geocodeAddress(parkingAddress);
-
         // CREATE OWNER REQUEST
         const reqRef = await addDoc(collection(db, "ownerRequests"), {
           userId: fbUser.uid,
@@ -155,9 +129,6 @@ export default function RegisterScreen() {
           address: parkingAddress,
           price: Number(parkingPrice),
           totalSpots: Number(parkingSpots),
-          latitude: coords?.latitude || null,
-          longitude: coords?.longitude || null,
-          coordinate: coords || null,
           status: "pending",
           createdAt: serverTimestamp(),
         });

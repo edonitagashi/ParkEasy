@@ -101,28 +101,6 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Geocode address string to coordinates
-  const geocodeAddress = async (address) => {
-    try {
-      const query = encodeURIComponent(address.trim());
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GOOGLE_MAPS_API_KEY}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data.results && data.results.length > 0) {
-        const location = data.results[0].geometry.location;
-        return {
-          latitude: location.lat,
-          longitude: location.lng,
-        };
-      }
-      return null;
-    } catch (e) {
-      console.error("Geocoding error:", e);
-      return null;
-    }
-  };
-
   const openEditModal = () => {
     setEditName(parking.name);
     setEditPrice(String(parking.price));
@@ -152,24 +130,10 @@ export default function Home() {
         return;
       }
 
-      // Geocode address if parking has one (update from ownerRequests)
-      let coordsUpdate = {};
-      if (parking.address) {
-        const coords = await geocodeAddress(parking.address);
-        if (coords) {
-          coordsUpdate = {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            coordinate: coords,
-          };
-        }
-      }
-
       await updateDoc(doc(db, "parkings", parking.id), {
         name: trimmedName,
         price: priceNum,
         totalSpots: spotsNum,
-        ...coordsUpdate,
       });
 
       Alert.alert("Success", "Parking updated successfully!");
