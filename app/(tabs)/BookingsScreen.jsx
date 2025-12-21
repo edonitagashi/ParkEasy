@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-  import theme from "../../components/theme";
+  import theme from "../hooks/theme";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
-import { colors } from "../../components/theme";
+import { colors } from "../hooks/theme";
 import { collection, query, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
 import { router } from "expo-router";
@@ -25,7 +25,7 @@ export default function BookingsScreen() {
   const [doneVisible, setDoneVisible] = useState(false);
 
   useEffect(() => {
-    // subscribe to real-time updates for this user's bookings
+    
     let unsub = () => {};
     if (auth.currentUser) {
       const q = query(
@@ -64,7 +64,7 @@ export default function BookingsScreen() {
     ]);
   };
 
-  // perform actual delete with error handling and UI feedback
+
   const runDelete = async (bookingId) => {
     try {
       console.log("runDelete called for bookingId:", bookingId);
@@ -79,7 +79,7 @@ export default function BookingsScreen() {
         return;
       }
 
-      // optimistic UI: remove locally first for snappy UX
+      
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
 
       await deleteDoc(doc(db, "bookings", bookingId));
@@ -91,14 +91,14 @@ export default function BookingsScreen() {
       console.error("Delete error:", err);
       const code = err?.code || "unknown";
       const msg = err?.message || String(err);
-      // Show detailed error to help debugging (permission, auth, etc.)
+    
       Alert.alert(
         "Delete failed",
         `${code}\n${msg}`,
         [{ text: "OK" }]
       );
 
-      // Helpful hint for common permission error
+    
       if (code === "permission-denied") {
         Alert.alert(
           "Permission denied",
@@ -107,7 +107,7 @@ export default function BookingsScreen() {
         );
       }
 
-      // revert UI if delete failed: reload bookings from server
+    
       loadBookings();
     }
   };

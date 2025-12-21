@@ -1,8 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { Modal, Animated, StyleSheet, View, Pressable } from 'react-native';
-import theme, { colors, radii, spacing, shadows } from '../theme';
+import { theme } from '../../app/hooks/theme';
 
-export default function FadeModal({ visible, onClose, children, emphasize = false, autoEmphasize = false }) {
+const { colors, radii, spacing, shadows, flex, zIndex } = theme;
+
+export default function FadeModal({ 
+  visible, 
+  onClose, 
+  children, 
+  emphasize = false, 
+  autoEmphasize = false 
+}) {
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.98)).current;
   const [focused, setFocused] = React.useState(false);
@@ -11,7 +19,7 @@ export default function FadeModal({ visible, onClose, children, emphasize = fals
     if (visible) {
       Animated.parallel([
         Animated.timing(opacity, { toValue: 1, duration: 260, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 10, tension: 60 }),
+        Animated.spring(scale, { toValue: 1, friction: 10, tension: 60, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
@@ -25,11 +33,16 @@ export default function FadeModal({ visible, onClose, children, emphasize = fals
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
       <Animated.View style={[styles.backdrop, { opacity }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <Animated.View style={[styles.container, (emphasize || (autoEmphasize && focused)) && styles.containerFocused, { transform: [{ scale }] }]}>
+        <Animated.View 
+          style={[
+            styles.container, 
+            (emphasize || (autoEmphasize && focused)) && styles.containerFocused,
+            { transform: [{ scale }] }
+          ]}
+        >
           {autoEmphasize
             ? React.Children.map(children, (child) => {
                 if (!React.isValidElement(child)) return child;
-                // Attach focus/blur where available (TextInput, Picker-like components)
                 const onFocus = (e) => {
                   setFocused(true);
                   child.props.onFocus?.(e);
@@ -50,31 +63,25 @@ export default function FadeModal({ visible, onClose, children, emphasize = fals
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: colors.pickerBackdrop ,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.backdrop,
+    ...flex.justifyContent.center,
+    ...flex.alignItems.center,
     padding: spacing.lg,
   },
   container: {
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
     width: '92%',
-    padding: spacing.lg,
+    maxWidth: 420,
+    padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: shadows.card.shadowColor,
-    shadowOpacity: shadows.card.shadowOpacity,
-    shadowRadius: shadows.card.shadowRadius,
-    shadowOffset: shadows.card.shadowOffset,
-    elevation: 8,
-    // optional focus/outline glow leveraging theme tokens
-    // note: to enable, merge styles.containerFocused into container when needed
+    ...shadows.card,
   },
   containerFocused: {
-    borderColor: colors.borderStrong,
-    // subtle brand outline via elevated shadow
-    shadowColor: '#2E7D6A',
-    shadowOpacity: 0.12,
-    elevation: 10,
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.18,
+    elevation: 12,
   },
 });

@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import { useLocalSearchParams } from "expo-router";
 import { db } from "../../firebase/firebase";

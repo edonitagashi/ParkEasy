@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import theme from "./theme";
+import theme from "../app/hooks/theme";
 
 const cities = {
   "Prishtinë": { lat: 42.6629, lon: 21.1655 },

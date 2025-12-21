@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import { MaterialIcons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 

@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import theme from "../../components/theme";
+import theme from "../hooks/theme";
 
 const { colors } = theme;
 

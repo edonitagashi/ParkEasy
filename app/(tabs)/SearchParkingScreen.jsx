@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import * as Location from "expo-location";
 import haversine from "haversine-distance";
 import { AntDesign } from "@expo/vector-icons";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Text } from 'react-native';
-import { colors } from '../../components/theme';
+import { colors } from '../hooks/theme';
 import { auth, db } from '../../firebase/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';

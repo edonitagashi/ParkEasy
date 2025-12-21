@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -7,10 +7,14 @@ import {
   TextInput,
   Alert,
   Platform,
-  ScrollView
+  ScrollView,
+  Animated
 } from "react-native";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
-import { colors, spacing, radii } from "../../components/theme";
+import FadeModal from "../../components/animation/FadeModal";
+import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
+import Message from "../hooks/Message";
+import { colors, spacing, radii } from "../hooks/theme";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -23,6 +27,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [taskDone, setTaskDone] = useState(false);
 
   const showAlert = (title, message) => {
     if (Platform.OS === "web") alert(`${title}\n\n${message}`);
@@ -34,6 +40,7 @@ export default function LoginScreen() {
     /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleLogin = async () => {
+    setModalVisible(true);
     if (!email || !password)
       return showAlert("Error", "Please fill in all fields.");
 
@@ -108,19 +115,42 @@ export default function LoginScreen() {
       }
 
       // 🔹5) User normal → tabs
-      router.replace("/(tabs)/nearby");
+      setModalVisible(false);
+      setTaskDone(true);
+      setTimeout(() => {
+        setTaskDone(false);
+        router.replace("/(tabs)/nearby");
+      }, 1500);
       setLoading(false);
       return;
     } catch (err) {
+      setModalVisible(false);
       showAlert("Login Error", err.message);
     }
 
     setLoading(false);
   };
 
+  // Shadow grow animation
+  const shadowAnim = useRef(new Animated.Value(8)).current;
+  const handleCardPressIn = () => {
+    Animated.spring(shadowAnim, { toValue: 20, useNativeDriver: false, friction: 6, tension: 60 }).start();
+  };
+  const handleCardPressOut = () => {
+    Animated.spring(shadowAnim, { toValue: 8, useNativeDriver: false, friction: 6, tension: 60 }).start();
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#E9F8F6' }} contentContainerStyle={styles.outerContainer}>
-      <View style={styles.card}>
+      <Animated.View
+        style={[
+          styles.card,
+          { shadowRadius: shadowAnim, elevation: shadowAnim }
+        ]}
+        onTouchStart={handleCardPressIn}
+        onTouchEnd={handleCardPressOut}
+        onTouchCancel={handleCardPressOut}
+      >
         <Text style={styles.cardTitle}>Login</Text>
         <Text style={styles.subtitle}>Access your Parking App account</Text>
 
@@ -145,6 +175,9 @@ export default function LoginScreen() {
           <AnimatedTouchable style={styles.button} onPress={handleLogin} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
           </AnimatedTouchable>
+          <TaskCompleteOverlay visible={taskDone} message={
+            <Message icon="✔" text="Login Successful!" color={colors.success} align="center" />
+          } />
           <View style={styles.googleButtonWrapper}>
             <GoogleAuthButton mode="login" style={{ width: '100%' }} />
           </View>
@@ -155,7 +188,8 @@ export default function LoginScreen() {
             Don’t have an account? <Text style={styles.link}>Sign up</Text>
           </Text>
         </AnimatedTouchable>
-      </View>
+
+      </Animated.View>
     </ScrollView>
   );
 }

@@ -1,3 +1,4 @@
+// components/theme.js
 
 export const colors = {
   // Core brand (matching current app visuals exactly)
@@ -6,31 +7,32 @@ export const colors = {
   secondary: "#5C8374",
   accent: "#8FD3C8",
 
-  // Surfaces
-  background: "#FFFFFF", // keep plain white to avoid hue shifts
+  // Surfaces & Backgrounds
+  background: "#FFFFFF",
   surface: "#FFFFFF",
+  backgroundAlt: "#E9F8F6",        // për ekranet si Login/Register/Welcome
+  surfaceTransparent: "#FFFFFFDD", // për karta me transparencë
 
   // Text
-  text: "#333", 
-  textStrong: "#000",
-  textMuted: "#555",
-  // Text on brand surfaces
+  text: "#333333", 
+  textStrong: "#000000",
+  textMuted: "#555555",
   textOnPrimary: "#FFFFFF",
 
   // Borders
-  border: "#CCCCCC", // default input/card border
-  borderSoft: "#CDEDE7", // subtle green accent border for cards
-  borderStrong: "#AAAAAA", // stronger neutral border for emphasis
-  divider: "#EAEAEA", // separators and list dividers
-  outline: "#2E7D6A33", // focus ring/outline on interactive elements
+  border: "#CCCCCC",
+  borderSoft: "#CDEDE7",
+  borderStrong: "#AAAAAA", 
+  divider: "#EAEAEA",
+  outline: "#2E7D6A33",
 
   // State
-  success: "#2E7D6A",
-  danger: "#b02a37", // matches existing reject/delete buttons
+  success: "#22C55E",
+  danger: "#b02a37",
   warning: "#F59E0B",
 
   // Overlays
-  backdrop: "rgba(0,0,0,0.35)", // matches FadeModal default
+  backdrop: "rgba(0,0,0,0.35)",
   pickerBackdrop: "rgba(0,0,0,0.45)",
 
   // Chips
@@ -66,6 +68,13 @@ export const radii = {
 // -------------------- TYPOGRAPHY --------------------
 export const typography = {
   fontFamily: "System",
+  fontWeight: {
+    normal: "400",
+    medium: "500",
+    semiBold: "600",
+    bold: "700",
+    black: "900",
+  },
   size: {
     xs: 12,
     sm: 14,
@@ -73,17 +82,18 @@ export const typography = {
     lg: 18,
     xl: 22,
     xxl: 28,
+    xxxl: 38,
   },
 };
 
 // -------------------- SHADOWS --------------------
 export const shadows = {
   card: {
-    elevation: 3,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    elevation: 8,
   },
 };
 
@@ -116,6 +126,25 @@ export const borders = {
   thick: 2,
 };
 
+// -------------------- FLEX --------------------
+export const flex = {
+  justifyContent: {
+    start: "flex-start",
+    end: "flex-end",
+    center: "center",
+    between: "space-between",
+    around: "space-around",
+    evenly: "space-evenly",
+  },
+  alignItems: {
+    start: "flex-start",
+    end: "flex-end",
+    center: "center",
+    stretch: "stretch",
+    baseline: "baseline",
+  },
+};
+
 // -------------------- THEME EXPORT --------------------
 export const theme = {
   colors,
@@ -127,6 +156,8 @@ export const theme = {
   animation,
   zIndex,
   borders,
+  flex,
 };
 
+// Default export për backward compatibility
 export default theme;

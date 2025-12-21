@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import theme from "../components/theme";
+import theme from "../app/hooks/theme";
 const { colors } = theme;
 import {
   View,
@@ -11,8 +11,8 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
-import AnimatedTouchable from "../components/animation/AnimatedTouchable";
 import TaskCompleteOverlay from "../components/animation/TaskCompleteOverlay";
+import Message from "./hooks/Message";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useLocalSearchParams, router } from "expo-router";
@@ -219,7 +219,7 @@ export default function EditBookingScreen() {
         </View>
 
         {/* SAVE BUTTON */}
-        <AnimatedTouchable
+        <TouchableOpacity
           style={[styles.button, saving && { opacity: 0.7 }]}
           onPress={handleUpdate}
           disabled={saving}
@@ -227,8 +227,11 @@ export default function EditBookingScreen() {
           <Text style={styles.buttonText}>
             {saving ? "Saving..." : "Save Changes"}
           </Text>
-        </AnimatedTouchable>
-        <TaskCompleteOverlay visible={doneVisible} message="Saved" />
+        </TouchableOpacity>
+        <TaskCompleteOverlay
+          visible={doneVisible}
+          message={<Message icon="✔" text="Saved!" color={colors.success} align="left" />}
+        />
       </View>
     </>
   );

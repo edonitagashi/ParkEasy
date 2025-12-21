@@ -13,7 +13,7 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Text, StyleSheet, Platform, Alert, View } from "react-native";
 import AnimatedTouchable from "./animation/AnimatedTouchable";
-import { colors, spacing, radii, typography } from "./theme";
+import { colors, spacing, radii, typography } from "../app/hooks/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { auth, db } from "../firebase/firebase";

@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, StatusBar, StyleSheet, Text, View, ActivityIndicator } from "react-native";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
 import ParkingCard from "../../components/ParkingCard";
 import SearchHeader from "../../components/SearchHeader";

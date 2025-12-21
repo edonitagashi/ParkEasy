@@ -12,7 +12,7 @@ import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "firebase
 import { auth, db } from "../firebase/firebase";
 import { useRouter } from "expo-router";
 
-import SearchHeader from "../components/SearchHeader"; // 👈 path-i i saktë (rregullo nëse është ndryshe)
+import SearchHeader from "../components/SearchHeader"; 
 
 const NotifCard = memo(({ item, onCancel }) => (
   <View style={styles.card}>

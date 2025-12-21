@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import AnimatedTouchable from "./animation/AnimatedTouchable";
 import { Ionicons } from "@expo/vector-icons";
-import theme from "./theme";
+import theme from "../app/hooks/theme";
 import { useRouter } from "expo-router";
-import { colors } from "./theme";
+import { colors } from "../app/hooks/theme";
 
 function AdminBackHeader({ title }) {
   const router = useRouter();

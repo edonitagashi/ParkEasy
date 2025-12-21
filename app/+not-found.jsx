@@ -1,5 +1,5 @@
 import React from "react";
-import theme from "../components/theme";
+import theme from "../app/hooks/theme";
 const { colors } = theme;
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

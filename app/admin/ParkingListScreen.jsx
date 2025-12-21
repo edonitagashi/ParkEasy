@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { db } from "../../firebase/firebase";
-import theme from "../../components/theme";
+import theme from "../hooks/theme";
 const { colors } = theme;
 import { collection, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import AdminBackHeader from "../../components/AdminBackHeader";

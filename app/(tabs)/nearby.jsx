@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import theme from "../../components/theme";
+import theme from "../hooks/theme";
 const { colors } = theme;
 import { 
   View, Text, Image, TouchableOpacity, Modal, StyleSheet, 

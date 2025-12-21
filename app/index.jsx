@@ -1,28 +1,67 @@
+  const scaleAnim = useRef(new Animated.Value(0.92)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const tiltAnim = useRef(new Animated.Value(0)).current;
 import React, { useEffect, useRef } from "react";
-import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View, TouchableOpacity } from "react-native";
-import theme, { colors, shadows } from "../components/theme";
+import { StyleSheet, Animated, Image, StatusBar, ScrollView, Text, View } from "react-native";
+import AnimatedTouchable from "../components/animation/AnimatedTouchable";
+import theme, { colors, shadows } from "./hooks/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Index() {
+function IndexScreen() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(30)).current;
-
   useEffect(() => {
+    // Bounce in
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
       Animated.spring(translateY, { toValue: 0, speed: 1, bounciness: 10, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true })
     ]).start();
+    // Pulse effect (infinite)
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.03, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1200, useNativeDriver: true })
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
   }, []);
+
+  // Tilt handlers
+  const handleCardPressIn = () => {
+    Animated.spring(tiltAnim, { toValue: 1, useNativeDriver: true, friction: 5, tension: 80 }).start();
+  };
+  const handleCardPressOut = () => {
+    Animated.spring(tiltAnim, { toValue: 0, useNativeDriver: true, friction: 5, tension: 80 }).start();
+  };
 
   return (
     <LinearGradient colors={["#E9F8F6", "#D7EEE8", "#C4E3DD"]} style={styles.gradient}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <SafeAreaView style={{ flex: 1 }} edges={['top','bottom']}>
         <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY }] }]}> 
+          <Animated.View
+            style={[styles.container, {
+              opacity: fadeAnim,
+              transform: [
+                { translateY },
+                { scale: Animated.multiply(scaleAnim, pulseAnim) },
+                {
+                  rotateZ: tiltAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '-7deg']
+                  })
+                }
+              ]
+            }]}
+            onTouchStart={handleCardPressIn}
+            onTouchEnd={handleCardPressOut}
+            onTouchCancel={handleCardPressOut}
+          >
             <Text style={styles.appName}>ParkEasy</Text>
             <Image source={require("../assets/images/index5.jpg")} style={styles.headerImage} resizeMode="contain" />
             <Text style={styles.subtitle}>Find and reserve your parking spot effortlessly.</Text>
@@ -32,14 +71,14 @@ export default function Index() {
             </View>
             <View style={styles.buttonContainer}>
               <Link href="LoginScreen" asChild>
-                <TouchableOpacity style={styles.primaryButton}>
+                <AnimatedTouchable style={styles.primaryButton}>
                   <Text style={styles.primaryText}>Login</Text>
-                </TouchableOpacity>
+                </AnimatedTouchable>
               </Link>
               <Link href="RegisterScreen" asChild>
-                <TouchableOpacity style={styles.secondaryButton}>
+                <AnimatedTouchable style={styles.secondaryButton}>
                   <Text style={styles.secondaryText}>Register</Text>
-                </TouchableOpacity>
+                </AnimatedTouchable>
               </Link>
             </View>
           </Animated.View>
@@ -85,3 +124,5 @@ const styles = StyleSheet.create({
   secondaryButton: { width: "80%", paddingVertical: theme.spacing.md, borderWidth: 2, borderColor: colors.primary, borderRadius: 14, alignItems: "center" },
   secondaryText: { color: colors.primary, fontSize: 18, fontWeight: "700" },
 });
+
+export default IndexScreen;

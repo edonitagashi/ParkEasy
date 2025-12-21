@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import { auth, db } from "../../firebase/firebase";
 import {
   doc,

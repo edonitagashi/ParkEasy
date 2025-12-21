@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "./theme";
-import { colors } from "./theme";
+import theme from "../app/hooks/theme";
+import { colors } from "../app/hooks/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import OptimizedImage from "./OptimizedImage";

@@ -9,9 +9,9 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
-import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import TaskCompleteOverlay from "../../components/animation/TaskCompleteOverlay";
-import { colors, radii, spacing } from "../../components/theme";
+import Message from "../hooks/Message";
+import { colors, radii, spacing } from "../hooks/theme";
 
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
@@ -20,6 +20,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import FadeModal from "../../components/animation/FadeModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 
 export default function BookParkingScreen() {
   const { id, name } = useLocalSearchParams(); // parkingId + parkingName
@@ -73,21 +74,6 @@ export default function BookParkingScreen() {
             importance: Notifications.AndroidImportance.DEFAULT,
           });
         }
-      } catch (e) {
-        console.log('Notification permission setup error', e);
-      }
-
-      // Schedule a confirmation notification immediately
-      try {
-        const notificationId = await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Booking Confirmed',
-            body: `Your parking at ${name} is reserved for ${formatDate(date)} ${formatTime(time)}.`,
-            data: { bookingId: bookingRef.id },
-          },
-          trigger: null,
-        });
-        // Persist a record of the scheduled notification
         try {
           await addDoc(collection(db, 'users', auth.currentUser.uid, 'notifications'), {
             notificationId,
@@ -296,7 +282,7 @@ export default function BookParkingScreen() {
       </View>
 
       {/* SUBMIT */}
-      <AnimatedTouchable
+      <TouchableOpacity
         style={[styles.button, loading && { opacity: 0.7 }]}
         onPress={handleBooking}
         disabled={loading}
@@ -304,8 +290,8 @@ export default function BookParkingScreen() {
         <Text style={styles.buttonText}>
           {loading ? "Saving..." : "Reserve Now"}
         </Text>
-      </AnimatedTouchable>
-      <TaskCompleteOverlay visible={doneVisible} message="Reserved" />
+      </TouchableOpacity>
+      <TaskCompleteOverlay visible={doneVisible} message={<Message icon="✔" text="Reserved!" color={colors.success} align="left" />} />
     </View>
   );
 }

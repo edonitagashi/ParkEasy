@@ -1,8 +1,8 @@
-// app/admin/_layout.jsx
+
 import { Stack } from "expo-router";
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import theme, { colors } from "../../components/theme";
+import theme, { colors } from "../hooks/theme";
 import { auth } from "../../firebase/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";

@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "./theme";
+import { colors } from "../app/hooks/theme";
 
 function SearchHeader({ title, onBackPress, onNotificationPress }) {
   const insets = useSafeAreaInsets();

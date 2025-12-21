@@ -21,8 +21,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import theme from "../../components/theme";
-import SearchHeader from "../../components/SearchHeader"; // 👈 Sigurohu që path-i është i saktë
+import theme from "../hooks/theme";
+import SearchHeader from "../../components/SearchHeader"; 
 
 const { colors } = theme;
 

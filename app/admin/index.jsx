@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import theme from "../../components/theme";
-import { colors } from "../../components/theme";
+import theme from "../hooks/theme";
+import { colors } from "../hooks/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { db } from "../../firebase/firebase";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { View, Image, StyleSheet, Animated, ActivityIndicator, Platform } from "react-native";
-import theme from "./theme";
+import theme from "../app/hooks/theme";
 import { resolveImage } from "./images";
 
 /**
