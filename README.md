@@ -23,53 +23,75 @@ Throughout the course, we have implemented some of the most important tasks and 
 ParkEasy revolutionizes parking management in Kosovo by providing a seamless, real-time platform where drivers can discover, reserve, and manage parking spots while owners can efficiently manage their parking spaces. The application features role-based access for Users, Owners, and Administrators, ensuring a tailored experience for each stakeholder in the parking ecosystem.
 
 ## 🚗 User Features
+<p align="left">
+ <img src="./assets/READMEimages/parkeasy.jpg" width="100" height="180"/>
+   <img src="./assets/READMEimages/login.png" width="100" height="180"/>
+     <img src="./assets/READMEimages/signup.png" width="100" height="180"/>
+          <img src="./assets/READMEimages/signupasuser.png" width="100" height="180"/>
+
+
+</p>
 
 ### Nearby
 *Real-time map view with available parking spots*
-![Alt text for the image](assets\READMEimages\mapi.jpg)
-![Alt text for the image](assets\READMEimages\reserveatmaps.jpg)
+<p align="left">
+  <img src="./assets/READMEimages/mapi.jpg" width="100" height="180"/>
+   <img src="./assets/READMEimages/reserveatmaps.jpg" width="100" height="180"/>
+</p>
 
 
 
 ### Search
 *Advanced search functionality for parking locations*
+<p align="left">
+ <img src="./assets/READMEimages/search.jpg" width="100" height="180"/>
+   <img src="./assets/READMEimages/reserveparking.png" width="100" height="180"/>
+</p>
 
 ### Bookings
 *Manage reservations and booking history*
+<p align="left">
+ <img src="./assets/READMEimages/mybookings.png" width="100" height="180"/>
+   <img src="./assets/READMEimages/editbooking.png" width="100" height="180"/>
+    <img src="./assets/READMEimages/deletebooking.jpg" width="100" height="180"/>
+</p>
 
 ### Favorites
 *Save and access preferred parking locations*
+<p align="left">
+ <img src="./assets/READMEimages/favorites.jpg" width="100" height="180"/>
+</p>
 
 ### Profile
 *User account management and settings*
+<p align="left">
+ <img src="./assets/READMEimages/profile.jpg" width="100" height="180"/>
+   <img src="./assets/READMEimages/profile2.png" width="100" height="180"/>
+     <img src="./assets/READMEimages/profilephoto.png" width="100" height="180"/>
+      <img src="./assets/READMEimages/notif.png" width="100" height="180"/>
+</p>
 
 ## 🏢 Owner Features
-
 ### Dashboard
 *Overview of parking spaces and earnings*
-
-### Parking Management
-*Add, edit, and manage parking spaces*
-
-### Bookings Overview
-*Monitor reservations and customer activity*
+<p align="left">
+ <img src="./assets/READMEimages/ownerhome.jpg" width="100" height="180"/>
+</p>
 
 ### Profile
 *Owner account and business information*
+<p align="left">
+   <img src="./assets/READMEimages/ownerprofile.png" width="100" height="180"/>
+</p>
 
 ## 👨‍💼 Admin Features
 
 ### Dashboard
-*System-wide analytics and monitoring*
-
-### User Management
-*Oversee all users and accounts*
-
-### Parking Oversight
-*Review and approve parking listings*
-
-### Owner Applications
-*Process owner registration requests*
+<p align="left">
+   <img src="./assets/READMEimages/admindashboard.png" width="100" height="180"/>
+     <img src="./assets/READMEimages/adminmanageparkings.png" width="100" height="180"/>
+          <img src="./assets/READMEimages/adminusermenagment.png" width="100" height="180"/>
+</p>
 
 ## Tech Stack
 
