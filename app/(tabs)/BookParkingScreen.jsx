@@ -21,6 +21,7 @@ import FadeModal from "../../components/animation/FadeModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookParkingScreen() {
   const { id, name } = useLocalSearchParams(); // parkingId + parkingName
@@ -146,7 +147,7 @@ export default function BookParkingScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <Text style={styles.title}>Reserve Parking</Text>
       <Text style={styles.subtitle}>{name}</Text>
 
@@ -292,14 +293,20 @@ export default function BookParkingScreen() {
         </Text>
       </TouchableOpacity>
       <TaskCompleteOverlay visible={doneVisible} message={<Message icon="✔" text="Reserved!" color={colors.success} align="left" />} />
-    </View>
+    </SafeAreaView>
   );
 }
 
 /* ---------- STYLES ---------- */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 22, backgroundColor: colors.surface },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg + spacing.xs,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
 
   title: {
     fontSize: 26,

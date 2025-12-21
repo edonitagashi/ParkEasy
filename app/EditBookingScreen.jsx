@@ -11,6 +11,7 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import TaskCompleteOverlay from "../components/animation/TaskCompleteOverlay";
 import Message from "./hooks/Message";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -110,7 +111,7 @@ export default function EditBookingScreen() {
       {/* Hide the default web breadcrumb/header */}
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Text style={styles.title}>Edit Booking</Text>
 
         {/* DATE FIELD */}
@@ -232,7 +233,7 @@ export default function EditBookingScreen() {
           visible={doneVisible}
           message={<Message icon="✔" text="Saved!" color={colors.success} align="left" />}
         />
-      </View>
+      </SafeAreaView>
     </>
   );
 }
@@ -240,7 +241,13 @@ export default function EditBookingScreen() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: theme.spacing.lg + theme.spacing.xs, backgroundColor: colors.surface },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    paddingHorizontal: theme.spacing.lg + theme.spacing.xs,
+    paddingTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.lg,
+  },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
