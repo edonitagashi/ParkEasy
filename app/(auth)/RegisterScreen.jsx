@@ -16,6 +16,7 @@ import { auth, db } from "../../firebase/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -143,11 +144,39 @@ export default function RegisterScreen() {
           { merge: true }
         );
 
+        // SAVE OWNER DATA TO ASYNCSTORAGE
+        await AsyncStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            id: fbUser.uid,
+            name: name.trim(),
+            phone: phone.trim(),
+            email: email.trim().toLowerCase(),
+            password: password,
+            role: "owner",
+            avatarUri: fbUser.photoURL || "",
+          })
+        );
+
         // SEND OWNER TO HOME SCREEN
         router.replace("/owner/home");
       }
       // --- NORMAL USER ---
       else {
+        // SAVE USER DATA TO ASYNCSTORAGE
+        await AsyncStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            id: fbUser.uid,
+            name: name.trim(),
+            phone: phone.trim(),
+            email: email.trim().toLowerCase(),
+            password: password,
+            role: "user",
+            avatarUri: fbUser.photoURL || "",
+          })
+        );
+        
         router.replace("/(tabs)/nearby");
       }
     } catch (error) {

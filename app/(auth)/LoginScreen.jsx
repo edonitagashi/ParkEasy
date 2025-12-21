@@ -20,6 +20,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -28,7 +29,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [taskDone, setTaskDone] = useState(false);
 
   const showAlert = (title, message) => {
     if (Platform.OS === "web") alert(`${title}\n\n${message}`);
@@ -65,12 +65,14 @@ export default function LoginScreen() {
 
       let role = "user";
       let status = "active";
+      let userData = null;
 
       // 🔹1) nëse user-i ekziston në Firestore
       if (snap.exists()) {
         const data = snap.data();
         role = data.role || "user";
         status = data.ownerStatus || "none";
+        userData = data; // Save complete user data
 
         if (data.status === "inactive") {
           showAlert(
@@ -99,8 +101,32 @@ export default function LoginScreen() {
         );
       }
 
+      // 🔹 Check for existing AsyncStorage data (for old accounts)
+      const existingDataRaw = await AsyncStorage.getItem("currentUser");
+      let existingData = null;
+      if (existingDataRaw) {
+        try {
+          existingData = JSON.parse(existingDataRaw);
+        } catch {}
+      }
+
+      // 🔹 Helper function to merge data with priority: Firestore > Existing > Default
+      const mergeUserData = (role, defaultName) => ({
+        id: uid,
+        email: normalizedEmail,
+        name: userData?.name || existingData?.name || defaultName,
+        phone: userData?.phone || existingData?.phone || "",
+        password: password,
+        role: role,
+        avatarUri: userData?.avatarUri || userData?.image || existingData?.avatarUri || "",
+      });
+
       // 🔹3) Redirect për admin
       if (role === "admin") {
+        await AsyncStorage.setItem(
+          "currentUser",
+          JSON.stringify(mergeUserData("admin", "Admin"))
+        );
         router.replace("/admin");
         setLoading(false);
         return;
@@ -108,6 +134,10 @@ export default function LoginScreen() {
 
       // 🔹4) Redirect për owner
       if (role === "owner") {
+        await AsyncStorage.setItem(
+          "currentUser",
+          JSON.stringify(mergeUserData("owner", "Owner"))
+        );
         // status = pending / approved / rejected
         router.replace("/owner/home");
         setLoading(false);
@@ -115,12 +145,25 @@ export default function LoginScreen() {
       }
 
       // 🔹5) User normal → tabs
+      const userDataToSave = mergeUserData("user", "User");
+      
+      // Update Firestore with complete data if fields are missing (migration for old accounts)
+      if (!userData?.name || !userData?.phone) {
+        await setDoc(
+          ref,
+          {
+            name: userDataToSave.name,
+            phone: userDataToSave.phone,
+            avatarUri: userDataToSave.avatarUri,
+          },
+          { merge: true }
+        );
+      }
+      
+      await AsyncStorage.setItem("currentUser", JSON.stringify(userDataToSave));
+      
       setModalVisible(false);
-      setTaskDone(true);
-      setTimeout(() => {
-        setTaskDone(false);
-        router.replace("/(tabs)/nearby");
-      }, 1500);
+      router.replace("/(tabs)/nearby");
       setLoading(false);
       return;
     } catch (err) {
@@ -175,9 +218,6 @@ export default function LoginScreen() {
           <AnimatedTouchable style={styles.button} onPress={handleLogin} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? "Loading..." : "Login"}</Text>
           </AnimatedTouchable>
-          <TaskCompleteOverlay visible={taskDone} message={
-            <Message icon="✔" text="Login Successful!" color={colors.success} align="center" />
-          } />
           <View style={styles.googleButtonWrapper}>
             <GoogleAuthButton mode="login" style={{ width: '100%' }} />
           </View>
