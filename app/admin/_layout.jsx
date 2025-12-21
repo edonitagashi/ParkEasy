@@ -6,6 +6,7 @@ import theme, { colors } from "../hooks/theme";
 import { auth } from "../../firebase/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AdminLayout() {
   const router = useRouter();
@@ -29,14 +30,16 @@ export default function AdminLayout() {
       }}
     >
       {/* HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Admin Panel</Text>
+      <SafeAreaView style={styles.header} edges={['top']}>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Admin Panel</Text>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <MaterialIcons name="logout" size={20} color={colors.textOnPrimary} />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+            <MaterialIcons name="logout" size={20} color={colors.textOnPrimary} />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {/* RENDER ADMIN SCREENS */}
       <Stack
@@ -51,13 +54,15 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
-    paddingTop: theme.spacing.lg,
+    elevation: 5,
+  },
+  headerContent: {
+    paddingTop: theme.spacing.md,
     paddingBottom: theme.spacing.md,
     paddingHorizontal: theme.spacing.lg,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    elevation: 5,
   },
   title: {
     color: colors.textOnPrimary,
