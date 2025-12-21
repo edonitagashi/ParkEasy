@@ -12,6 +12,6 @@ module.exports = {
   ],
 
   moduleNameMapper: {
-    "^\\.\\./\\.\\./firebase/firebase$": "<rootDir>/__mocks__/firebaseClient.js"
-  }
+    "^\\.\\./\\.\\./firebase/firebase$": "<rootDir>/__mocks__/firebaseClient.js",
+  },
 };

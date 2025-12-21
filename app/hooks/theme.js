@@ -1,45 +1,37 @@
 // components/theme.js
 
 export const colors = {
-  // Core brand (matching current app visuals exactly)
   primary: "#2E7D6A",
   primaryDark: "#245E52",
   secondary: "#5C8374",
   accent: "#8FD3C8",
 
-  // Surfaces & Backgrounds
   background: "#FFFFFF",
   surface: "#FFFFFF",
-  backgroundAlt: "#E9F8F6",        // për ekranet si Login/Register/Welcome
-  surfaceTransparent: "#FFFFFFDD", // për karta me transparencë
+  backgroundAlt: "#E9F8F6",
+  surfaceTransparent: "#FFFFFFDD",
 
-  // Text
-  text: "#333333", 
+  text: "#333333",
   textStrong: "#000000",
   textMuted: "#555555",
   textOnPrimary: "#FFFFFF",
 
-  // Borders
   border: "#CCCCCC",
   borderSoft: "#CDEDE7",
-  borderStrong: "#AAAAAA", 
+  borderStrong: "#AAAAAA",
   divider: "#EAEAEA",
   outline: "#2E7D6A33",
 
-  // State
   success: "#22C55E",
   danger: "#b02a37",
   warning: "#F59E0B",
 
-  // Overlays
   backdrop: "rgba(0,0,0,0.35)",
   pickerBackdrop: "rgba(0,0,0,0.45)",
 
-  // Chips
   chipBg: "#E6FFFB",
   chipText: "#0F766E",
 
-  // Picker (iOS spinner) specific
   pickerHeader: "#0F172A",
   pickerDoneBg: "#2E7D6A",
   pickerDoneText: "#FFFFFF",
@@ -126,22 +118,22 @@ export const borders = {
   thick: 2,
 };
 
-// -------------------- FLEX --------------------
+// -------------------- FLEX (✅ FIXED) --------------------
 export const flex = {
   justifyContent: {
-    start: "flex-start",
-    end: "flex-end",
-    center: "center",
-    between: "space-between",
-    around: "space-around",
-    evenly: "space-evenly",
+    start: { justifyContent: "flex-start" },
+    end: { justifyContent: "flex-end" },
+    center: { justifyContent: "center" },
+    between: { justifyContent: "space-between" },
+    around: { justifyContent: "space-around" },
+    evenly: { justifyContent: "space-evenly" },
   },
   alignItems: {
-    start: "flex-start",
-    end: "flex-end",
-    center: "center",
-    stretch: "stretch",
-    baseline: "baseline",
+    start: { alignItems: "flex-start" },
+    end: { alignItems: "flex-end" },
+    center: { alignItems: "center" },
+    stretch: { alignItems: "stretch" },
+    baseline: { alignItems: "baseline" },
   },
 };
 
@@ -159,5 +151,4 @@ export const theme = {
   flex,
 };
 
-// Default export për backward compatibility
 export default theme;
