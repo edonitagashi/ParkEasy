@@ -23,9 +23,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const placeholderImage = require("../../assets/favicon.png");
 
-// Helper: Calculate distance in miles or km
 const getDistanceFromLatLon = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Radius of Earth in km
+  const R = 6371; 
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -64,7 +63,7 @@ const CustomMarker = React.memo(({ parking, onPress, available, userLocation }) 
           <Image source={imageSource} style={styles.markerImage} resizeMode="cover" />
         </View>
 
-        {/* Price + Distance Tag */}
+       
         <View style={styles.infoTag}>
           <Text style={styles.priceTagText}>{price}</Text>
           {distance && <Text style={styles.distanceText}>· {distance}</Text>}
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
 
   locateBtn: {
     position: "absolute",
-    bottom: 100,
+    bottom: 50,
     right: 20,
     zIndex: 10,
     backgroundColor: "#fff",

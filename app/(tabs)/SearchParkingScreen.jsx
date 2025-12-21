@@ -26,6 +26,14 @@ const placeholderImage = require("../../assets/images/image1.png");
 
 const ITEM_HEIGHT = 160;
 
+const formatDistance = (meters) => {
+  if (!meters || meters === Infinity) return "— km";
+  const km = meters / 1000;
+  if (km < 0.1) return "< 0.1 km";
+  if (km < 10) return km.toFixed(1) + " km";
+  return km.toFixed(0) + " km";
+};
+
 export default function SearchParkingScreen() {
   const [searchText, setSearchText] = useState("");
   const { parkings, loading, error, refresh } = useParkings();
@@ -45,33 +53,37 @@ export default function SearchParkingScreen() {
     })();
   }, []);
 
+  const parkingsWithDistance = useMemo(() => {
+    if (!parkings || !userLocation) return parkings || [];
 
-  const sortedByDistance = useMemo(() => {
-    if (!userLocation || !parkings) return parkings || [];
+    return parkings.map((p) => {
+      const lat = Number(p.coordinate?.latitude ?? p.latitude);
+      const lng = Number(p.coordinate?.longitude ?? p.longitude);
 
-    return [...parkings]
-      .map((p) => {
-        const lat = Number(p.coordinate?.latitude ?? p.latitude);
-        const lng = Number(p.coordinate?.longitude ?? p.longitude);
+      let distance = Infinity;
 
-        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-          return { ...p, distance: Infinity };
-        }
-
-        const distance = haversine(
-          { lat: userLocation.latitude, lon: userLocation.longitude },
-          { lat, lon: lng }
+      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        distance = haversine(
+          { latitude: userLocation.latitude, longitude: userLocation.longitude },
+          { latitude: lat, longitude: lng }
         );
+      }
 
-        return { ...p, distance };
-      })
-      .sort((a, b) => a.distance - b.distance);
+      return {
+        ...p,
+        distanceMeters: distance,
+        distanceFormatted: formatDistance(distance),
+        priceNumeric: p.price ? parseFloat(p.price) : 0, 
+      };
+    });
   }, [parkings, userLocation]);
 
-  const filteredParkings = useMemo(() => {
-    let list = [...(sortedByDistance || [])];
+ 
+  const filteredAndSortedParkings = useMemo(() => {
+    let list = [...parkingsWithDistance];
 
-    // SEARCH FILTER
+ 
+    
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       list = list.filter(
@@ -81,23 +93,19 @@ export default function SearchParkingScreen() {
       );
     }
 
-    // SORTING OPTIONS
+   
     switch (sortOption) {
       case "priceLow":
-        return list.sort((a, b) => a.price - b.price);
-
+        return list.sort((a, b) => a.priceNumeric - b.priceNumeric);
       case "priceHigh":
-        return list.sort((a, b) => b.price - a.price);
-
+        return list.sort((a, b) => b.priceNumeric - a.priceNumeric);
       case "nameAZ":
-        return list.sort((a, b) => a.name.localeCompare(b.name));
-
+        return list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
       case "distance":
       default:
-        return list;
+        return list.sort((a, b) => a.distanceMeters - b.distanceMeters);
     }
-  }, [sortedByDistance, searchText, sortOption]);
-
+  }, [parkingsWithDistance, searchText, sortOption]);
 
   const keyExtractor = useCallback((item) => item.id, []);
 
@@ -107,9 +115,14 @@ export default function SearchParkingScreen() {
         item={{
           ...item,
           image:
-            item.image || (item.imageUrl && resolveImage(item.imageUrl)) || placeholderImage,
+            item.imageUrl
+              ? resolveImage(item.imageUrl)
+              : item.image || placeholderImage,
           isFavorite: favorites.includes(item.id),
           onFavoriteToggle: () => toggleFavorite(item.id),
+        
+          distance: item.distanceFormatted,
+          pricePerHour: item.price ? `$${item.price}/hr` : "Free",
         }}
       />
     ),
@@ -126,16 +139,63 @@ export default function SearchParkingScreen() {
   );
 
   if (loading || !parkings) {
-    
     const skeletons = Array.from({ length: 6 }).map((_, i) => (
-      <View key={i} style={{ height: ITEM_HEIGHT, marginHorizontal: 16, marginBottom: theme.spacing.md }}>
-        <View style={{ flexDirection: 'row', height: '100%', borderRadius: 14, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider }}>
-          <View style={{ width: 120, height: '100%', backgroundColor: colors.divider }} />
+      <View
+        key={i}
+        style={{
+          height: ITEM_HEIGHT,
+          marginHorizontal: 16,
+          marginBottom: theme.spacing.md,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            height: "100%",
+            borderRadius: 14,
+            overflow: "hidden",
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.divider,
+          }}
+        >
+          <View style={{ width: 120, height: "100%", backgroundColor: colors.divider }} />
           <View style={{ flex: 1, padding: theme.spacing.md }}>
-            <View style={{ height: 14, width: '30%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
-            <View style={{ height: 18, width: '60%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.sm }} />
-            <View style={{ height: 12, width: '50%', backgroundColor: colors.divider, borderRadius: 6, marginBottom: theme.spacing.xs }} />
-            <View style={{ height: 12, width: '40%', backgroundColor: colors.divider, borderRadius: 6 }} />
+            <View
+              style={{
+                height: 14,
+                width: "30%",
+                backgroundColor: colors.divider,
+                borderRadius: 6,
+                marginBottom: theme.spacing.sm,
+              }}
+            />
+            <View
+              style={{
+                height: 18,
+                width: "60%",
+                backgroundColor: colors.divider,
+                borderRadius: 6,
+                marginBottom: theme.spacing.sm,
+              }}
+            />
+            <View
+              style={{
+                height: 12,
+                width: "50%",
+                backgroundColor: colors.divider,
+                borderRadius: 6,
+                marginBottom: theme.spacing.xs,
+              }}
+            />
+            <View
+              style={{
+                height: 12,
+                width: "40%",
+                backgroundColor: colors.divider,
+                borderRadius: 6,
+              }}
+            />
           </View>
         </View>
       </View>
@@ -154,7 +214,7 @@ export default function SearchParkingScreen() {
       <SafeAreaView style={styles.container}>
         <SearchHeader title="Search Parking" />
         <View style={styles.center}>
-          <Text style={{ color: colors.danger, marginBottom: theme.spacing.md - 2 }}>
+          <Text style={{ color: colors.danger, marginBottom: theme.spacing.md }}>
             Failed to load data.
           </Text>
           <AnimatedTouchable style={styles.retryBtn} onPress={refresh}>
@@ -165,9 +225,8 @@ export default function SearchParkingScreen() {
     );
   }
 
- 
   return (
-    <SafeAreaView style={styles.container} edges={["left","right"]}>
+    <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <SearchHeader title="Search Parking" />
 
       <View style={styles.searchContainer}>
@@ -182,30 +241,49 @@ export default function SearchParkingScreen() {
             {sortOption === "distance"
               ? "Nearest"
               : sortOption === "priceLow"
-              ? "Price ↑"
+              ? "Price (Low → High)"
               : sortOption === "priceHigh"
-              ? "Price ↓"
-              : "Name A-Z"}
+              ? "Price (High → Low)"
+              : "Name (A → Z)"}
           </Text>
-          <AntDesign name="down" size={16} />
+          <AntDesign name={showSortMenu ? "up" : "down"} size={16} color={colors.text} />
         </AnimatedTouchable>
-
 
         {showSortMenu && (
           <View style={styles.sortMenu}>
-            <AnimatedTouchable onPress={() => { setSortOption("distance"); setShowSortMenu(false); }}>
+            <AnimatedTouchable
+              onPress={() => {
+                setSortOption("distance");
+                setShowSortMenu(false);
+              }}
+            >
               <Text style={styles.sortOption}>Nearest</Text>
             </AnimatedTouchable>
 
-            <AnimatedTouchable onPress={() => { setSortOption("priceLow"); setShowSortMenu(false); }}>
+            <AnimatedTouchable
+              onPress={() => {
+                setSortOption("priceLow");
+                setShowSortMenu(false);
+              }}
+            >
               <Text style={styles.sortOption}>Price (Low → High)</Text>
             </AnimatedTouchable>
 
-            <AnimatedTouchable onPress={() => { setSortOption("priceHigh"); setShowSortMenu(false); }}>
+            <AnimatedTouchable
+              onPress={() => {
+                setSortOption("priceHigh");
+                setShowSortMenu(false);
+              }}
+            >
               <Text style={styles.sortOption}>Price (High → Low)</Text>
             </AnimatedTouchable>
 
-            <AnimatedTouchable onPress={() => { setSortOption("nameAZ"); setShowSortMenu(false); }}>
+            <AnimatedTouchable
+              onPress={() => {
+                setSortOption("nameAZ");
+                setShowSortMenu(false);
+              }}
+            >
               <Text style={styles.sortOption}>Name (A → Z)</Text>
             </AnimatedTouchable>
           </View>
@@ -213,17 +291,19 @@ export default function SearchParkingScreen() {
       </View>
 
       <FlatList
-        data={filteredParkings}
+        data={filteredAndSortedParkings}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         getItemLayout={getItemLayout}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={
-          filteredParkings.length === 0 ? { flex: 1 } : styles.listContent
+          filteredAndSortedParkings.length === 0
+            ? { flex: 1 }
+            : styles.listContent
         }
         ListEmptyComponent={() => (
           <View style={styles.center}>
-            <Text>No results found</Text>
+            <Text style={{ color: colors.textSecondary }}>No results found</Text>
           </View>
         )}
       />
@@ -256,27 +336,30 @@ const styles = StyleSheet.create({
   },
 
   sortMenu: {
-    marginTop: theme.spacing.sm - theme.spacing.xs,
+    marginTop: 4,
     backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingVertical: theme.spacing.xs + 2,
-    elevation: 4,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 
   sortOption: {
-    paddingVertical: theme.spacing.sm + theme.spacing.xs,
-    paddingHorizontal: theme.spacing.md + 2,
+    paddingVertical: theme.spacing.sm + 2,
+    paddingHorizontal: theme.spacing.md,
     fontSize: 14,
     color: colors.text,
   },
 
-  listContent: { paddingBottom: theme.spacing.xl - theme.spacing.sm },
+  listContent: { paddingBottom: theme.spacing.xl },
 
   retryBtn: {
     backgroundColor: colors.primary,
-    paddingHorizontal: theme.spacing.xl - theme.spacing.sm,
+    paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.sm + theme.spacing.xs,
     borderRadius: 8,
   },
