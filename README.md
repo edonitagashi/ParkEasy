@@ -1,172 +1,101 @@
-# Phase 1 – ParkEasy – Parking App Prototype
+# ParkEasy - Mobile Parking Management App
 
-**Technology:** Node.js + Expo/React Native  
+[![React Native](https://img.shields.io/badge/React%20Native-0.72+-blue.svg)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-49+-black.svg)](https://expo.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-orange.svg)](https://firebase.google.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project, developed by third-year Computer Engineering students at FIEK, is a prototype of a mobile parking management app. It provides screen views for navigation between locations, searching for parking spots, saving favorite spots, and managing the user profile for now.
+ParkEasy is a comprehensive mobile parking management application developed as part of the **Mobile Application Programming** course at FIEK (Faculty of Computer Engineering and Information Technology). This project implements essential mobile development concepts and best practices, including Firebase integration, real-time data synchronization, role-based authentication, and modern UI/UX design.
+
+Throughout the course, we have implemented some of the most important tasks and features required for mobile application development. In the final phase, we focused on critical improvements including map functionality fixes, notification system implementation, image picker enhancements, UI animation refinements, and comprehensive testing to ensure a polished, production-ready application.
 
 ## Developed by
-- Arila Behrami  
-- Edonita Gashi  
-- Erza Duraku  
-- Engji Osmani  
-- Albi Kallaba  
-- Fatlinda Osdautaj  
 
-## Clone the Repository
-```bash
-git clone https://github.com/edonitagashi/ParkEasy.git 
-```
+* Edonita Gashi 
+* Fatlinda Osdautaj
+* Erza Duraku
+* Engji Osmani
+* Albi Kallaba
+* Arila Behrami
 
-## Project Description
+## What ParkEasy Offers
 
-ParkEasy is a mobile app prototype built using Node.js and Expo/React Native. Currently, it does **not** connect to a database (e.g., Firebase) but demonstrates the UI and screen navigation.
+ParkEasy revolutionizes parking management in Kosovo by providing a seamless, real-time platform where drivers can discover, reserve, and manage parking spots while owners can efficiently manage their parking spaces. The application features role-based access for Users, Owners, and Administrators, ensuring a tailored experience for each stakeholder in the parking ecosystem.
 
-The app features four main sections in a tab bar:
+## 🚗 User Features
 
-- **Nearby** – Displays a map with nearby parking spots.  
-- **Search** – Allows users to search for specific parking spots.  
-- **Favorites** – Saves frequently used or favorite parking spots.  
-- **Profile** – Shows user information and additional options like Settings, Help, About Us.  
-
-## Key Functionalities
-
-- **Nearby Map:** Display of parking spots on a map with the option to save locations.  
-- **Search Parking:** Search for parking spots by name or location.  
-- **Favorites:** List of favorite parking spots for easy access.  
-- **Profile Management:** View user information and access additional options (Settings, Help, About Us).  
-- **Navigation:** Tab bar allows quick switching between the four main sections.  
-
-## How to Run the Prototype
-
-1. **Clone the repository:**
-```bash
-git clone https://github.com/edonitagashi/ParkEasy.git
-```
-2. **Install the dependencies:**
-```bash
-cd ParkEasy
-npm install
-```
-3. **Start the app using Expo:**
-```bash
-npx expo start
-```
-## QR Code
-![QR Code](assets/qrcode.png)
-
-## Screenshots
-
-<p align="center">
-  <img src="assets/foto1.jpg" alt="Foto 1" width="200"/>
-  <img src="assets/foto2.png" alt="Foto 2" width="200"/>
-  <img src="assets/foto3.png" alt="Foto 3" width="200"/>
-  <img src="assets/foto4.jpg" alt="Foto 4" width="200"/>
-  <img src="assets/foto5.jpg" alt="Foto 5" width="200"/>
-  <img src="assets/foto6.jpg" alt="Foto 6" width="200"/>
-  <img src="assets/foto7.jpg" alt="Foto 7" width="200"/>
-</p>
+### Nearby
+*Real-time map view with available parking spots*
+![Alt text for the image](assets\READMEimages\mapi.jpg)
+![Alt text for the image](assets\READMEimages\reserveatmaps.jpg)
 
 
 
-## Conclusion
+### Search
+*Advanced search functionality for parking locations*
 
-This is the initial prototype of the parking management app, developed in accordance with the requirements of the first phase of the “Mobile Device Programming” course project, demonstrating screen navigation, saving preferences, and map integration without a backend or database connection.
+### Bookings
+*Manage reservations and booking history*
 
+### Favorites
+*Save and access preferred parking locations*
 
+### Profile
+*User account management and settings*
 
-# Phase 2 – Functional Version with Firebase Integration
+## 🏢 Owner Features
 
-In the second phase of the project, the ParkEasy application becomes a fully functional system by integrating Firebase Authentication and Firestore Database. Users can now register, log in, reserve parking spots, save favorites, manage bookings, and interact with real-time data. The system also includes dedicated functionality for Admin and Owner roles.
+### Dashboard
+*Overview of parking spaces and earnings*
 
-**Technology:** Node.js + Expo/React Native + Firebase (Auth & Firestore)
+### Parking Management
+*Add, edit, and manage parking spaces*
 
-This version adds backend integration, real data operations, and improved UI/UX compared to Phase 1.
+### Bookings Overview
+*Monitor reservations and customer activity*
 
----
+### Profile
+*Owner account and business information*
 
-## Key Functionalities
+## 👨‍💼 Admin Features
 
----
+### Dashboard
+*System-wide analytics and monitoring*
 
-## **1. Authentication (Firebase Authentication)**
+### User Management
+*Oversee all users and accounts*
 
-The app implements secure authentication with two methods:
+### Parking Oversight
+*Review and approve parking listings*
 
-- **Email / Password Login**  
-- **Google Login (GoogleAuthProvider)**  
+### Owner Applications
+*Process owner registration requests*
 
-User input is validated during registration and login.  
-After successful authentication, users are redirected based on their role:
+## Tech Stack
 
-- **User → Nearby screen**  
-- **Owner → Owner Home screen**  
-- **Admin → Admin Dashboard**
+- **Frontend**: React Native 0.72+ with Expo
+- **Backend**: Firebase (Auth, Firestore, Storage)
+- **Navigation**: React Navigation
+- **Styling**: Custom theme system
+- **Testing**: Jest with React Native Testing Library
 
-Logout functionality is also available in the Profile screens.
+## Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Expo CLI (`npm install -g @expo/cli`)
+- Firebase project
+
+### Setup
+1. Clone the repo: `git clone https://github.com/edonitagashi/ParkEasy.git`
+2. Install dependencies: `npm install`
+3. Configure Firebase in `firebase/firebase.js`
+4. Run: `npx expo start`
+
+### Testing
+- Install Expo Go app on device
+- Scan QR code to test on physical device
 
 ---
 
-## **2. CRUD with Firestore (Create, Read, Update, Delete)**
-
-Cloud Firestore is used as the main backend database, enabling full CRUD for all dynamic data in the app.
-
-### **Users**
-- User roles are stored in `/users/{uid}`  
-- Users can update their profile information  
-
-### **Bookings (User)**
-- Create booking → **BookParkingScreen**  
-- View bookings in real time → **BookingsScreen**  
-- Update booking → **EditBookingScreen**  
-- Delete booking → Firestore delete  
-
-### **Favorites**
-- Managed in `/favorites/{uid}`  
-- Users can save/remove favorite parkings  
-- Real-time updates via `onSnapshot`  
-- Optimistic UI for instant feedback  
-
-### **Parkings (Admin + Owner)**
-- Admin can view, edit, or delete parkings  
-- Owner can edit their own parking  
-- When a request is approved, a new parking record is created  
-
-### **Owner Requests**
-- Users can apply to become parking owners  
-- Admin can approve or reject applications  
-- Approved requests automatically create a new parking in Firestore  
-
----
-
-## **3. External API (Optional Feature)**
-
-An external **Weather API** is integrated in the Nearby Web version, displaying real-time weather information.
-
----
-
-## Screenshots
-
-<p align="center">
-  <img src="assets/Foto1.1.png" alt="Foto 1.1" width="200"/>
-  <img src="assets/Foto1.2.png" alt="Foto 1.2" width="200"/>
-  <img src="assets/Foto1.3.png" alt="Foto 1.3" width="200"/>
-  <img src="assets/Foto1.4.png" alt="Foto 1.4" width="200"/>
-  <img src="assets/Foto1.5.png" alt="Foto 1.5" width="200"/>
-  <img src="assets/Foto1.6.png" alt="Foto 1.6" width="200"/>
-  <img src="assets/Foto1.7.png" alt="Foto 1.7" width="200"/>
-  <img src="assets/Foto1.8.png" alt="Foto 1.8" width="200"/>
-  <img src="assets/Foto1.9.png" alt="Foto 1.9" width="200"/>
-  <img src="assets/Foto1.10.png" alt="Foto 1.10" width="200"/>
-  <img src="assets/Foto1.11.png" alt="Foto 1.11" width="200"/>
-  <img src="assets/Foto1.12.png" alt="Foto 1.12" width="200"/>
-  <img src="assets/Foto1.13.png" alt="Foto 1.13" width="200"/>
-  <img src="assets/Foto1.14.png" alt="Foto 1.14" width="200"/>
-  <img src="assets/Foto1.15.png" alt="Foto 1.15" width="200"/>
-  <img src="assets/Foto1.16.png" alt="Foto 1.16" width="200"/>
-</p>
-
----
-
-## Conclusion
-
-Phase 2 upgrades ParkEasy into a complete, data-driven parking management application. With secure authentication, real-time Firestore CRUD, and role-based access, the app now supports full booking, favorites, and parking administration features for Users, Owners, and Admins — fully meeting the requirements of the second project phase.
+*ParkEasy - Making parking in Kosovo smarter and easier!* 🇽🇰
