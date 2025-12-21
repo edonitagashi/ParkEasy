@@ -59,7 +59,7 @@ const CustomMarker = React.memo(({ parking, onPress, available, userLocation }) 
       <View style={styles.markerOuter}>
         <View style={[
           styles.markerContainer,
-          !available && styles.markerUnavailable // Subtle dim when full
+          !available && styles.markerUnavailable 
         ]}>
           <Image source={imageSource} style={styles.markerImage} resizeMode="cover" />
         </View>
@@ -165,12 +165,12 @@ export default function Nearby() {
 
   return (
     <View style={styles.container}>
-      {/* My Location Button */}
+      
       <TouchableOpacity onPress={centerOnUser} style={styles.locateBtn} activeOpacity={0.8}>
         <Icon name="locate-outline" size={32} color="#2E7D6A" />
       </TouchableOpacity>
 
-      {/* Map */}
+
       <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
@@ -190,7 +190,7 @@ export default function Nearby() {
         ))}
       </MapView>
 
-      {/* Enhanced Bottom Sheet Modal */}
+    
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setModalVisible(false)} />

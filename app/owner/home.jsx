@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
   FlatList,
   Modal,
   TextInput,
@@ -13,6 +12,7 @@ import {
   Platform,
   InteractionManager,
 } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import theme, { colors } from "../hooks/theme";
@@ -40,7 +40,7 @@ export default function Home() {
   const [editSpots, setEditSpots] = useState("");
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
 
-  // LOAD USER EMAIL FOR EACH BOOKING
+
   const loadUserEmails = async (bookingList) => {
     const updatedBookings = [];
 
@@ -110,7 +110,6 @@ export default function Home() {
 
   const saveEdit = async () => {
     try {
-      // Validate inputs
       const trimmedName = editName.trim();
       const priceNum = parseFloat(editPrice);
       const spotsNum = parseInt(editSpots);
@@ -218,7 +217,6 @@ export default function Home() {
         photoUri: base64Img,
       });
 
-      // Update local state immediately
       setParking({ ...parking, photoUri: base64Img });
       setShowPhotoOptions(false);
 
@@ -237,7 +235,6 @@ export default function Home() {
         photoUri: "",
       });
 
-      // Update local state immediately
       setParking({ ...parking, photoUri: "" });
       setShowPhotoOptions(false);
 
@@ -280,7 +277,7 @@ export default function Home() {
       {parking && (
         <View style={styles.parkingCard}>
           {/* Parking Photo Section */}
-          <TouchableOpacity 
+          <AnimatedTouchable 
             style={styles.photoContainer}
             onPress={() => setShowPhotoOptions(true)}
           >
@@ -297,7 +294,7 @@ export default function Home() {
             <View style={styles.photoOverlay}>
               <Ionicons name="camera" size={20} color="#FFFFFF" />
             </View>
-          </TouchableOpacity>
+          </AnimatedTouchable>
 
           <Text style={styles.pTitle}>{parking.name}</Text>
           <Text style={styles.pText}>Address: {parking.address}</Text>
@@ -306,9 +303,9 @@ export default function Home() {
             Spots: {parking.freeSpots} / {parking.totalSpots}
           </Text>
 
-          <TouchableOpacity style={styles.editBtn} onPress={openEditModal}>
+          <AnimatedTouchable style={styles.editBtn} onPress={openEditModal}>
             <Text style={styles.editText}>Edit Parking</Text>
-          </TouchableOpacity>
+          </AnimatedTouchable>
         </View>
       )}
 
@@ -380,33 +377,30 @@ export default function Home() {
             />
 
             <View style={styles.row}>
-              <TouchableOpacity style={[styles.btn, styles.save]} onPress={saveEdit}>
+              <AnimatedTouchable style={[styles.btn, styles.save]} onPress={saveEdit}>
                 <Text style={styles.btnText}>Save</Text>
-              </TouchableOpacity>
+              </AnimatedTouchable>
 
-              <TouchableOpacity
+              <AnimatedTouchable
                 style={[styles.btn, styles.cancel]}
                 onPress={() => setEditVisible(false)}
               >
                 <Text style={styles.btnText}>Cancel</Text>
-              </TouchableOpacity>
+              </AnimatedTouchable>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Photo Options Bottom Sheet */}
       {showPhotoOptions && (
         <View style={styles.bottomSheetOverlay}>
-          <TouchableOpacity 
+          <AnimatedTouchable 
             style={styles.bottomSheetBackground}
-            activeOpacity={1}
             onPress={() => setShowPhotoOptions(false)}
           />
           <View style={styles.bottomSheetContent}>
-            <TouchableOpacity 
+            <AnimatedTouchable 
               style={styles.modalOption} 
-              activeOpacity={0.7}
               onPress={() => {
                 setShowPhotoOptions(false);
                 InteractionManager.runAfterInteractions(() => {
@@ -416,11 +410,10 @@ export default function Home() {
             >
               <Ionicons name="image" size={24} color={colors.primary} />
               <Text style={styles.modalOptionText}>Choose from library</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
             
-            <TouchableOpacity 
+            <AnimatedTouchable 
               style={styles.modalOption} 
-              activeOpacity={0.7}
               onPress={() => {
                 setShowPhotoOptions(false);
                 InteractionManager.runAfterInteractions(() => {
@@ -430,12 +423,11 @@ export default function Home() {
             >
               <Ionicons name="camera" size={24} color={colors.primary} />
               <Text style={styles.modalOptionText}>Take Photo</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
             
             {parking.photoUri && (
-              <TouchableOpacity 
+              <AnimatedTouchable 
                 style={[styles.modalOption, styles.deleteOption]} 
-                activeOpacity={0.7}
                 onPress={() => {
                   setShowPhotoOptions(false);
                   InteractionManager.runAfterInteractions(() => {
@@ -445,18 +437,17 @@ export default function Home() {
               >
                 <Ionicons name="trash" size={24} color={colors.danger} />
                 <Text style={[styles.modalOptionText, styles.deleteOptionText]}>Delete</Text>
-              </TouchableOpacity>
+              </AnimatedTouchable>
             )}
             
-            <TouchableOpacity 
+            <AnimatedTouchable 
               style={[styles.modalOption, styles.cancelOption]}
-              activeOpacity={0.7}
               onPress={() => {
                 setShowPhotoOptions(false);
               }}
             >
               <Text style={styles.cancelOptionText}>Cancel</Text>
-            </TouchableOpacity>
+            </AnimatedTouchable>
           </View>
         </View>
       )}
@@ -465,9 +456,7 @@ export default function Home() {
   );
 }
 
-//
-// STYLES
-//
+
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   container: { flex: 1, padding: theme.spacing.lg + theme.spacing.sm, backgroundColor: colors.background },
@@ -593,7 +582,6 @@ const styles = StyleSheet.create({
   cancel: { backgroundColor: colors.danger },
   btnText: { color: colors.textOnPrimary, fontWeight: "700" },
 
-  // Photo Options Bottom Sheet Styles
   bottomSheetOverlay: {
     position: 'absolute',
     top: 0,

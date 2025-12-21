@@ -22,7 +22,6 @@ export default function AdminLayout() {
         flex: 1,
         backgroundColor: colors.surface,
 
-        // 🔥 KY FIX E BEN ADMIN PANEL ME U SCROLLU NË WEB
         ...(Platform.OS === "web" && {
           minHeight: "100vh",
           overflowY: "auto",
@@ -41,7 +40,6 @@ export default function AdminLayout() {
         </View>
       </SafeAreaView>
 
-      {/* RENDER ADMIN SCREENS */}
       <Stack
         screenOptions={{
           headerShown: false,

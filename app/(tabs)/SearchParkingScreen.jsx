@@ -126,7 +126,7 @@ export default function SearchParkingScreen() {
   );
 
   if (loading || !parkings) {
-    // skeleton list during initial load
+    
     const skeletons = Array.from({ length: 6 }).map((_, i) => (
       <View key={i} style={{ height: ITEM_HEIGHT, marginHorizontal: 16, marginBottom: theme.spacing.md }}>
         <View style={{ flexDirection: 'row', height: '100%', borderRadius: 14, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider }}>
@@ -173,7 +173,6 @@ export default function SearchParkingScreen() {
       <View style={styles.searchContainer}>
         <SearchBar value={searchText} onChangeText={setSearchText} />
 
-        {/* SORTING BUTTON */}
         <AnimatedTouchable
           style={styles.sortButton}
           onPress={() => setShowSortMenu((prev) => !prev)}
@@ -191,7 +190,7 @@ export default function SearchParkingScreen() {
           <AntDesign name="down" size={16} />
         </AnimatedTouchable>
 
-        {/* SORT DROPDOWN MENU */}
+
         {showSortMenu && (
           <View style={styles.sortMenu}>
             <AnimatedTouchable onPress={() => { setSortOption("distance"); setShowSortMenu(false); }}>

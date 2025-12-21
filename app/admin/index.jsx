@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import theme from "../hooks/theme";
 import { colors } from "../hooks/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -86,10 +87,10 @@ function StatCard({ label, value, icon }) {
 
 function MenuButton({ title, icon, color, onPress }) {
   return (
-    <TouchableOpacity style={[styles.menuBtn, { backgroundColor: color }]} onPress={onPress}>
+    <AnimatedTouchable style={[styles.menuBtn, { backgroundColor: color }]} onPress={onPress}>
       <Ionicons name={icon} size={24} color={theme.colors.pickerDoneText} />
       <Text style={styles.menuText}>{title}</Text>
-    </TouchableOpacity>
+    </AnimatedTouchable>
   );
 }
 

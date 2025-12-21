@@ -23,25 +23,21 @@ export default function useFavorites() {
 
   const userRef = useRef(auth.currentUser);
 
-  // subscribe to Firebase auth state changes so the hook reacts properly after refresh
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       userRef.current = user;
-      // restart listener when auth changes
       startListener();
     });
 
     return () => {
       try { unsubAuth(); } catch (e) {}
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startListener = useCallback(() => {
     setLoading(true);
     setError(null);
 
-    // cleanup previous listener
     if (unsubRef.current) {
       try { unsubRef.current(); } catch (e) {}
       unsubRef.current = null;
@@ -129,7 +125,6 @@ export default function useFavorites() {
         } catch (err2) {
           console.error("useFavorites toggle failed:", err2 || err);
           showAlert("Error", "Could not update favorites. Please try again.");
-          // revert optimistic update
           setFavorites(currently);
         }
       } finally {

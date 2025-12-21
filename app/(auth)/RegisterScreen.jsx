@@ -38,7 +38,7 @@ export default function RegisterScreen() {
 
   const [loading, setLoading] = useState(false);
 
-  // Kosovo phone formatter: +383 00 000 000
+
   const formatKosovoPhone = (text) => {
     try {
       const digits = String(text || "").replace(/\D+/g, "");
@@ -96,7 +96,7 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
-      // CREATE AUTH ACCOUNT
+      
       const result = await createUserWithEmailAndPassword(
         auth,
         email.trim().toLowerCase(),
@@ -105,7 +105,7 @@ export default function RegisterScreen() {
 
       const fbUser = result.user;
 
-      // SAVE BASIC USER DATA
+    
       await setDoc(doc(db, "users", fbUser.uid), {
         id: fbUser.uid,
         name: name.trim(),

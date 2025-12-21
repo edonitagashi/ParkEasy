@@ -32,7 +32,6 @@ export default function Profile() {
 
   const [supportOpen, setSupportOpen] = useState(false);
   
-  // Edit profile states
   const [editVisible, setEditVisible] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -135,7 +134,6 @@ export default function Profile() {
     setLoading(false);
   };
 
-  // Load data on mount
   useEffect(() => {
     (async () => {
       try {
@@ -151,7 +149,6 @@ export default function Profile() {
     })();
   }, []);
 
-  // Safe stubs to avoid undefined handler errors
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -218,11 +215,9 @@ export default function Profile() {
           <Text style={styles.userLabel}>Owner Account</Text>
         </View>
 
-        {/* Edit Profile Section */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Edit profile</Text>
           
-          {/* Name Field */}
           <View style={styles.fieldRow}>
             <Text style={styles.fieldLabel}>Name</Text>
             <TextInput
@@ -236,7 +231,6 @@ export default function Profile() {
           
           <View style={styles.divider} />
           
-          {/* Phone Number Field */}
           <View style={styles.fieldRow}>
             <Text style={styles.fieldLabel}>Phone Number</Text>
             <TextInput
@@ -252,7 +246,6 @@ export default function Profile() {
           
           <View style={styles.divider} />
           
-          {/* Email Field */}
           <View style={styles.fieldRow}>
             <Text style={styles.fieldLabel}>Email</Text>
             <TextInput
@@ -267,7 +260,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Password Section */}
         <View style={styles.sectionCard}>
           <View style={[styles.fieldRow, { position: "relative" }]}>
             <Text style={styles.fieldLabel}>Password</Text>
@@ -286,7 +278,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Save Button */}
         <TouchableOpacity 
           style={[styles.saveBtn, saving && { opacity: 0.7 }]} 
           onPress={handleSave} 
@@ -295,10 +286,8 @@ export default function Profile() {
           <Text style={styles.saveTxt}>{saving ? "Saving..." : "Save changes"}</Text>
         </TouchableOpacity>
 
-        {/* Success Message */}
         {successMsg ? <Text style={styles.successMsg}>{successMsg}</Text> : null}
 
-        {/* PARKING INFO Section */}
         <Text style={styles.section}>Parking Information</Text>
         {requestData && (
           <View style={styles.sectionCard}>
@@ -320,14 +309,12 @@ export default function Profile() {
           </View>
         )}
 
-        {/* RESUBMIT BUTTON */}
         {userData.ownerStatus === "rejected" && (
           <TouchableOpacity style={styles.resubmitBtn} onPress={handleResubmit}>
             <Text style={styles.btnText}>Resubmit Request</Text>
           </TouchableOpacity>
         )}
 
-        {/* SUPPORT SECTION (DROPDOWN) */}
         <TouchableOpacity style={styles.supportHeader} onPress={toggleSupport}>
           <Text style={styles.supportTitle}>Support</Text>
         </TouchableOpacity>
@@ -339,7 +326,6 @@ export default function Profile() {
           </View>
         )}
 
-        {/* LOGOUT BUTTON */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.btnText}>Log out</Text>
         </TouchableOpacity>
@@ -350,9 +336,7 @@ export default function Profile() {
   );
 }
 
-//
-// STYLES
-//
+
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
@@ -361,7 +345,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#E9F8F6" 
   },
 
-  // Profile Header Styles
   profileHeader: {
     alignItems: 'center',
     paddingVertical: 40,
@@ -383,7 +366,6 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
 
-  // Edit Profile Card
   sectionCard: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -424,7 +406,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#CFE1DB',
   },
 
-  // Password field specific
   showBtn: {
     position: "absolute",
     right: 12,

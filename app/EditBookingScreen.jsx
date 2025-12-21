@@ -108,13 +108,11 @@ export default function EditBookingScreen() {
 
   return (
     <>
-      {/* Hide the default web breadcrumb/header */}
       <Stack.Screen options={{ headerShown: false }} />
 
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Text style={styles.title}>Edit Booking</Text>
 
-        {/* DATE FIELD */}
         {Platform.OS === "web" ? (
           <View style={styles.input}>
             <View style={styles.iconRow}>
@@ -157,7 +155,6 @@ export default function EditBookingScreen() {
           </>
         )}
 
-        {/* TIME FIELD */}
         {Platform.OS === "web" ? (
           <View style={styles.input}>
             <View style={styles.iconRow}>
@@ -204,7 +201,6 @@ export default function EditBookingScreen() {
           </>
         )}
 
-        {/* DURATION FIELD */}
         <View style={styles.input}>
           <View style={styles.iconRow}>
             <Ionicons name="hourglass-outline" size={20} color="#2E7D6A" />
@@ -219,7 +215,6 @@ export default function EditBookingScreen() {
           </View>
         </View>
 
-        {/* SAVE BUTTON */}
         <TouchableOpacity
           style={[styles.button, saving && { opacity: 0.7 }]}
           onPress={handleUpdate}

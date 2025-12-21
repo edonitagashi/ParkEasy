@@ -18,13 +18,13 @@ export default function FadeModal({
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration: 260, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
         Animated.spring(scale, { toValue: 1, friction: 10, tension: 60, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(opacity, { toValue: 0, duration: 220, useNativeDriver: true }),
-        Animated.timing(scale, { toValue: 0.98, duration: 220, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0, duration: 900, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 0.98, duration: 900, useNativeDriver: true }),
       ]).start();
     }
   }, [visible]);

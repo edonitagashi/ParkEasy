@@ -1,6 +1,3 @@
-// Map canonical image names/paths to static requires so the bundler can include them.
-// Use keys that match what you store in Firestore (e.g., "/images/image1.png" or "image1.png").
-
 export const IMAGES = {
   "image1.png": require("../assets/images/image1.png"),
   "image2.png": require("../assets/images/image2.png"),
@@ -22,19 +19,15 @@ export const IMAGES = {
 export function resolveImage(pathOrName) {
   if (!pathOrName) return null;
 
-  // If path starts with /images/ or images/, extract the filename
   const parts = pathOrName.split("/");
   const name = parts[parts.length - 1];
 
-  // If it's already an http(s) URL, return as-is (caller will handle uri)
   if (pathOrName.startsWith("http://") || pathOrName.startsWith("https://")) {
     return { uri: pathOrName };
   }
 
-  // Look up in map
   if (IMAGES[name]) return IMAGES[name];
 
-  // As a last resort, if the input is just a filename and exists in map
   if (IMAGES[pathOrName]) return IMAGES[pathOrName];
 
   return null;

@@ -1,5 +1,3 @@
-// components/theme.js
-
 export const colors = {
   primary: "#2E7D6A",
   primaryDark: "#245E52",
@@ -38,7 +36,6 @@ export const colors = {
   pickerWheelText: "#0F172A",
 };
 
-// -------------------- SPACING --------------------
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -48,7 +45,6 @@ export const spacing = {
   xxl: 32,
 };
 
-// -------------------- RADII --------------------
 export const radii = {
   sm: 6,
   md: 10,
@@ -57,7 +53,6 @@ export const radii = {
   pill: 999,
 };
 
-// -------------------- TYPOGRAPHY --------------------
 export const typography = {
   fontFamily: "System",
   fontWeight: {
@@ -78,7 +73,6 @@ export const typography = {
   },
 };
 
-// -------------------- SHADOWS --------------------
 export const shadows = {
   card: {
     shadowColor: "#000",
@@ -89,21 +83,20 @@ export const shadows = {
   },
 };
 
-// -------------------- OPACITY --------------------
+
 export const opacity = {
   disabled: 0.5,
   pressed: 0.7,
   muted: 0.8,
 };
 
-// -------------------- ANIMATION --------------------
 export const animation = {
   fast: 120,
   normal: 200,
   slow: 300,
 };
 
-// -------------------- Z-INDEX --------------------
+
 export const zIndex = {
   base: 0,
   header: 10,
@@ -112,13 +105,11 @@ export const zIndex = {
   toast: 200,
 };
 
-// -------------------- BORDERS --------------------
 export const borders = {
   thin: 1,
   thick: 2,
 };
 
-// -------------------- FLEX (✅ FIXED) --------------------
 export const flex = {
   justifyContent: {
     start: { justifyContent: "flex-start" },
@@ -137,7 +128,6 @@ export const flex = {
   },
 };
 
-// -------------------- THEME EXPORT --------------------
 export const theme = {
   colors,
   spacing,

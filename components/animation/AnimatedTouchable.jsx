@@ -1,10 +1,6 @@
 import React from 'react';
-
 import { Pressable } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { theme } from '../../app/hooks/theme';
-
-const { opacity: themeOpacity } = theme;
 
 export default function AnimatedTouchable({ 
   children, 
@@ -19,14 +15,14 @@ export default function AnimatedTouchable({
   }));
 
   const handlePressIn = () => {
-    opacity.value = withTiming(themeOpacity.pressed, { duration: 220 });
+    opacity.value = withTiming(0.9, { duration: 150 });
   };
 
   const handlePressOut = () => {
-    opacity.value = withTiming(1, { duration: 220 });
+    opacity.value = withTiming(1, { duration: 300 });
   };
 
-  // Extract width-related styles to apply to Pressable
+
   const { width, minWidth, maxWidth, ...restStyle } = (style || {});
   const pressableStyle = { width, minWidth, maxWidth };
 

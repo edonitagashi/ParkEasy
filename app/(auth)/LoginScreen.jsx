@@ -67,12 +67,12 @@ export default function LoginScreen() {
       let status = "active";
       let userData = null;
 
-      // 🔹1) nëse user-i ekziston në Firestore
+    
       if (snap.exists()) {
         const data = snap.data();
         role = data.role || "user";
         status = data.ownerStatus || "none";
-        userData = data; // Save complete user data
+        userData = data; 
 
         if (data.status === "inactive") {
           showAlert(
@@ -85,7 +85,7 @@ export default function LoginScreen() {
         }
       }
 
-      // 🔹2) Admini special (override)
+    
       if (normalizedEmail === "admin12@gmail.com") {
         role = "admin";
         await setDoc(
@@ -101,7 +101,6 @@ export default function LoginScreen() {
         );
       }
 
-      // 🔹 Check for existing AsyncStorage data (for old accounts)
       const existingDataRaw = await AsyncStorage.getItem("currentUser");
       let existingData = null;
       if (existingDataRaw) {
@@ -110,7 +109,7 @@ export default function LoginScreen() {
         } catch {}
       }
 
-      // 🔹 Helper function to merge data with priority: Firestore > Existing > Default
+      
       const mergeUserData = (role, defaultName) => ({
         id: uid,
         email: normalizedEmail,
@@ -121,7 +120,7 @@ export default function LoginScreen() {
         avatarUri: userData?.avatarUri || userData?.image || existingData?.avatarUri || "",
       });
 
-      // 🔹3) Redirect për admin
+  
       if (role === "admin") {
         await AsyncStorage.setItem(
           "currentUser",
@@ -132,22 +131,22 @@ export default function LoginScreen() {
         return;
       }
 
-      // 🔹4) Redirect për owner
+    
       if (role === "owner") {
         await AsyncStorage.setItem(
           "currentUser",
           JSON.stringify(mergeUserData("owner", "Owner"))
         );
-        // status = pending / approved / rejected
+      
         router.replace("/owner/home");
         setLoading(false);
         return;
       }
 
-      // 🔹5) User normal → tabs
+
       const userDataToSave = mergeUserData("user", "User");
       
-      // Update Firestore with complete data if fields are missing (migration for old accounts)
+      
       if (!userData?.name || !userData?.phone) {
         await setDoc(
           ref,
@@ -174,7 +173,7 @@ export default function LoginScreen() {
     setLoading(false);
   };
 
-  // Shadow grow animation
+
   const shadowAnim = useRef(new Animated.Value(8)).current;
   const handleCardPressIn = () => {
     Animated.spring(shadowAnim, { toValue: 20, useNativeDriver: false, friction: 6, tension: 60 }).start();

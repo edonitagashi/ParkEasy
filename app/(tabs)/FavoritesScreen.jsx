@@ -10,7 +10,7 @@ import { resolveImage } from "../../components/images";
 import useParkings from "../hooks/useParkings";
 import useFavorites from "../hooks/useFavorites";
 
-// Use an existing fallback image that is present in the repo
+
 const placeholderImage = require("../../assets/images/image1.png");
 const ITEM_HEIGHT = 160;
 
@@ -31,7 +31,7 @@ export default function FavoritesScreen() {
 
   const renderItem = useCallback(
     ({ item }) => {
-      // Use same image resolution/fallback logic as Search screen:
+      
       const imageSource =
         item.image ||
         (item.imageUrl && resolveImage(item.imageUrl)) ||

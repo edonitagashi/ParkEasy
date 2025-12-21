@@ -24,12 +24,11 @@ export default function useParkings() {
     setLoading(true);
     setError(null);
 
-    // cleanup previous listener if exists
     if (unsubRef.current) {
       try {
         unsubRef.current();
       } catch (e) {
-        // ignore
+        
       }
       unsubRef.current = null;
     }
@@ -69,7 +68,6 @@ export default function useParkings() {
   }, [startListener]);
 
   const refresh = useCallback(() => {
-    // re-subscribe to force a fresh read
     startListener();
   }, [startListener]);
 

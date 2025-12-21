@@ -79,7 +79,7 @@ export default function BookingsScreen() {
         return;
       }
 
-      // Optimistic UI update
+    
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
 
       await deleteDoc(doc(db, "bookings", bookingId));
@@ -90,8 +90,7 @@ export default function BookingsScreen() {
       console.error("Delete error:", err);
       Alert.alert("Delete Failed", err.message || "Unknown error");
 
-      // Reload on error
-      // (onSnapshot will handle refresh automatically)
+  
     }
   };
 
@@ -106,7 +105,7 @@ export default function BookingsScreen() {
     ]);
   };
 
-  // Calculate total cost
+  
   const getTotal = (duration) => {
     const hours = parseFloat(duration) || 0;
     return (hours * 5).toFixed(2); // $5 per hour

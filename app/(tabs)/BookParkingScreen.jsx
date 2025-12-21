@@ -79,7 +79,7 @@ export default function BookParkingScreen() {
         createdAt: new Date(),
       });
 
-      // ... (your notification code remains exactly the same)
+  
 
       setDoneVisible(true);
       setTimeout(() => {
@@ -95,7 +95,7 @@ export default function BookParkingScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Wrap everything to handle keyboard properly */}
+    
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -226,7 +226,7 @@ export default function BookParkingScreen() {
               </>
             )}
 
-            {/* DURATION FIELD - with returnKeyType="done" */}
+          
             <View style={styles.input}>
               <View style={styles.iconRow}>
                 <Ionicons name="hourglass-outline" size={20} color={colors.primary} />
@@ -309,13 +309,13 @@ export default function BookParkingScreen() {
               )}
             </View>
 
-            {/* TOTAL AMOUNT */}
+          
             <View style={styles.totalContainer}>
               <Text style={styles.totalLabel}>Total Amount</Text>
               <Text style={styles.totalAmount}>${totalCost}</Text>
             </View>
 
-            {/* SUBMIT - Now always tappable */}
+          
             <TouchableOpacity
               style={[styles.button, loading && { opacity: 0.7 }]}
               onPress={handleBooking}
@@ -337,7 +337,7 @@ export default function BookParkingScreen() {
   );
 }
 
-/* ---------- STYLES (only small adjustment for scroll) ---------- */
+
 
 const styles = StyleSheet.create({
   container: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.lg + spacing.xs,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.xl + 40, // Extra space so button is not cut off
+    paddingBottom: spacing.xl + 40,
   },
 
   title: {

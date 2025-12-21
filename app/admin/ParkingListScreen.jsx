@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   Modal,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { db } from "../../firebase/firebase";
 import theme from "../hooks/theme";
@@ -22,7 +22,6 @@ export default function ParkingListScreen() {
   const [parkings, setParkings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // modal state for editing
   const [editModal, setEditModal] = useState(false);
   const [editData, setEditData] = useState({
     id: "",
@@ -106,13 +105,13 @@ export default function ParkingListScreen() {
         <Text style={styles.text}>Spots: {item.freeSpots}/{item.totalSpots}</Text>
 
         <View style={styles.row}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => openEdit(item)}>
+          <AnimatedTouchable style={styles.iconBtn} onPress={() => openEdit(item)}>
             <Text style={{ color: "#2E7D6A" }}>Edit</Text>
-          </TouchableOpacity>
+          </AnimatedTouchable>
 
-          <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(item.id)}>
+          <AnimatedTouchable style={styles.iconBtn} onPress={() => handleDelete(item.id)}>
             <Text style={{ color: "#b02a37" }}>Delete</Text>
-          </TouchableOpacity>
+          </AnimatedTouchable>
         </View>
       </View>
     ),
@@ -145,7 +144,6 @@ export default function ParkingListScreen() {
         getItemLayout={getItemLayout}
       />
 
-      {/* Edit modal unchanged in behavior */}
       <Modal visible={editModal} transparent animationType="fade" onRequestClose={() => setEditModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>

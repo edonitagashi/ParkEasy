@@ -5,6 +5,8 @@ import theme from "../app/hooks/theme";
 import { colors } from "../app/hooks/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { auth, db } from "../firebase/firebase";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 import OptimizedImage from "./OptimizedImage";
 import AnimatedTouchable from "./animation/AnimatedTouchable";
 
@@ -18,15 +20,31 @@ function ParkingCard({ item, hideReserve, blur = false }) {
   const toggleFavorite = useCallback(() => {
     setIsFavorite((prev) => !prev);
     if (item?.onFavoriteToggle) item.onFavoriteToggle();
-    // haptics optional: removed to avoid missing module errors
   }, [item]);
 
-  const handleReserve = useCallback(() => {
-    router.push({
-      pathname: "/(tabs)/BookParkingScreen",
-      params: { id: item.id, name: item.name },
-    });
-    // haptics optional: removed to avoid missing module errors
+  const handleReserve = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        Alert.alert("Error", "You must be logged in to reserve.");
+        return;
+      }
+      await addDoc(collection(db, "bookings"), {
+        userId: user.uid,
+        userEmail: user.email,
+        parkingId: item.id,
+        parkingName: item.name,
+        date: new Date().toISOString().slice(0, 10),
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        createdAt: Timestamp.now(),
+      });
+      router.push({
+        pathname: "/(tabs)/BookParkingScreen",
+        params: { id: item.id, name: item.name },
+      });
+    } catch (err) {
+      Alert.alert("Error", "Failed to reserve parking.");
+    }
   }, [item?.id, item?.name]);
 
   const showDetails = useCallback(() => {
@@ -47,7 +65,6 @@ function ParkingCard({ item, hideReserve, blur = false }) {
         >
           <View>
             <OptimizedImage source={item.photoUri || item.image} thumbnail={item.imageThumb || null} style={styles.image} />
-            {/* Stronger top/bottom fade overlays for better legibility */}
             <LinearGradient
               colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.0)"]}
               start={{ x: 0, y: 0 }}
@@ -207,29 +224,22 @@ function areEqual(prevProps, nextProps) {
   const p = prevProps.item || {};
   const n = nextProps.item || {};
 
-  // If id changed, re-render
   if (p.id !== n.id) return false;
 
-  // If favorite status changed, re-render
   if (p.isFavorite !== n.isFavorite) return false;
 
-  // If important display fields changed, re-render
   if (p.distance !== n.distance) return false;
   if (p.price !== n.price) return false;
   if ((p.spots || p.freeSpots) !== (n.spots || n.freeSpots)) return false;
 
-  // If image source changed, re-render (check both photoUri and image)
   const pImg = typeof (p.photoUri || p.image) === "string" ? (p.photoUri || p.image) : (p.photoUri || p.image)?.uri;
   const nImg = typeof (n.photoUri || n.image) === "string" ? (n.photoUri || n.image) : (n.photoUri || n.image)?.uri;
   if (pImg !== nImg) return false;
 
-  // If photo uri changed specifically, re-render
   if (p.photoUri !== n.photoUri) return false;
 
-  // hideReserve prop rarely changes — keep equality
   if (prevProps.hideReserve !== nextProps.hideReserve) return false;
 
-  // Otherwise no re-render
   return true;
 }
 

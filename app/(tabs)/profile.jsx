@@ -227,7 +227,7 @@ const syncAvatarToFirestore = async (base64Img) => {
             setPassword(me.password || "");
             setAvatarUri(me.avatarUri || null);
           } else {
-            // ... (kodi për gjetjen e përdoruesit nga AsyncStorage kur nuk ka auth – mbetet i njëjtë)
+            
           }
           InteractionManager.runAfterInteractions(() => {
             loadAvatarFromFirestore();
@@ -348,7 +348,7 @@ const syncAvatarToFirestore = async (base64Img) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#E9F8F6" }}>
-      {/* HEADER ME TITULL DHE ZILJË */}
+    
       <SearchHeader
         title="Profile"
         onNotificationPress={() => router.push("/notification")}
@@ -359,7 +359,7 @@ const syncAvatarToFirestore = async (base64Img) => {
   showsVerticalScrollIndicator={false}
   contentContainerStyle={{ paddingTop: 20 }}
 >
-        {/* AVATARI DHE EMRII */}
+    
         <View style={s.profileTop}>
           <TouchableOpacity
             style={s.avatarContainer}
@@ -378,7 +378,7 @@ const syncAvatarToFirestore = async (base64Img) => {
           <Text style={s.userLabel}>User</Text>
         </View>
 
-        {/* KARTELA E VETME PËR TË GJITHA FUSHAT (përfshirë Password) */}
+    
         <View style={s.sectionCard}>
           <Text style={s.sectionTitle}>Edit profile</Text>
 
@@ -409,7 +409,7 @@ const syncAvatarToFirestore = async (base64Img) => {
           </View>
           <View style={s.divider} />
 
-          {/* Email */}
+          
           <View style={s.fieldRow}>
             <Text style={s.fieldLabel}>Email</Text>
             <TextInput
@@ -424,7 +424,7 @@ const syncAvatarToFirestore = async (base64Img) => {
           </View>
           <View style={s.divider} />
 
-          {/* Password – tani brenda së njëjtës kartelë */}
+        
           <View style={[s.fieldRow, { position: "relative" }]}>
             <Text style={s.fieldLabel}>Password</Text>
             <TextInput
@@ -453,7 +453,7 @@ const syncAvatarToFirestore = async (base64Img) => {
 
         {successMsg ? <Text style={s.successMsg}>{successMsg}</Text> : null}
 
-        {/* MORE OPTIONS – mbeten siç ishin */}
+      
         <Text style={s.section}>More Options</Text>
 
         <TouchableOpacity style={s.optionItem} onPress={handleAboutUs}>
