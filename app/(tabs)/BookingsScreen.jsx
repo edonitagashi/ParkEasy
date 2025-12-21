@@ -35,7 +35,27 @@ export default function BookingsScreen() {
       unsub = onSnapshot(
         q,
         (snapshot) => {
-          const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+          let items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+          // Sort newest first (client-side), using createdAt or date+time
+          const getTime = (it) => {
+            try {
+              if (it.createdAt?.toDate) return it.createdAt.toDate().getTime();
+              if (it.createdAt instanceof Date) return it.createdAt.getTime();
+              if (it.date) {
+                const base = new Date(it.date);
+                if (it.time) {
+                  const [h, m] = String(it.time).split(":");
+                  base.setHours(parseInt(h || 0, 10), parseInt(m || 0, 10), 0, 0);
+                }
+                return base.getTime();
+              }
+            } catch {}
+            return 0;
+          };
+
+          items = items.sort((a, b) => getTime(b) - getTime(a));
+
           console.log("Realtime bookings update, count:", items.length);
           setBookings(items);
           setLoading(false);

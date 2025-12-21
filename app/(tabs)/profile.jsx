@@ -287,6 +287,21 @@ const syncAvatarToFirestore = async (base64Img) => {
         await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
       }
 
+      // SAVE TO FIRESTORE
+      if (auth.currentUser) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await setDoc(
+          userRef,
+          {
+            name: fullName.trim(),
+            phone: phoneNumber.trim(),
+            email: email.trim().toLowerCase(),
+            avatarUri: avatarUri ?? "",
+          },
+          { merge: true }
+        );
+      }
+
       setSuccessMsg("✅ Changes saved successfully!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (e) {
