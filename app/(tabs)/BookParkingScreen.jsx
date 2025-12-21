@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  ActivityIndicator,
   Alert,
   StyleSheet,
   Platform,
@@ -24,7 +23,7 @@ import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookParkingScreen() {
-  const { id, name } = useLocalSearchParams(); // parkingId + parkingName
+  const { id, name } = useLocalSearchParams();
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -33,12 +32,22 @@ export default function BookParkingScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   const [duration, setDuration] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(""); // "cash" or "card"
+
   const [loading, setLoading] = useState(false);
   const [doneVisible, setDoneVisible] = useState(false);
 
   const formatDate = (d) => d.toISOString().split("T")[0];
   const formatTime = (t) =>
     t.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+  // Price per hour
+  const pricePerHour = 5;
+
+  // Calculate total cost
+  const totalCost = duration && !isNaN(duration) && parseFloat(duration) > 0
+    ? (parseFloat(duration) * pricePerHour).toFixed(2)
+    : "0.00";
 
   const handleBooking = async () => {
     if (!auth.currentUser) {
@@ -49,26 +58,30 @@ export default function BookParkingScreen() {
       return Alert.alert("Error", "Duration is required.");
     }
 
+    if (!paymentMethod) {
+      return Alert.alert("Error", "Please select a payment method.");
+    }
+
     setLoading(true);
 
     try {
       const bookingRef = await addDoc(collection(db, "bookings"), {
         userId: auth.currentUser.uid,
-        parkingId: id,            // fiks parking ID
-        parkingName: name,        // emri i parkingut
+        parkingId: id,
+        parkingName: name,
         date: formatDate(date),
         time: formatTime(time),
         duration,
+        paymentMethod,
         createdAt: new Date(),
       });
 
-      // Ask for notification permissions and configure Android channel
+      // Notification permissions & channel (unchanged)
       try {
         const settings = await Notifications.getPermissionsAsync();
         if (!settings.granted) {
           await Notifications.requestPermissionsAsync();
         }
-        // Android channel
         if (Platform.OS === 'android') {
           await Notifications.setNotificationChannelAsync('default', {
             name: 'Default',
@@ -90,14 +103,12 @@ export default function BookParkingScreen() {
         console.log('Error scheduling notification', e);
       }
 
-      // Schedule a reminder ~10 minutes before the booked time
+      // Reminder notification (unchanged)
       try {
-        // Compose the target Date from selected date + time
         const target = new Date(date);
         const t = new Date(time);
         target.setHours(t.getHours(), t.getMinutes(), 0, 0);
 
-        // Reminder 10 minutes before
         const reminderTime = new Date(target.getTime() - 10 * 60 * 1000);
         const now = new Date();
         let trigger;
@@ -105,7 +116,6 @@ export default function BookParkingScreen() {
           const seconds = Math.max(1, Math.floor((reminderTime.getTime() - now.getTime()) / 1000));
           trigger = { seconds };
         } else {
-          // If the booking is soon, send immediate reminder
           trigger = null;
         }
 
@@ -118,7 +128,6 @@ export default function BookParkingScreen() {
           trigger,
         });
 
-        // Persist reminder record
         try {
           await addDoc(collection(db, 'users', auth.currentUser.uid, 'notifications'), {
             notificationId: reminderId,
@@ -282,6 +291,79 @@ export default function BookParkingScreen() {
         </View>
       </View>
 
+      {/* PAYMENT METHOD */}
+      <View style={styles.paymentContainer}>
+        <Text style={styles.paymentLabel}>Payment Method</Text>
+        <View style={styles.paymentOptions}>
+          <TouchableOpacity
+            style={[
+              styles.paymentOption,
+              paymentMethod === "cash" && styles.paymentOptionSelected,
+            ]}
+            onPress={() => setPaymentMethod("cash")}
+          >
+            <Ionicons
+              name="cash-outline"
+              size={24}
+              color={paymentMethod === "cash" ? "#fff" : colors.primary}
+            />
+            <Text
+              style={[
+                styles.paymentText,
+                paymentMethod === "cash" && styles.paymentTextSelected,
+              ]}
+            >
+              Cash in Person
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.paymentOption,
+              paymentMethod === "card" && styles.paymentOptionSelected,
+            ]}
+            onPress={() => setPaymentMethod("card")}
+          >
+            <Ionicons
+              name="card-outline"
+              size={24}
+              color={paymentMethod === "card" ? "#fff" : colors.primary}
+            />
+            <Text
+              style={[
+                styles.paymentText,
+                paymentMethod === "card" && styles.paymentTextSelected,
+              ]}
+            >
+              Debit Card
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Simple messages - no animation */}
+        {paymentMethod === "cash" && (
+          <View style={styles.cashMessageContainer}>
+            <Text style={styles.cashMessage}>
+              You will pay in cash when you arrive at the parking spot.
+            </Text>
+          </View>
+        )}
+
+        {paymentMethod === "card" && (
+          <View style={styles.cardMessageContainer}>
+            <Text style={styles.cardMessage}>
+              Payment in progress...
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* TOTAL AMOUNT */}
+      <View style={styles.totalContainer}>
+        <Text style={styles.totalLabel}>Total Amount</Text>
+        <Text style={styles.totalAmount}>${totalCost}</Text>
+      </View>
+
       {/* SUBMIT */}
       <TouchableOpacity
         style={[styles.button, loading && { opacity: 0.7 }]}
@@ -292,7 +374,11 @@ export default function BookParkingScreen() {
           {loading ? "Saving..." : "Reserve Now"}
         </Text>
       </TouchableOpacity>
-      <TaskCompleteOverlay visible={doneVisible} message={<Message icon="✔" text="Reserved!" color={colors.success} align="left" />} />
+
+      <TaskCompleteOverlay
+        visible={doneVisible}
+        message={<Message icon="✔" text="Reserved!" color={colors.success} align="left" />}
+      />
     </SafeAreaView>
   );
 }
@@ -364,5 +450,97 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     backgroundColor: "transparent",
+  },
+
+  paymentContainer: {
+    marginBottom: 20,
+  },
+  paymentLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    marginBottom: 10,
+  },
+  paymentOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  paymentOption: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    backgroundColor: "#F8F8F8",
+    marginHorizontal: 6,
+  },
+  paymentOptionSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  paymentText: {
+    fontSize: 16,
+    color: colors.text,
+    marginLeft: 12,
+  },
+  paymentTextSelected: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  // Simple cash message
+  cashMessageContainer: {
+    marginTop: 12,
+    padding: 14,
+    backgroundColor: "#e8f5e9",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#4caf50",
+  },
+  cashMessage: {
+    fontSize: 15,
+    color: "#2e7d32",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+
+  // Simple debit card message
+  cardMessageContainer: {
+    marginTop: 12,
+    padding: 14,
+    backgroundColor: "#e3f2fd",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  cardMessage: {
+    fontSize: 15,
+    color: colors.primary,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+
+  // Total amount
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 18,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  totalAmount: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: colors.primary,
   },
 });
