@@ -101,6 +101,22 @@ ParkEasy revolutionizes parking management in Kosovo by providing a seamless, re
 - **Styling**: Custom theme system
 - **Testing**: Jest with React Native Testing Library
 
+## Key Functionalities
+
+ParkEasy offers a comprehensive set of features designed to streamline parking management:
+
+- **User Authentication**: Secure login and registration with role-based access (User, Owner, Admin)
+- **Real-time Map Integration**: Interactive maps showing nearby parking spots with availability
+- **Advanced Search**: Location-based search for parking spaces with filters
+- **Booking Management**: Reserve, edit, and cancel parking bookings with history tracking
+- **Favorites System**: Save preferred parking locations for quick access
+- **Profile Management**: User profiles with photo upload and notification settings
+- **Owner Dashboard**: Manage parking spaces, view earnings, and handle reservations
+- **Admin Panel**: Oversee parking requests, user management, and system-wide reservations
+- **Notifications**: Real-time alerts for booking confirmations and updates
+- **Image Handling**: Optimized image uploading and display for parking photos
+- **Cross-platform Compatibility**: Built with React Native for iOS and Android
+
 ## Quick Start
 
 ### Prerequisites
@@ -117,6 +133,10 @@ ParkEasy revolutionizes parking management in Kosovo by providing a seamless, re
 ### Testing
 - Install Expo Go app on device
 - Scan QR code to test on physical device
+
+## Conclusions
+
+This project, developed as part of the Mobile Application Programming course at FIEK, successfully completed 100% of the assigned tasks and goals. The implementation demonstrates proficiency in React Native development, Firebase integration, and modern mobile app best practices, resulting in a fully functional parking management system.
 
 ---
 
