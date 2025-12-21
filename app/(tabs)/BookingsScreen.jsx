@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-  import theme from "../hooks/theme";
+import theme from "../hooks/theme";
 import AnimatedTouchable from "../../components/animation/AnimatedTouchable";
 import { colors } from "../hooks/theme";
 import { collection, query, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
@@ -25,19 +25,19 @@ export default function BookingsScreen() {
   const [doneVisible, setDoneVisible] = useState(false);
 
   useEffect(() => {
-    
     let unsub = () => {};
     if (auth.currentUser) {
       const q = query(
         collection(db, "bookings"),
         where("userId", "==", auth.currentUser.uid)
       );
+
       unsub = onSnapshot(
         q,
         (snapshot) => {
           let items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-          // Sort newest first (client-side), using createdAt or date+time
+          // Sort by newest first (using createdAt or date/time fallback)
           const getTime = (it) => {
             try {
               if (it.createdAt?.toDate) return it.createdAt.toDate().getTime();
@@ -56,7 +56,6 @@ export default function BookingsScreen() {
 
           items = items.sort((a, b) => getTime(b) - getTime(a));
 
-          console.log("Realtime bookings update, count:", items.length);
           setBookings(items);
           setLoading(false);
         },
@@ -73,6 +72,29 @@ export default function BookingsScreen() {
     return () => unsub();
   }, []);
 
+  const runDelete = async (bookingId) => {
+    try {
+      if (!bookingId) {
+        Alert.alert("Error", "Booking ID missing.");
+        return;
+      }
+
+      // Optimistic UI update
+      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+
+      await deleteDoc(doc(db, "bookings", bookingId));
+
+      setDoneVisible(true);
+      setTimeout(() => setDoneVisible(false), 1200);
+    } catch (err) {
+      console.error("Delete error:", err);
+      Alert.alert("Delete Failed", err.message || "Unknown error");
+
+      // Reload on error
+      // (onSnapshot will handle refresh automatically)
+    }
+  };
+
   const handleDelete = (bookingId) => {
     Alert.alert("Delete Booking", "Are you sure you want to delete this booking?", [
       { text: "Cancel", style: "cancel" },
@@ -84,52 +106,10 @@ export default function BookingsScreen() {
     ]);
   };
 
-
-  const runDelete = async (bookingId) => {
-    try {
-      console.log("runDelete called for bookingId:", bookingId);
-
-      if (!bookingId) {
-        Alert.alert("Error", "Booking id missing.");
-        return;
-      }
-
-      if (!auth || !auth.currentUser) {
-        Alert.alert("Error", "You must be logged in to delete a booking.");
-        return;
-      }
-
-      
-      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
-
-      await deleteDoc(doc(db, "bookings", bookingId));
-
-      console.log("deleteDoc succeeded for:", bookingId);
-      setDoneVisible(true);
-      setTimeout(() => setDoneVisible(false), 1200);
-    } catch (err) {
-      console.error("Delete error:", err);
-      const code = err?.code || "unknown";
-      const msg = err?.message || String(err);
-    
-      Alert.alert(
-        "Delete failed",
-        `${code}\n${msg}`,
-        [{ text: "OK" }]
-      );
-
-    
-      if (code === "permission-denied") {
-        Alert.alert(
-          "Permission denied",
-          "Your Firestore rules prevent deleting this document. Check that `userId` matches the signed-in user or update rules.",
-          [{ text: "OK" }]
-        );
-      }
-
-    
-      loadBookings();
-    }
+  // Calculate total cost
+  const getTotal = (duration) => {
+    const hours = parseFloat(duration) || 0;
+    return (hours * 5).toFixed(2); // $5 per hour
   };
 
   if (loading) {
@@ -137,10 +117,9 @@ export default function BookingsScreen() {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
         <SearchHeader title="My Bookings" />
-        
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ marginTop: 10 }}>Loading bookings...</Text>
+          <Text style={{ marginTop: 10, color: colors.text }}>Loading bookings...</Text>
         </View>
       </SafeAreaView>
     );
@@ -151,59 +130,86 @@ export default function BookingsScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
       <SearchHeader title="My Bookings" />
 
-      
-
       {bookings.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Ionicons name="calendar-outline" size={50} color={colors.primary} />
+          <Ionicons name="calendar-outline" size={60} color={colors.primary + "88"} />
           <Text style={styles.emptyText}>You have no bookings yet.</Text>
+          <Text style={styles.emptySubText}>Start reserving parking spots!</Text>
         </View>
       ) : (
-        <>
-          <FlatList
-            data={bookings}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: theme.spacing.lg }}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <View style={styles.row}>
-                  <Ionicons name="car-outline" size={20} color={colors.primary} />
-                  <Text style={styles.parkingName}>{item.parkingName}</Text>
-                  {/* booking id hidden in UI */}
+        <FlatList
+          data={bookings}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: theme.spacing.lg }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.headerRow}>
+                <Ionicons name="car-outline" size={24} color={colors.primary} />
+                <Text style={styles.parkingName}>{item.parkingName}</Text>
+              </View>
+
+              <View style={styles.details}>
+                <View style={styles.detailRow}>
+                  <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
+                  <Text style={styles.detailText}>{item.date}</Text>
                 </View>
 
-                <Text style={styles.info}> {item.date}</Text>
-                <Text style={styles.info}> {item.time}</Text>
-                <Text style={styles.info}> {item.duration} hours</Text>
+                <View style={styles.detailRow}>
+                  <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+                  <Text style={styles.detailText}>{item.time}</Text>
+                </View>
 
-                <View style={styles.actions}>
-                  <AnimatedTouchable
-                    style={styles.editBtn}
-                    onPress={() =>
-                      router.push({
-                        pathname: "EditBookingScreen",
-                        params: { bookingId: item.id },
-                      })
-                    }
-                  >
-                    <Ionicons name="create-outline" size={18} color={theme.colors.textOnPrimary} />
-                    <Text style={styles.btnText}>Edit</Text>
-                  </AnimatedTouchable>
+                <View style={styles.detailRow}>
+                  <Ionicons name="hourglass-outline" size={18} color={colors.textMuted} />
+                  <Text style={styles.detailText}>{item.duration} hours</Text>
+                </View>
 
-                  <AnimatedTouchable
-                    style={styles.deleteBtn}
-                    onPress={() => runDelete(item.id)}
-                  >
-                    <Ionicons name="trash-outline" size={18} color={theme.colors.textOnPrimary} />
-                    <Text style={styles.btnText}>Delete</Text>
-                  </AnimatedTouchable>
+                <View style={styles.detailRow}>
+                  <Ionicons
+                    name={item.paymentMethod === "card" ? "card-outline" : "cash-outline"}
+                    size={18}
+                    color={item.paymentMethod === "card" ? colors.primary : "#2e7d32"}
+                  />
+                  <Text style={styles.detailText}>
+                    {item.paymentMethod === "card" ? "Debit Card" : "Cash in Person"}
+                  </Text>
+                </View>
+
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Total Amount</Text>
+                  <Text style={styles.totalAmount}>${getTotal(item.duration)}</Text>
                 </View>
               </View>
-            )}
-          />
-          <TaskCompleteOverlay visible={doneVisible} message="Deleted" />
-        </>
+
+              <View style={styles.actions}>
+                <AnimatedTouchable
+                  style={styles.editBtn}
+                  onPress={() =>
+                    router.push({
+                      pathname: "EditBookingScreen",
+                      params: { bookingId: item.id },
+                    })
+                  }
+                >
+                  <Ionicons name="create-outline" size={18} color="#fff" />
+                  <Text style={styles.btnText}>Edit</Text>
+                </AnimatedTouchable>
+
+                <AnimatedTouchable
+                  style={styles.deleteBtn}
+                  onPress={() => handleDelete(item.id)}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
+                  <Text style={styles.btnText}>Delete</Text>
+                </AnimatedTouchable>
+              </View>
+            </View>
+          )}
+        />
       )}
+
+      <TaskCompleteOverlay visible={doneVisible} message="Deleted!" />
     </SafeAreaView>
   );
 }
@@ -211,79 +217,136 @@ export default function BookingsScreen() {
 /* --------- STYLES --------- */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
 
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   emptyBox: {
-    marginTop: 100,
-    alignItems: "center",
+    flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
   },
 
   emptyText: {
-    marginTop: theme.spacing.md - 2,
-    fontSize: 16,
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+  },
+
+  emptySubText: {
+    marginTop: 8,
+    fontSize: 15,
     color: colors.textMuted,
   },
 
   card: {
     backgroundColor: "#F3F8F7",
     padding: theme.spacing.lg + theme.spacing.xs,
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: theme.spacing.lg,
     borderWidth: 1,
     borderColor: colors.borderSoft,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
 
-  row: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: theme.spacing.md - 2,
+    marginBottom: theme.spacing.md,
   },
 
   parkingName: {
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "700",
     color: colors.primary,
-    marginLeft: theme.spacing.sm - 2,
+    marginLeft: theme.spacing.sm,
   },
 
-  info: {
-    fontSize: 15,
+  details: {
+    marginBottom: theme.spacing.md,
+  },
+
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: theme.spacing.xs,
+  },
+
+  detailText: {
+    fontSize: 15.5,
     color: colors.text,
-    marginTop: theme.spacing.sm - theme.spacing.xs,
+    marginLeft: theme.spacing.sm,
+  },
+
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+  },
+
+  totalLabel: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: colors.text,
+  },
+
+  totalAmount: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.primary,
   },
 
   actions: {
     flexDirection: "row",
-    marginTop: theme.spacing.lg - theme.spacing.xs,
+    justifyContent: "space-between",
+    marginTop: theme.spacing.lg,
   },
 
   editBtn: {
     backgroundColor: colors.primary,
-    paddingVertical: theme.spacing.sm + theme.spacing.xs,
-    paddingHorizontal: theme.spacing.lg,
-    borderRadius: 10,
-    marginRight: theme.spacing.md - 2,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.spacing.sm - 2,
+    gap: 8,
+    flex: 1,
+    marginRight: 10,
+    justifyContent: "center",
   },
 
   deleteBtn: {
-    backgroundColor: colors.danger,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    backgroundColor: colors.danger || "#e74c3c",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.spacing.sm - 2,
+    gap: 8,
+    flex: 1,
+    justifyContent: "center",
   },
 
   btnText: {
-    color: theme.colors.textOnPrimary,
+    color: "#fff",
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: 15,
   },
 });
